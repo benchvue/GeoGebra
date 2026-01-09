@@ -34,8 +34,16 @@ Zoom in/out, grid, axes, settings
 Toolbar & mode switching
 
 Points, lines, segments, circles
+### Point
+![Point](./week01/images/point.png)
+
+### Line
+![Line](./week01/images/line.png)
 
 Sliders and basic animation
+
+👉 **Slide - Open in GeoGebra (recommended):**  
+https://www.geogebra.org/calculator/cswhastn
 
 Color, style, visibility
 
@@ -205,8 +213,15 @@ Sine, cosine, tangent
 
 ## 🔗 Live Interactive GeoGebra File
 
-👉 **Open in GeoGebra (recommended):**  
+👉 **Slide - Open in GeoGebra (recommended):**  
 https://www.geogebra.org/m/a5bzju5p
+
+<div align="center">
+  <iframe src="https://www.geogebra.org/calculator/cswhastn?embed"
+          width="800"
+          height="600"></iframe>
+</div>
+
 
 Angle-based motion
 
