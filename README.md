@@ -42,6 +42,9 @@ Points, lines, segments, circles
 
 Sliders and basic animation
 
+👉 **Circle with radius controlled by slider**  
+.https://www.geogebra.org/calculator/c4rqx9sz
+
 👉 **Slide - Open in GeoGebra (recommended):**  
 https://www.geogebra.org/calculator/cswhastn
 
@@ -59,6 +62,9 @@ Example .ggb File
 
 A draggable triangle
 
+👉 **Complementary and Supplementary Angles**
+https://www.geogebra.org/m/qzrdbhpb
+
 Slider controlling circle radius
 
 Animated point moving along a line
@@ -70,11 +76,21 @@ Intersection of objects
 
 Perpendicular & parallel lines
 
+👉 **Perpendicular Line**
+https://www.geogebra.org/m/YaQ3mEjY
+
 Angles and angle measurement
 
 Area calculation
 
+👉 **Area of a Rectangle**  
+https://www.geogebra.org/m/GeEKST8P
+
 Introduction to π (pi)
+
+👉 **π:**  
+https://www.geogebra.org/m/XqmnH4bQ#material/NbJkSyHW
+
 
 Skills
 
@@ -215,13 +231,6 @@ Sine, cosine, tangent
 
 👉 **Slide - Open in GeoGebra (recommended):**  
 https://www.geogebra.org/m/a5bzju5p
-
-<div align="center">
-  <iframe src="https://www.geogebra.org/calculator/cswhastn?embed"
-          width="800"
-          height="600"></iframe>
-</div>
-
 
 Angle-based motion
 
