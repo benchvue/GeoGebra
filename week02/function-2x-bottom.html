@@ -23,6 +23,38 @@
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
         }
 
+        .description {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #fff9e6 0%, #ffe8cc 100%);
+            border-radius: 12px;
+            border: 3px solid #f39c12;
+            transition: opacity 0.3s, transform 0.3s, max-height 0.3s;
+            overflow: hidden;
+        }
+
+        .description.hidden {
+            opacity: 0;
+            transform: scaleY(0);
+            max-height: 0;
+            padding: 0;
+            margin: 0;
+        }
+
+        .description h2 {
+            margin: 0 0 15px 0;
+            color: #2c3e50;
+            font-size: 26px;
+        }
+
+        .description p {
+            margin: 8px 0;
+            color: #34495e;
+            font-size: 18px;
+            line-height: 1.6;
+        }
+
         .function-box {
             width: 200px;
             height: 150px;
@@ -203,6 +235,10 @@
             background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
         }
 
+        .btn-info {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+        }
+
         .btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
@@ -216,6 +252,12 @@
 </head>
 <body>
     <div class="container">
+        <div class="description hidden" id="description">
+            <h2>Understanding Functions</h2>
+            <p><strong>A function is like a math machine:</strong> You put a number in (input), the machine follows a rule, and you get a number out (output).</p>
+            <p><strong>Our function f(x) = 2x means:</strong> Whatever number you put in, the machine doubles it and gives you the result!</p>
+        </div>
+
         <div class="step-indicator" id="stepIndicator">Step 1: Input 0 → Output 0</div>
         
         <div class="io-container">
@@ -244,6 +286,7 @@
             <button class="btn btn-pause" id="pauseBtn" onclick="pause()" disabled>Pause</button>
             <button class="btn btn-stop" id="stopBtn" onclick="stop()" disabled>Stop</button>
             <button class="btn btn-toggle" id="toggleBtn" onclick="toggleFormula()">Show Formula</button>
+            <button class="btn btn-info" id="infoBtn" onclick="toggleDescription()">Show Info</button>
         </div>
     </div>
 
@@ -259,6 +302,7 @@
         let intervalId = null;
         let isPlaying = false;
         let isFormulaVisible = false;
+        let isDescriptionVisible = false;
 
         function updateValues() {
             const inputEl = document.getElementById('inputValue');
@@ -331,6 +375,21 @@
             } else {
                 formula.classList.add('hidden');
                 toggleBtn.textContent = 'Show Formula';
+            }
+        }
+
+        function toggleDescription() {
+            const description = document.getElementById('description');
+            const infoBtn = document.getElementById('infoBtn');
+            
+            isDescriptionVisible = !isDescriptionVisible;
+            
+            if (isDescriptionVisible) {
+                description.classList.remove('hidden');
+                infoBtn.textContent = 'Hide Info';
+            } else {
+                description.classList.add('hidden');
+                infoBtn.textContent = 'Show Info';
             }
         }
 
