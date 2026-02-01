@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Understanding Functions - With Stacking</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+        }
+        .container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .explanation {
+            background: #f0f4ff;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 5px solid #667eea;
+        }
+        .canvas-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+        canvas {
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            background: white;
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        button {
+            padding: 12px 24px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .play { background: #4CAF50; color: white; }
+        .pause { background: #FF9800; color: white; }
+        .stop { background: #f44336; color: white; }
+        .info { background: #2196F3; color: white; }
+        .function-selector {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        .function-btn {
+            padding: 10px 20px;
+            background: #e0e0e0;
+            border: 2px solid transparent;
+        }
+        .function-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #4c5fd5;
+        }
+        .output-display {
+            background: #fff9c4;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            min-height: 80px;
+            border: 2px solid #ffd54f;
+        }
+        .output-display h3 {
+            margin-top: 0;
+            color: #f57f17;
+        }
+        .stack-display {
+            background: #e8f5e9;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            min-height: 100px;
+            border: 2px solid #66bb6a;
+        }
+        .stack-display h3 {
+            margin-top: 0;
+            color: #2e7d32;
+        }
+        .stack-item {
+            font-family: 'Courier New', monospace;
+            margin: 5px 0;
+            padding: 8px;
+            background: white;
+            border-radius: 5px;
+            border-left: 4px solid #66bb6a;
+        }
+        .current-step {
+            background: #c8e6c9 !important;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Understanding Functions</h1>
+        
+        <div class="explanation">
+            <p><strong>A function is like a math machine:</strong> You put a number in (input), the machine follows a rule, and you get a number out (output).</p>
+            <p><strong>Our function f(x) = 2x means:</strong> Whatever number you put in, the machine doubles it and gives you the result!</p>
+        </div>
+
+        <div class="output-display" id="outputDisplay">
+            <h3>📊 Current Step</h3>
+            <div id="currentStep">Step 1: Input 0 → Output 0</div>
+        </div>
+
+        <div class="canvas-container">
+            <canvas id="functionCanvas" width="600" height="500"></canvas>
+        </div>
+
+        <div class="controls">
+            <button class="play" onclick="play()">▶️ Play</button>
+            <button class="pause" onclick="pause()">⏸️ Pause</button>
+            <button class="stop" onclick="stop()">⏹️ Stop</button>
+            <button class="info" onclick="toggleFormula()">📐 Show Formula</button>
+            <button class="info" onclick="toggleInfo()">ℹ️ Show Info</button>
+        </div>
+
+        <div class="function-selector">
+            <button class="function-btn active" onclick="selectFunction(1)">Function 1 (2x)</button>
+            <button class="function-btn" onclick="selectFunction(2)">Function 2 (3x)</button>
+            <button class="function-btn" onclick="selectFunction(3)">Function 3 (½x)</button>
+        </div>
+
+        <div class="stack-display" id="stackDisplay">
+            <h3>📚 Coordinate Stack</h3>
+            <div id="stackContent">Ready to start...</div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('functionCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        let animationId;
+        let currentX = 0;
+        let maxX = 10;
+        let isPlaying = false;
+        let currentFunction = 1;
+        let coordinateStack = [];
+        
+        const functions = {
+            1: { fn: x => 2 * x, name: 'f(x) = 2x', color: '#e74c3c' },
+            2: { fn: x => 3 * x, name: 'f(x) = 3x', color: '#3498db' },
+            3: { fn: x => 0.5 * x, name: 'f(x) = ½x', color: '#2ecc71' }
+        };
+
+        function drawAxes() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw grid
+            ctx.strokeStyle = '#f0f0f0';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 10; i++) {
+                // Vertical lines
+                ctx.beginPath();
+                ctx.moveTo(50 + i * 50, 50);
+                ctx.lineTo(50 + i * 50, 450);
+                ctx.stroke();
+                
+                // Horizontal lines
+                ctx.beginPath();
+                ctx.moveTo(50, 50 + i * 40);
+                ctx.lineTo(550, 50 + i * 40);
+                ctx.stroke();
+            }
+            
+            // Draw axes
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 2;
+            
+            // X-axis
+            ctx.beginPath();
+            ctx.moveTo(50, 450);
+            ctx.lineTo(550, 450);
+            ctx.stroke();
+            
+            // Y-axis
+            ctx.beginPath();
+            ctx.moveTo(50, 450);
+            ctx.lineTo(50, 50);
+            ctx.stroke();
+            
+            // Labels
+            ctx.fillStyle = '#000';
+            ctx.font = '14px Arial';
+            ctx.fillText('Input (x-axis)', 250, 480);
+            ctx.save();
+            ctx.translate(20, 250);
+            ctx.rotate(-Math.PI / 2);
+            ctx.fillText('Output (y-axis)', 0, 0);
+            ctx.restore();
+            
+            // Axis numbers
+            ctx.font = '12px Arial';
+            for (let i = 0; i <= 10; i++) {
+                ctx.fillText(i, 45 + i * 50, 465);
+                ctx.fillText(i, 30, 455 - i * 40);
+            }
+            
+            // Function name
+            const func = functions[currentFunction];
+            ctx.font = 'bold 18px Arial';
+            ctx.fillStyle = func.color;
+            ctx.fillText(func.name, 250, 30);
+        }
+
+        function plotPoint(x, y, isActive = false) {
+            const canvasX = 50 + x * 50;
+            const canvasY = 450 - y * 40;
+            
+            ctx.fillStyle = isActive ? '#ff6b6b' : functions[currentFunction].color;
+            ctx.beginPath();
+            ctx.arc(canvasX, canvasY, isActive ? 8 : 5, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            if (isActive) {
+                ctx.strokeStyle = '#ff6b6b';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            }
+        }
+
+        function drawLine() {
+            ctx.strokeStyle = functions[currentFunction].color;
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            
+            ctx.beginPath();
+            for (let i = 0; i <= currentX * 10; i++) {
+                const x = i / 10;
+                const y = functions[currentFunction].fn(x);
+                const canvasX = 50 + x * 50;
+                const canvasY = 450 - y * 40;
+                
+                if (i === 0) {
+                    ctx.moveTo(canvasX, canvasY);
+                } else {
+                    ctx.lineTo(canvasX, canvasY);
+                }
+            }
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+
+        function updateDisplay() {
+            const func = functions[currentFunction];
+            const y = func.fn(currentX);
+            
+            document.getElementById('currentStep').innerHTML = 
+                `Step ${currentX + 1}: Input <strong>${currentX}</strong> → Output <strong>${y}</strong>`;
+            
+            // Update coordinate stack
+            coordinateStack.push({ x: currentX, y: y });
+            updateStackDisplay();
+        }
+
+        function updateStackDisplay() {
+            const stackContent = document.getElementById('stackContent');
+            let html = '';
+            
+            coordinateStack.forEach((coord, index) => {
+                const coords = coordinateStack.slice(0, index + 1)
+                    .map(c => `(${c.x},${c.y})`)
+                    .join(', ');
+                
+                const className = index === coordinateStack.length - 1 ? 'stack-item current-step' : 'stack-item';
+                html += `<div class="${className}">${coord.x} → ${coord.y}, Stack: ${coords}</div>`;
+            });
+            
+            stackContent.innerHTML = html || 'Ready to start...';
+        }
+
+        function animate() {
+            if (!isPlaying) return;
+            
+            if (currentX <= maxX) {
+                drawAxes();
+                
+                // Draw all previous points
+                for (let i = 0; i < currentX; i++) {
+                    const y = functions[currentFunction].fn(i);
+                    plotPoint(i, y, false);
+                }
+                
+                // Draw current point
+                const y = functions[currentFunction].fn(currentX);
+                plotPoint(currentX, y, true);
+                
+                drawLine();
+                updateDisplay();
+                
+                currentX++;
+                animationId = setTimeout(animate, 1000);
+            } else {
+                isPlaying = false;
+            }
+        }
+
+        function play() {
+            if (currentX > maxX) {
+                stop();
+            }
+            isPlaying = true;
+            animate();
+        }
+
+        function pause() {
+            isPlaying = false;
+            if (animationId) {
+                clearTimeout(animationId);
+            }
+        }
+
+        function stop() {
+            pause();
+            currentX = 0;
+            coordinateStack = [];
+            drawAxes();
+            document.getElementById('currentStep').innerHTML = 'Step 1: Input 0 → Output 0';
+            document.getElementById('stackContent').innerHTML = 'Ready to start...';
+        }
+
+        function selectFunction(num) {
+            currentFunction = num;
+            stop();
+            
+            // Update button styles
+            document.querySelectorAll('.function-btn').forEach((btn, index) => {
+                if (index + 1 === num) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+        }
+
+        function toggleFormula() {
+            alert(`Current Formula: ${functions[currentFunction].name}\n\nThis means:\n- Take the input (x)\n- ${currentFunction === 1 ? 'Multiply by 2' : currentFunction === 2 ? 'Multiply by 3' : 'Divide by 2'}\n- Get the output (y)`);
+        }
+
+        function toggleInfo() {
+            alert('How to use:\n\n1. Click PLAY to start the animation\n2. Watch as points are plotted\n3. See the coordinate stack build up\n4. Switch between different functions\n5. Click STOP to reset');
+        }
+
+        // Initialize
+        drawAxes();
+    </script>
+</body>
+</html>
