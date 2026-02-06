@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Function Animation</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Arial', sans-serif;
+        }
+
+        .container {
+            background: white;
+            padding: 40px 50px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .step-indicator {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 22px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .main-layout {
+            display: flex;
+            align-items: center;
+            gap: 40px;
+        }
+
+        .left-panel {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .machine-layout {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        .value-wrapper {
+            position: relative;
+            width: 70px;
+            height: 70px;
+        }
+
+        .value {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 30px;
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .input-value { background: linear-gradient(135deg, #27ae60 0%, #229954 100%); }
+        .output-value { background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); }
+
+        .value-label-group {
+            position: absolute;
+            left: 100%;
+            top: 50%;
+            transform: translateY(-50%);
+            margin-left: 12px;
+            white-space: nowrap;
+        }
+
+        .value-label { font-size: 15px; font-weight: bold; color: #2c3e50; }
+        .axis-hint { font-size: 11px; color: #7f8c8d; font-weight: bold; letter-spacing: 1px; text-transform: uppercase; margin-top: 2px; }
+
+        .arrow-vertical {
+            width: 4px;
+            height: 50px;
+            background: #2c3e50;
+            position: relative;
+        }
+
+        .arrow-up::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-bottom: 18px solid #2c3e50;
+            border-left: 9px solid transparent;
+            border-right: 9px solid transparent;
+        }
+
+        .arrow-input { margin: 10px 0; }
+        .arrow-output { margin: 10px 0; }
+
+        .function-box {
+            width: 220px;
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            border: 4px solid #2c3e50;
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 14px 18px;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            z-index: 2;
+            transition: transform 0.1s ease;
+        }
+
+        .function-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: rgba(255,255,255,0.9);
+            margin-bottom: 8px;
+        }
+
+        .calc-board {
+            background: rgba(255,255,255,0.92);
+            border-radius: 10px;
+            padding: 10px 14px;
+            width: 100%;
+            box-sizing: border-box;
+            min-height: 80px;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .calc-line {
+            font-size: 16px;
+            font-weight: bold;
+            color: #2c3e50;
+            opacity: 0;
+            transform: translateY(5px);
+            transition: opacity 0.35s ease, transform 0.35s ease;
+            white-space: nowrap;
+        }
+
+        .calc-line.visible { opacity: 1; transform: translateY(0); }
+        .calc-line.result { color: #2980b9; font-size: 18px; }
+
+        .moving-ball {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            position: absolute;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.35);
+            z-index: 10;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .moving-ball.green { background: linear-gradient(135deg, #27ae60 0%, #229954 100%); }
+        .moving-ball.blue { background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); }
+        .moving-ball.orange { background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%); }
+
+        @keyframes popIn {
+            0% { transform: translate(-50%, -50%) scale(0); }
+            70% { transform: translate(-50%, -50%) scale(1.15); }
+            100% { transform: translate(-50%, -50%) scale(1); }
+        }
+        @keyframes popOut {
+            0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+        }
+        @keyframes pulse {
+            0% { transform: scale(0.9); opacity: 0.7; }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .right-panel {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .graph-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+
+        .graph-container {
+            position: relative;
+            width: 340px;
+            height: 340px;
+        }
+
+        .graph-canvas {
+            width: 340px;
+            height: 340px;
+            border: 2px solid #bdc3c8;
+            border-radius: 8px;
+            background: #f9f9f9;
+        }
+
+        .points-list {
+            margin-top: 10px;
+            font-size: 14px;
+            font-weight: bold;
+            color: #2c3e50;
+            min-height: 22px;
+            text-align: center;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 25px;
+            flex-wrap: wrap;
+        }
+
+        .func-selector {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 12px;
+        }
+
+        .btn {
+            padding: 10px 28px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            color: white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0,0,0,0.3); }
+        .btn:active { transform: translateY(0); box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+
+        .btn-play { background: linear-gradient(135deg, #27ae60 0%, #229954 100%); }
+        .btn-pause { background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%); }
+        .btn-stop { background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); }
+
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn:disabled:hover { transform: none; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+
+        .btn-func {
+            padding: 10px 24px;
+            font-size: 16px;
+            font-weight: bold;
+            border: 3px solid #8e44ad;
+            border-radius: 8px;
+            cursor: pointer;
+            background: white;
+            color: #8e44ad;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            transition: all 0.2s;
+        }
+
+        .btn-func:hover {
+            background: #f5eef8;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+        }
+
+        .btn-func.active {
+            background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+            color: white;
+            border-color: #8e44ad;
+            box-shadow: 0 4px 15px rgba(142, 68, 173, 0.4);
+        }
+
+        .btn-func:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-func:disabled:hover {
+            transform: none;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="step-indicator" id="stepIndicator">Press Play to start</div>
+
+        <div class="main-layout">
+            <div class="left-panel">
+                <div class="machine-layout" id="machineLayout">
+                    <div class="value-wrapper" id="outputWrapper">
+                        <div class="value output-value" id="outputValue">?</div>
+                        <div class="value-label-group">
+                            <div class="value-label">Output (y)</div>
+                            <div class="axis-hint">y-axis</div>
+                        </div>
+                    </div>
+
+                    <div class="arrow-vertical arrow-up arrow-output"></div>
+
+                    <div class="function-box" id="functionBox">
+                        <div class="function-title" id="functionTitle">f(x) = 2x + 1</div>
+                        <div class="calc-board" id="calcBoard">
+                            <div class="calc-line" id="line1"></div>
+                            <div class="calc-line" id="line2"></div>
+                            <div class="calc-line result" id="line3"></div>
+                        </div>
+                    </div>
+
+                    <div class="arrow-vertical arrow-up arrow-input"></div>
+
+                    <div class="value-wrapper" id="inputWrapper">
+                        <div class="value input-value" id="inputValue">?</div>
+                        <div class="value-label-group">
+                            <div class="value-label">Input (x)</div>
+                            <div class="axis-hint">x-axis</div>
+                        </div>
+                    </div>
+
+                    <div class="moving-ball green" id="movingBall">0</div>
+                </div>
+            </div>
+
+            <div class="right-panel">
+                <div class="graph-title">Coordinate Plane</div>
+                <div class="graph-container">
+                    <canvas class="graph-canvas" id="graphCanvas" width="340" height="340"></canvas>
+                </div>
+                <div class="points-list" id="pointsList">Points: —</div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-play" id="playBtn" onclick="play()">Play</button>
+            <button class="btn btn-pause" id="pauseBtn" onclick="pause()" disabled>Pause</button>
+            <button class="btn btn-stop" id="stopBtn" onclick="stop()" disabled>Stop</button>
+        </div>
+
+        <div class="func-selector">
+            <button class="btn-func active" id="funcBtn1" onclick="selectFunction(0)">f(x) = 2x + 1</button>
+            <button class="btn-func" id="funcBtn2" onclick="selectFunction(1)">f(x) = 2x − 1</button>
+        </div>
+    </div>
+
+    <script>
+        // ===== FUNCTION DEFINITIONS =====
+        const functions = [
+            {
+                label: 'f(x) = 2x + 1',
+                calc: (x) => 2 * x + 1,
+                calcLine1: (x) => `f(${x}) = 2×${x} + 1`,
+                calcLine2: (x) => `f(${x}) = ${2 * x} + 1`,
+                calcLine3: (x, y) => `f(${x}) = ${y}`,
+                inputs: [0, 1, 2, 3]
+            },
+            {
+                label: 'f(x) = 2x − 1',
+                calc: (x) => 2 * x - 1,
+                calcLine1: (x) => `f(${x}) = 2×${x} − 1`,
+                calcLine2: (x) => `f(${x}) = ${2 * x} − 1`,
+                calcLine3: (x, y) => `f(${x}) = ${y}`,
+                inputs: [0, 1, 2, 3]
+            }
+        ];
+
+        let selectedFunc = 0;
+        let currentStep = 0;
+        let isPlaying = false;
+        let animationInProgress = false;
+        let timeouts = [];
+        let plottedPoints = [];
+
+        function getSteps() {
+            const fn = functions[selectedFunc];
+            return fn.inputs.map(x => ({ input: x, output: fn.calc(x) }));
+        }
+
+        // ===== GRAPH =====
+        const canvas = document.getElementById('graphCanvas');
+        const ctx = canvas.getContext('2d');
+        const gridMin = -2;
+        const gridMax = 8;
+        const gridRange = gridMax - gridMin;
+        const padding = 30;
+        const graphW = canvas.width - padding * 2;
+        const graphH = canvas.height - padding * 2;
+
+        function toCanvasX(x) { return padding + ((x - gridMin) / gridRange) * graphW; }
+        function toCanvasY(y) { return padding + ((gridMax - y) / gridRange) * graphH; }
+
+        function drawGrid() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            for (let i = gridMin; i <= gridMax; i++) {
+                const cx = toCanvasX(i);
+                const cy = toCanvasY(i);
+
+                ctx.beginPath();
+                ctx.moveTo(cx, padding);
+                ctx.lineTo(cx, canvas.height - padding);
+                ctx.strokeStyle = (i === 0) ? '#2c3e50' : '#dce1e5';
+                ctx.lineWidth = (i === 0) ? 2 : 1;
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.moveTo(padding, cy);
+                ctx.lineTo(canvas.width - padding, cy);
+                ctx.strokeStyle = (i === 0) ? '#2c3e50' : '#dce1e5';
+                ctx.lineWidth = (i === 0) ? 2 : 1;
+                ctx.stroke();
+
+                ctx.fillStyle = '#7f8c8d';
+                ctx.font = 'bold 11px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'top';
+                if (i !== 0) ctx.fillText(i, cx, toCanvasY(0) + 5);
+
+                ctx.textAlign = 'right';
+                ctx.textBaseline = 'middle';
+                if (i !== 0) ctx.fillText(i, toCanvasX(0) - 6, cy);
+            }
+
+            ctx.fillStyle = '#7f8c8d';
+            ctx.font = 'bold 11px Arial';
+            ctx.textAlign = 'right';
+            ctx.textBaseline = 'top';
+            ctx.fillText('0', toCanvasX(0) - 6, toCanvasY(0) + 5);
+
+            ctx.fillStyle = '#2c3e50';
+            const xEnd = canvas.width - padding + 5;
+            const yAxis = toCanvasY(0);
+            ctx.beginPath();
+            ctx.moveTo(xEnd, yAxis);
+            ctx.lineTo(xEnd - 8, yAxis - 4);
+            ctx.lineTo(xEnd - 8, yAxis + 4);
+            ctx.fill();
+
+            const xAxis = toCanvasX(0);
+            const yEnd = padding - 5;
+            ctx.beginPath();
+            ctx.moveTo(xAxis, yEnd);
+            ctx.lineTo(xAxis - 4, yEnd + 8);
+            ctx.lineTo(xAxis + 4, yEnd + 8);
+            ctx.fill();
+
+            ctx.fillStyle = '#2c3e50';
+            ctx.font = 'bold 13px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('x', xEnd - 2, yAxis + 16);
+            ctx.textBaseline = 'middle';
+            ctx.textAlign = 'left';
+            ctx.fillText('y', xAxis + 10, yEnd + 2);
+        }
+
+        function drawPoints() {
+            if (plottedPoints.length > 1) {
+                ctx.beginPath();
+                ctx.moveTo(toCanvasX(plottedPoints[0].x), toCanvasY(plottedPoints[0].y));
+                for (let i = 1; i < plottedPoints.length; i++) {
+                    ctx.lineTo(toCanvasX(plottedPoints[i].x), toCanvasY(plottedPoints[i].y));
+                }
+                ctx.strokeStyle = 'rgba(41, 128, 185, 0.4)';
+                ctx.lineWidth = 2;
+                ctx.setLineDash([6, 4]);
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }
+
+            plottedPoints.forEach((pt, idx) => {
+                const cx = toCanvasX(pt.x);
+                const cy = toCanvasY(pt.y);
+
+                ctx.beginPath();
+                ctx.arc(cx, cy, 8, 0, Math.PI * 2);
+                ctx.fillStyle = '#2980b9';
+                ctx.fill();
+
+                ctx.beginPath();
+                ctx.arc(cx, cy, 4, 0, Math.PI * 2);
+                ctx.fillStyle = '#1a5276';
+                ctx.fill();
+
+                const labels = ['A', 'B', 'C', 'D'];
+                ctx.fillStyle = '#2980b9';
+                ctx.font = 'bold 13px Arial';
+                ctx.textAlign = 'left';
+                ctx.textBaseline = 'bottom';
+                ctx.fillText(`${labels[idx] || ''}`, cx + 10, cy - 4);
+
+                ctx.fillStyle = '#555';
+                ctx.font = '11px Arial';
+                ctx.fillText(`(${pt.x}, ${pt.y})`, cx + 10, cy + 10);
+            });
+        }
+
+        function plotPoint(x, y) {
+            plottedPoints.push({ x, y });
+            redrawGraph();
+            updatePointsList();
+        }
+
+        function clearPoints() {
+            plottedPoints = [];
+            redrawGraph();
+            updatePointsList();
+        }
+
+        function redrawGraph() { drawGrid(); drawPoints(); }
+
+        function updatePointsList() {
+            const el = document.getElementById('pointsList');
+            if (plottedPoints.length === 0) {
+                el.textContent = 'Points: —';
+            } else {
+                const labels = ['A', 'B', 'C', 'D'];
+                const strs = plottedPoints.map((pt, i) => `${labels[i]}(${pt.x}, ${pt.y})`);
+                el.textContent = 'Points: ' + strs.join('  ');
+            }
+        }
+
+        // ===== FUNCTION SELECTOR =====
+        function selectFunction(index) {
+            if (isPlaying || animationInProgress) {
+                // Stop first
+                stopInternal();
+            }
+
+            selectedFunc = index;
+
+            document.getElementById('funcBtn1').classList.toggle('active', index === 0);
+            document.getElementById('funcBtn2').classList.toggle('active', index === 1);
+
+            document.getElementById('functionTitle').textContent = functions[index].label;
+
+            resetAll();
+        }
+
+        // ===== ANIMATION =====
+        function clearAllTimeouts() { timeouts.forEach(t => clearTimeout(t)); timeouts = []; }
+        function addTimeout(fn, delay) { const t = setTimeout(fn, delay); timeouts.push(t); return t; }
+
+        function getCenter(el) {
+            const container = document.getElementById('machineLayout');
+            const cRect = container.getBoundingClientRect();
+            const eRect = el.getBoundingClientRect();
+            return {
+                x: eRect.left + eRect.width / 2 - cRect.left,
+                y: eRect.top + eRect.height / 2 - cRect.top
+            };
+        }
+
+        function hideAllLines() {
+            for (let i = 1; i <= 3; i++) document.getElementById('line' + i).classList.remove('visible');
+        }
+        function showLine(n) { document.getElementById('line' + n).classList.add('visible'); }
+        function resetCalcBoard() { hideAllLines(); }
+
+        function setCalcLines(input, output) {
+            const fn = functions[selectedFunc];
+            document.getElementById('line1').textContent = fn.calcLine1(input);
+            document.getElementById('line2').textContent = fn.calcLine2(input);
+            document.getElementById('line3').textContent = fn.calcLine3(input, output);
+        }
+
+        function animateStep() {
+            if (animationInProgress) return;
+            animationInProgress = true;
+
+            const steps = getSteps();
+            const step = steps[currentStep];
+
+            if (currentStep === 0 && plottedPoints.length > 0) {
+                clearPoints();
+            }
+
+            const ball = document.getElementById('movingBall');
+            const inputEl = document.getElementById('inputValue');
+            const outputEl = document.getElementById('outputValue');
+            const stepEl = document.getElementById('stepIndicator');
+            const functionBox = document.getElementById('functionBox');
+
+            stepEl.textContent = `Step ${currentStep + 1}: x = ${step.input} → y = ?`;
+            resetCalcBoard();
+            setCalcLines(step.input, step.output);
+
+            inputEl.textContent = step.input;
+            inputEl.style.animation = 'none';
+            requestAnimationFrame(() => { inputEl.style.animation = 'pulse 0.4s ease'; });
+
+            const inputPos = getCenter(inputEl);
+            const boxPos = getCenter(functionBox);
+            const outputPos = getCenter(outputEl);
+
+            ball.textContent = step.input;
+            ball.className = 'moving-ball green';
+            ball.style.transition = 'none';
+            ball.style.left = inputPos.x + 'px';
+            ball.style.top = inputPos.y + 'px';
+            ball.style.opacity = '1';
+            ball.style.animation = 'popIn 0.35s ease forwards';
+
+            addTimeout(() => {
+                ball.style.animation = '';
+                ball.style.transform = 'translate(-50%, -50%) scale(1)';
+                ball.style.transition = 'left 0.7s cubic-bezier(0.4,0,0.2,1), top 0.7s cubic-bezier(0.4,0,0.2,1)';
+                ball.style.left = boxPos.x + 'px';
+                ball.style.top = boxPos.y + 'px';
+            }, 600);
+
+            addTimeout(() => {
+                ball.className = 'moving-ball orange';
+                ball.style.transition = 'transform 0.25s ease, opacity 0.25s ease';
+                ball.style.transform = 'translate(-50%, -50%) scale(0.4)';
+                ball.style.opacity = '0.3';
+
+                functionBox.style.transform = 'scale(1.06)';
+                addTimeout(() => {
+                    functionBox.style.transform = 'scale(0.96)';
+                    addTimeout(() => {
+                        functionBox.style.transform = 'scale(1.02)';
+                        addTimeout(() => { functionBox.style.transform = 'scale(1)'; }, 100);
+                    }, 100);
+                }, 100);
+            }, 1500);
+
+            addTimeout(() => { showLine(1); }, 2100);
+            addTimeout(() => { showLine(2); }, 2800);
+            addTimeout(() => {
+                showLine(3);
+                stepEl.textContent = `Step ${currentStep + 1}: x = ${step.input} → y = ${step.output}`;
+            }, 3500);
+
+            addTimeout(() => {
+                ball.textContent = step.output;
+                ball.className = 'moving-ball blue';
+                ball.style.opacity = '1';
+                ball.style.transition = 'transform 0.3s ease-out';
+                ball.style.transform = 'translate(-50%, -50%) scale(1)';
+            }, 4200);
+
+            addTimeout(() => {
+                ball.style.transition = 'left 0.7s cubic-bezier(0.4,0,0.2,1), top 0.7s cubic-bezier(0.4,0,0.2,1)';
+                ball.style.left = outputPos.x + 'px';
+                ball.style.top = outputPos.y + 'px';
+            }, 4600);
+
+            addTimeout(() => {
+                outputEl.textContent = step.output;
+                outputEl.style.animation = 'none';
+                requestAnimationFrame(() => { outputEl.style.animation = 'pulse 0.4s ease'; });
+                ball.style.animation = 'popOut 0.3s ease forwards';
+            }, 5500);
+
+            addTimeout(() => {
+                plotPoint(step.input, step.output);
+            }, 5900);
+
+            addTimeout(() => {
+                ball.style.opacity = '0';
+                ball.style.animation = '';
+                animationInProgress = false;
+                currentStep = (currentStep + 1) % steps.length;
+                if (isPlaying) { addTimeout(animateStep, 800); }
+            }, 6500);
+        }
+
+        function play() {
+            if (!isPlaying) {
+                isPlaying = true;
+                document.getElementById('playBtn').disabled = true;
+                document.getElementById('pauseBtn').disabled = false;
+                document.getElementById('stopBtn').disabled = false;
+                document.getElementById('funcBtn1').disabled = true;
+                document.getElementById('funcBtn2').disabled = true;
+                if (!animationInProgress) animateStep();
+            }
+        }
+
+        function pause() {
+            if (isPlaying) {
+                isPlaying = false;
+                document.getElementById('playBtn').disabled = false;
+                document.getElementById('pauseBtn').disabled = true;
+            }
+        }
+
+        function stopInternal() {
+            isPlaying = false;
+            animationInProgress = false;
+            clearAllTimeouts();
+            currentStep = 0;
+
+            document.getElementById('movingBall').style.transition = 'none';
+            document.getElementById('movingBall').style.opacity = '0';
+            document.getElementById('movingBall').style.animation = '';
+            document.getElementById('inputValue').textContent = '?';
+            document.getElementById('outputValue').textContent = '?';
+            document.getElementById('stepIndicator').textContent = 'Press Play to start';
+            document.getElementById('functionBox').style.transform = 'scale(1)';
+            resetCalcBoard();
+            clearPoints();
+
+            document.getElementById('playBtn').disabled = false;
+            document.getElementById('pauseBtn').disabled = true;
+            document.getElementById('stopBtn').disabled = true;
+            document.getElementById('funcBtn1').disabled = false;
+            document.getElementById('funcBtn2').disabled = false;
+        }
+
+        function stop() { stopInternal(); }
+
+        function resetAll() {
+            currentStep = 0;
+            document.getElementById('inputValue').textContent = '?';
+            document.getElementById('outputValue').textContent = '?';
+            document.getElementById('stepIndicator').textContent = 'Press Play to start';
+            document.getElementById('functionBox').style.transform = 'scale(1)';
+            resetCalcBoard();
+            clearPoints();
+
+            document.getElementById('playBtn').disabled = false;
+            document.getElementById('pauseBtn').disabled = true;
+            document.getElementById('stopBtn').disabled = true;
+        }
+
+        // Init
+        resetCalcBoard();
+        redrawGraph();
+    </script>
+</body>
+</html>

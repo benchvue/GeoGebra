@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Function Animation</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Arial', sans-serif;
+        }
+
+        .container {
+            background: white;
+            padding: 50px 60px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .step-indicator {
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .machine-layout {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        .value-wrapper {
+            position: relative;
+            width: 80px;
+            height: 80px;
+        }
+
+        .value {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 36px;
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .input-value { background: linear-gradient(135deg, #27ae60 0%, #229954 100%); }
+        .output-value { background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); }
+
+        .value-label-group {
+            position: absolute;
+            left: 100%;
+            top: 50%;
+            transform: translateY(-50%);
+            margin-left: 16px;
+            white-space: nowrap;
+        }
+
+        .value-label { font-size: 18px; font-weight: bold; color: #2c3e50; }
+        .axis-hint { font-size: 13px; color: #7f8c8d; font-weight: bold; letter-spacing: 1px; text-transform: uppercase; margin-top: 2px; }
+
+        .arrow-vertical {
+            width: 4px;
+            height: 70px;
+            background: #2c3e50;
+            position: relative;
+        }
+
+        .arrow-up::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-bottom: 20px solid #2c3e50;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+        }
+
+        /* Margins for arrows */
+        .arrow-input {
+            margin-bottom: 12px; /* gap between arrow bottom and green input circle */
+            margin-top: 12px;   /* gap between arrow top and red box */
+        }
+
+        .arrow-output {
+            margin-bottom: 12px; /* gap between arrow bottom and red box */
+            margin-top: 12px;   /* gap between arrow top and blue output circle */
+        }
+
+        .function-box {
+            width: 250px;
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            border: 4px solid #2c3e50;
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 16px 20px;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            z-index: 2;
+            transition: transform 0.1s ease;
+        }
+
+        .function-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: rgba(255,255,255,0.9);
+            margin-bottom: 10px;
+        }
+
+        .calc-board {
+            background: rgba(255,255,255,0.92);
+            border-radius: 10px;
+            padding: 12px 18px;
+            width: 100%;
+            box-sizing: border-box;
+            min-height: 90px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .calc-line {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2c3e50;
+            opacity: 0;
+            transform: translateY(5px);
+            transition: opacity 0.35s ease, transform 0.35s ease;
+            white-space: nowrap;
+        }
+
+        .calc-line.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .calc-line.result {
+            color: #2980b9;
+            font-size: 20px;
+        }
+
+        .moving-ball {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            position: absolute;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.35);
+            z-index: 10;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .moving-ball.green { background: linear-gradient(135deg, #27ae60 0%, #229954 100%); }
+        .moving-ball.blue { background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); }
+        .moving-ball.orange { background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%); }
+
+        @keyframes popIn {
+            0% { transform: translate(-50%, -50%) scale(0); }
+            70% { transform: translate(-50%, -50%) scale(1.15); }
+            100% { transform: translate(-50%, -50%) scale(1); }
+        }
+
+        @keyframes popOut {
+            0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.9); opacity: 0.7; }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            color: white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0,0,0,0.3); }
+        .btn:active { transform: translateY(0); box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+
+        .btn-play { background: linear-gradient(135deg, #27ae60 0%, #229954 100%); }
+        .btn-pause { background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%); }
+        .btn-stop { background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); }
+
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn:disabled:hover { transform: none; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="step-indicator" id="stepIndicator">Press Play to start</div>
+
+        <div class="machine-layout" id="machineLayout">
+            <div class="value-wrapper" id="outputWrapper">
+                <div class="value output-value" id="outputValue">?</div>
+                <div class="value-label-group">
+                    <div class="value-label">Output (y)</div>
+                    <div class="axis-hint">y-axis</div>
+                </div>
+            </div>
+
+            <div class="arrow-vertical arrow-up arrow-output"></div>
+
+            <div class="function-box" id="functionBox">
+                <div class="function-title">f(x) = 2x + 1</div>
+                <div class="calc-board" id="calcBoard">
+                    <div class="calc-line" id="line1">f(0) = 2×0 + 1</div>
+                    <div class="calc-line" id="line2">f(0) = 0 + 1</div>
+                    <div class="calc-line result" id="line3">f(0) = 1</div>
+                </div>
+            </div>
+
+            <div class="arrow-vertical arrow-up arrow-input"></div>
+
+            <div class="value-wrapper" id="inputWrapper">
+                <div class="value input-value" id="inputValue">?</div>
+                <div class="value-label-group">
+                    <div class="value-label">Input (x)</div>
+                    <div class="axis-hint">x-axis</div>
+                </div>
+            </div>
+
+            <div class="moving-ball green" id="movingBall">0</div>
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-play" id="playBtn" onclick="play()">Play</button>
+            <button class="btn btn-pause" id="pauseBtn" onclick="pause()" disabled>Pause</button>
+            <button class="btn btn-stop" id="stopBtn" onclick="stop()" disabled>Stop</button>
+        </div>
+    </div>
+
+    <script>
+        const steps = [
+            { input: 0, output: 1 },
+            { input: 1, output: 3 },
+            { input: 2, output: 5 },
+            { input: 3, output: 7 }
+        ];
+
+        let currentStep = 0;
+        let isPlaying = false;
+        let animationInProgress = false;
+        let timeouts = [];
+
+        function clearAllTimeouts() { timeouts.forEach(t => clearTimeout(t)); timeouts = []; }
+        function addTimeout(fn, delay) { const t = setTimeout(fn, delay); timeouts.push(t); return t; }
+
+        function getCenter(el) {
+            const container = document.getElementById('machineLayout');
+            const cRect = container.getBoundingClientRect();
+            const eRect = el.getBoundingClientRect();
+            return {
+                x: eRect.left + eRect.width / 2 - cRect.left,
+                y: eRect.top + eRect.height / 2 - cRect.top
+            };
+        }
+
+        function setCalcLines(input, output) {
+            const mult = 2 * input;
+            document.getElementById('line1').textContent = `f(${input}) = 2×${input} + 1`;
+            document.getElementById('line2').textContent = `f(${input}) = ${mult} + 1`;
+            document.getElementById('line3').textContent = `f(${input}) = ${output}`;
+        }
+
+        function hideAllLines() {
+            for (let i = 1; i <= 3; i++) {
+                document.getElementById('line' + i).classList.remove('visible');
+            }
+        }
+
+        function showLine(n) {
+            document.getElementById('line' + n).classList.add('visible');
+        }
+
+        function resetCalcBoard() { hideAllLines(); }
+
+        function animateStep() {
+            if (animationInProgress) return;
+            animationInProgress = true;
+
+            const step = steps[currentStep];
+            const ball = document.getElementById('movingBall');
+            const inputEl = document.getElementById('inputValue');
+            const outputEl = document.getElementById('outputValue');
+            const stepEl = document.getElementById('stepIndicator');
+            const functionBox = document.getElementById('functionBox');
+
+            stepEl.textContent = `Step ${currentStep + 1}: x = ${step.input} → y = ?`;
+            resetCalcBoard();
+            setCalcLines(step.input, step.output);
+
+            inputEl.textContent = step.input;
+            inputEl.style.animation = 'none';
+            requestAnimationFrame(() => { inputEl.style.animation = 'pulse 0.4s ease'; });
+
+            const inputPos = getCenter(inputEl);
+            const boxPos = getCenter(functionBox);
+            const outputPos = getCenter(outputEl);
+
+            // Phase 1: Green ball pops in at input
+            ball.textContent = step.input;
+            ball.className = 'moving-ball green';
+            ball.style.transition = 'none';
+            ball.style.left = inputPos.x + 'px';
+            ball.style.top = inputPos.y + 'px';
+            ball.style.opacity = '1';
+            ball.style.animation = 'popIn 0.35s ease forwards';
+
+            // Phase 2: Ball moves up to f(x) box
+            addTimeout(() => {
+                ball.style.animation = '';
+                ball.style.transform = 'translate(-50%, -50%) scale(1)';
+                ball.style.transition = 'left 0.7s cubic-bezier(0.4,0,0.2,1), top 0.7s cubic-bezier(0.4,0,0.2,1)';
+                ball.style.left = boxPos.x + 'px';
+                ball.style.top = boxPos.y + 'px';
+            }, 600);
+
+            // Phase 3: Ball enters box
+            addTimeout(() => {
+                ball.className = 'moving-ball orange';
+                ball.style.transition = 'transform 0.25s ease, opacity 0.25s ease';
+                ball.style.transform = 'translate(-50%, -50%) scale(0.4)';
+                ball.style.opacity = '0.3';
+
+                functionBox.style.transform = 'scale(1.06)';
+                addTimeout(() => {
+                    functionBox.style.transform = 'scale(0.96)';
+                    addTimeout(() => {
+                        functionBox.style.transform = 'scale(1.02)';
+                        addTimeout(() => { functionBox.style.transform = 'scale(1)'; }, 100);
+                    }, 100);
+                }, 100);
+            }, 1500);
+
+            // Phase 4: Reveal line 1
+            addTimeout(() => { showLine(1); }, 2100);
+
+            // Phase 5: Reveal line 2
+            addTimeout(() => { showLine(2); }, 2800);
+
+            // Phase 6: Reveal line 3
+            addTimeout(() => {
+                showLine(3);
+                stepEl.textContent = `Step ${currentStep + 1}: x = ${step.input} → y = ${step.output}`;
+            }, 3500);
+
+            // Phase 7: Blue ball emerges
+            addTimeout(() => {
+                ball.textContent = step.output;
+                ball.className = 'moving-ball blue';
+                ball.style.opacity = '1';
+                ball.style.transition = 'transform 0.3s ease-out';
+                ball.style.transform = 'translate(-50%, -50%) scale(1)';
+            }, 4200);
+
+            // Phase 8: Ball moves up to output
+            addTimeout(() => {
+                ball.style.transition = 'left 0.7s cubic-bezier(0.4,0,0.2,1), top 0.7s cubic-bezier(0.4,0,0.2,1)';
+                ball.style.left = outputPos.x + 'px';
+                ball.style.top = outputPos.y + 'px';
+            }, 4600);
+
+            // Phase 9: Arrives at output
+            addTimeout(() => {
+                outputEl.textContent = step.output;
+                outputEl.style.animation = 'none';
+                requestAnimationFrame(() => { outputEl.style.animation = 'pulse 0.4s ease'; });
+                ball.style.animation = 'popOut 0.3s ease forwards';
+            }, 5500);
+
+            // Phase 10: Reset and advance
+            addTimeout(() => {
+                ball.style.opacity = '0';
+                ball.style.animation = '';
+                animationInProgress = false;
+                currentStep = (currentStep + 1) % steps.length;
+                if (isPlaying) { addTimeout(animateStep, 800); }
+            }, 6200);
+        }
+
+        function play() {
+            if (!isPlaying) {
+                isPlaying = true;
+                document.getElementById('playBtn').disabled = true;
+                document.getElementById('pauseBtn').disabled = false;
+                document.getElementById('stopBtn').disabled = false;
+                if (!animationInProgress) animateStep();
+            }
+        }
+
+        function pause() {
+            if (isPlaying) {
+                isPlaying = false;
+                document.getElementById('playBtn').disabled = false;
+                document.getElementById('pauseBtn').disabled = true;
+            }
+        }
+
+        function stop() {
+            isPlaying = false;
+            animationInProgress = false;
+            clearAllTimeouts();
+            currentStep = 0;
+
+            document.getElementById('movingBall').style.transition = 'none';
+            document.getElementById('movingBall').style.opacity = '0';
+            document.getElementById('movingBall').style.animation = '';
+            document.getElementById('inputValue').textContent = '?';
+            document.getElementById('outputValue').textContent = '?';
+            document.getElementById('stepIndicator').textContent = 'Press Play to start';
+            document.getElementById('functionBox').style.transform = 'scale(1)';
+            resetCalcBoard();
+
+            document.getElementById('playBtn').disabled = false;
+            document.getElementById('pauseBtn').disabled = true;
+            document.getElementById('stopBtn').disabled = true;
+        }
+
+        resetCalcBoard();
+    </script>
+</body>
+</html>
