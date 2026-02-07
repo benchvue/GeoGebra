@@ -2,6 +2,14 @@
 
 This repository contains three progressive HTML visualizations demonstrating circle geometry, angles, radians, and arc length calculations. Each file builds upon the previous one with enhanced features.
 
+## 🚀 Live Demos
+
+[![Open Demo 1](https://img.shields.io/badge/▶%20Open%20Live%20Demo-Basic%20Angle-3498db?style=for-the-badge&logo=github)](https://benchvue.github.io/GeoGebra/week05/circle_angle_v1.html)
+
+[![Open Demo 2](https://img.shields.io/badge/▶%20Open%20Live%20Demo-Enhanced%20with%20Buttons-e67e22?style=for-the-badge&logo=github)](https://benchvue.github.io/GeoGebra/week05/circle_angle_v2.html)
+
+[![Open Demo 3](https://img.shields.io/badge/▶%20Open%20Live%20Demo-Complete%20with%20Radians-9b59b6?style=for-the-badge&logo=github)](https://benchvue.github.io/GeoGebra/week05/circle_angle_v3.html)
+
 ## 📁 Files
 
 1. **`circle_angle_v1.html`** - Basic Interactive Angle Visualization
@@ -130,14 +138,12 @@ These visualizations are ideal for:
 - Interactive mathematics education
 - Self-study and exploration
 
-## 🔗 Live Demo
+## 💾 Offline Usage
 
-To use these files:
+To use these files offline:
 1. Download the HTML file
 2. Open it in any web browser
 3. No internet connection required!
-
-Or visit the repository and use GitHub Pages to host them live.
 
 ## 📝 Notes
 
