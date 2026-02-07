@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Circle Angle</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #f5f5f5;
+            font-family: Arial, sans-serif;
+        }
+        
+        #container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        canvas {
+            border: 1px solid #ddd;
+            cursor: pointer;
+            display: block;
+        }
+        
+        #info {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 18px;
+            color: #333;
+        }
+        
+        .angle-display {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2563eb;
+            margin-top: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .button-container {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .angle-button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .angle-button:hover {
+            background: #1d4ed8;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .angle-button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <canvas id="canvas" width="700" height="700"></canvas>
+        <div id="info">
+            <div>Drag the endpoint to change the angle</div>
+            <div class="angle-display">Angle: <span id="angle">58.8</span>°</div>
+            <div class="button-container">
+                <button class="angle-button" onclick="increaseAngle(30)">+30°</button>
+                <button class="angle-button" onclick="increaseAngle(45)">+45°</button>
+                <button class="angle-button" onclick="increaseAngle(60)">+60°</button>
+                <button class="angle-button" onclick="increaseAngle(90)">+90°</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const angleDisplay = document.getElementById('angle');
+        
+        // Configuration
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+        const radius = 220;
+        const labelRadius = radius + 40; // Distance for angle labels
+        
+        // Fundamental angles to display
+        const fundamentalAngles = [0, 30, 45, 60, 90, 120, 135, 150, 180, 210, 225, 240, 270, 300, 315, 330];
+        
+        // State
+        let angle = 58.8; // Initial angle in degrees
+        let isDragging = false;
+        let isAnimating = false;
+        let animationStartAngle = 0;
+        let animationTargetAngle = 0;
+        let animationStartTime = 0;
+        let animationDuration = 500; // milliseconds
+        
+        // Convert degrees to radians
+        function toRadians(degrees) {
+            return degrees * Math.PI / 180;
+        }
+        
+        // Convert radians to degrees
+        function toDegrees(radians) {
+            return radians * 180 / Math.PI;
+        }
+        
+        // Normalize angle to 0-360 range
+        function normalizeAngle(deg) {
+            let normalized = deg % 360;
+            if (normalized < 0) normalized += 360;
+            return normalized;
+        }
+        
+        // Calculate endpoint position from angle
+        function getEndpoint(angleDeg) {
+            const rad = toRadians(angleDeg);
+            return {
+                x: centerX + radius * Math.cos(rad),
+                y: centerY - radius * Math.sin(rad)
+            };
+        }
+        
+        // Calculate angle from mouse position
+        function getAngleFromPoint(x, y) {
+            const dx = x - centerX;
+            const dy = centerY - y;
+            let rad = Math.atan2(dy, dx);
+            if (rad < 0) rad += 2 * Math.PI;
+            return toDegrees(rad);
+        }
+        
+        // Check if point is near endpoint
+        function isNearEndpoint(x, y, threshold = 15) {
+            const endpoint = getEndpoint(angle);
+            const distance = Math.sqrt(Math.pow(x - endpoint.x, 2) + Math.pow(y - endpoint.y, 2));
+            return distance < threshold;
+        }
+        
+        // Easing function for smooth animation
+        function easeInOutCubic(t) {
+            return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+        }
+        
+        // Animate angle change
+        function animateAngle(timestamp) {
+            if (!animationStartTime) animationStartTime = timestamp;
+            const elapsed = timestamp - animationStartTime;
+            const progress = Math.min(elapsed / animationDuration, 1);
+            const easedProgress = easeInOutCubic(progress);
+            
+            angle = animationStartAngle + (animationTargetAngle - animationStartAngle) * easedProgress;
+            draw();
+            
+            if (progress < 1) {
+                requestAnimationFrame(animateAngle);
+            } else {
+                isAnimating = false;
+                animationStartTime = 0;
+                angle = animationTargetAngle;
+                draw();
+            }
+        }
+        
+        // Increase angle by specified amount
+        function increaseAngle(degrees) {
+            if (isAnimating) return;
+            
+            isAnimating = true;
+            animationStartAngle = angle;
+            animationTargetAngle = normalizeAngle(angle + degrees);
+            animationStartTime = 0;
+            requestAnimationFrame(animateAngle);
+        }
+        
+        // Draw everything
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw fundamental angle lines
+            fundamentalAngles.forEach(deg => {
+                const rad = toRadians(deg);
+                const x = centerX + radius * Math.cos(rad);
+                const y = centerY - radius * Math.sin(rad);
+                
+                ctx.beginPath();
+                ctx.moveTo(centerX, centerY);
+                ctx.lineTo(x, y);
+                ctx.strokeStyle = '#d1d5db';
+                ctx.lineWidth = 1;
+                ctx.stroke();
+            });
+            
+            // Draw circle
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            // Draw fundamental angle labels
+            ctx.fillStyle = '#333';
+            ctx.font = 'bold 16px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            
+            fundamentalAngles.forEach(deg => {
+                const rad = toRadians(deg);
+                const x = centerX + labelRadius * Math.cos(rad);
+                const y = centerY - labelRadius * Math.sin(rad);
+                ctx.fillText(`${deg}°`, x, y);
+            });
+            
+            // Calculate positions
+            const startPoint = { x: centerX + radius, y: centerY };
+            const endpoint = getEndpoint(angle);
+            
+            // Draw base line (horizontal)
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY);
+            ctx.lineTo(startPoint.x, startPoint.y);
+            ctx.strokeStyle = '#10b981';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+            
+            // Draw radius line
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY);
+            ctx.lineTo(endpoint.x, endpoint.y);
+            ctx.strokeStyle = '#2563eb';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+            
+            // Draw angle arc
+            const arcRadius = 50;
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, arcRadius, 0, -toRadians(angle), true);
+            ctx.strokeStyle = '#666';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            // Draw center point
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 5, 0, 2 * Math.PI);
+            ctx.fillStyle = '#333';
+            ctx.fill();
+            
+            // Draw start point
+            ctx.beginPath();
+            ctx.arc(startPoint.x, startPoint.y, 8, 0, 2 * Math.PI);
+            ctx.fillStyle = '#10b981';
+            ctx.fill();
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            // Draw endpoint
+            ctx.beginPath();
+            ctx.arc(endpoint.x, endpoint.y, 10, 0, 2 * Math.PI);
+            ctx.fillStyle = isDragging ? '#1d4ed8' : '#2563eb';
+            ctx.fill();
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            // Draw labels
+            ctx.fillStyle = '#333';
+            ctx.font = '14px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'alphabetic';
+            
+            // Center label
+            ctx.fillText('Center', centerX, centerY + 25);
+            
+            // Start label
+            ctx.fillText('start', startPoint.x + 25, startPoint.y - 10);
+            
+            // End label
+            ctx.fillText('end', endpoint.x, endpoint.y - 15);
+            
+            // Current angle label near the arc
+            const labelAngleRad = toRadians(angle / 2);
+            const labelX = centerX + 70 * Math.cos(labelAngleRad);
+            const labelY = centerY - 70 * Math.sin(labelAngleRad);
+            ctx.fillStyle = '#2563eb';
+            ctx.font = 'bold 14px Arial';
+            ctx.fillText(`${angle.toFixed(1)}°`, labelX, labelY);
+            
+            // Update angle display
+            angleDisplay.textContent = normalizeAngle(angle).toFixed(1);
+        }
+        
+        // Mouse event handlers
+        canvas.addEventListener('mousedown', (e) => {
+            if (isAnimating) return;
+            
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            if (isNearEndpoint(x, y)) {
+                isDragging = true;
+                canvas.style.cursor = 'grabbing';
+            }
+        });
+        
+        canvas.addEventListener('mousemove', (e) => {
+            if (isAnimating) return;
+            
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            if (isDragging) {
+                angle = getAngleFromPoint(x, y);
+                draw();
+            } else {
+                canvas.style.cursor = isNearEndpoint(x, y) ? 'grab' : 'pointer';
+            }
+        });
+        
+        canvas.addEventListener('mouseup', () => {
+            isDragging = false;
+            canvas.style.cursor = 'pointer';
+        });
+        
+        canvas.addEventListener('mouseleave', () => {
+            isDragging = false;
+            canvas.style.cursor = 'pointer';
+        });
+        
+        // Touch support for mobile
+        canvas.addEventListener('touchstart', (e) => {
+            if (isAnimating) return;
+            
+            e.preventDefault();
+            const rect = canvas.getBoundingClientRect();
+            const touch = e.touches[0];
+            const x = touch.clientX - rect.left;
+            const y = touch.clientY - rect.top;
+            
+            if (isNearEndpoint(x, y)) {
+                isDragging = true;
+            }
+        });
+        
+        canvas.addEventListener('touchmove', (e) => {
+            if (isAnimating) return;
+            
+            e.preventDefault();
+            if (isDragging) {
+                const rect = canvas.getBoundingClientRect();
+                const touch = e.touches[0];
+                const x = touch.clientX - rect.left;
+                const y = touch.clientY - rect.top;
+                
+                angle = getAngleFromPoint(x, y);
+                draw();
+            }
+        });
+        
+        canvas.addEventListener('touchend', () => {
+            isDragging = false;
+        });
+        
+        // Initial draw
+        draw();
+    </script>
+</body>
+</html>
