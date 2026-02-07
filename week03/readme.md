@@ -73,7 +73,7 @@ Interactive math function animations designed to help students understand how **
 
 ---
 
-### 3. Function Machine — Original Horizontal with Graph
+### 3. Function Machine — Horizontal with X-Y Graph
 
 > Combines the horizontal function machine layout with the coordinate plane, providing a clean side-by-side view.
 
@@ -102,6 +102,38 @@ Interactive math function animations designed to help students understand how **
 
 ---
 
+### 4. Two-Function Comparison — f(x) = 2x + 1 vs f(x) = 2x − 1
+
+> Compare two linear functions side by side on the same coordinate plane. Toggle between functions to see how changing the y-intercept shifts the line.
+
+[![Open Demo 4](https://img.shields.io/badge/▶%20Open%20Live%20Demo-Two%20Functions%20Comparison-e67e22?style=for-the-badge&logo=github)](https://benchvue.github.io/GeoGebra/week03/functions-two.html)
+
+```
+        ┌───┐                        y
+        │ ? │ Output (y)             │
+        └───┘                        │    ╱ f(x) = 2x + 1
+          ▲                          │   ╱
+    ┌──────────────┐                 │  ╱╱ f(x) = 2x − 1
+    │  f(x) = ?    │                 │ ╱╱
+    └──────────────┘                 │╱╱
+          ▲                          └──────────── x
+        ┌───┐
+        │ ? │ Input (x)             Same slope, different
+        └───┘                       y-intercepts!
+
+  Function Machine            X-Y Graph (both lines)
+```
+
+**Features:**
+- Everything from Version 2, plus:
+- **Toggle between two functions**: `f(x) = 2x + 1` and `f(x) = 2x − 1`
+- Both functions plotted on the **same coordinate plane** for direct comparison
+- See how **same slope (m = 2)** with **different y-intercepts (+1 vs −1)** creates **parallel lines**
+- Demonstrates the effect of the **constant term** on line position
+- Function selector buttons to switch between the two functions
+
+---
+
 ## 🧠 How It Works
 
 Each animation demonstrates the same core concept in increasing detail:
@@ -110,6 +142,8 @@ Each animation demonstrates the same core concept in increasing detail:
 Input (x)  →  f(x) = 2x + 1  →  Output (y = 2x + 1)
 ```
 
+### f(x) = 2x + 1
+
 | Step | Input (x) | Calculation       | Output (y) | Point on Graph |
 |------|-----------|-------------------|------------|----------------|
 | 1    | 0         | 2 × 0 + 1 = 1    | 1          | (0, 1)         |
@@ -117,12 +151,28 @@ Input (x)  →  f(x) = 2x + 1  →  Output (y = 2x + 1)
 | 3    | 2         | 2 × 2 + 1 = 5    | 5          | (2, 5)         |
 | 4    | 3         | 2 × 3 + 1 = 7    | 7          | (3, 7)         |
 
+### f(x) = 2x − 1 *(Version 4)*
+
+| Step | Input (x) | Calculation       | Output (y) | Point on Graph |
+|------|-----------|-------------------|------------|----------------|
+| 1    | 0         | 2 × 0 − 1 = −1   | −1         | (0, −1)        |
+| 2    | 1         | 2 × 1 − 1 = 1    | 1          | (1, 1)         |
+| 3    | 2         | 2 × 2 − 1 = 3    | 3          | (2, 3)         |
+| 4    | 3         | 2 × 3 − 1 = 5    | 5          | (3, 5)         |
+
 ### Why a Straight Line?
 
-The function **f(x) = 2x + 1** is a **linear function**:
+The function **f(x) = 2x + 1** is a **linear function** in the form **y = mx + b**:
 - **Slope (m) = 2** — output increases by 2 for every 1 increase in input
 - **Y-intercept (b) = 1** — the line crosses the y-axis at (0, 1)
 - All plotted points lie on a **perfectly straight line**
+
+### Two Functions Comparison
+
+Comparing **f(x) = 2x + 1** and **f(x) = 2x − 1** shows:
+- **Same slope (m = 2)** → both lines are **parallel** (same steepness)
+- **Different y-intercepts (+1 vs −1)** → lines are shifted **2 units apart** vertically
+- Changing **b** moves the line **up or down** without changing its angle
 
 ### Visual Progression Across Versions
 
@@ -140,19 +190,33 @@ Version 2:  [ Input ]          │
 Version 3:  [ Input ] ──► [ Function Box ] ──► [ Output ]
                           (horizontal flow)
                         [ X-Y Graph below ]
+
+Version 4:  [ Input ]          │
+                ▲              │  [ X-Y Graph ]
+            [ Function ]       │  (two lines plotted!)
+                ▲              │
+            [ Output ]         │
+            (toggle between f(x) = 2x+1 and f(x) = 2x−1)
 ```
 
 ---
 
 ## 🎮 Controls
 
-All three versions share the same controls:
+All versions share the same base controls:
 
 | Button    | Action                                            |
 |-----------|---------------------------------------------------|
 | ▶ **Play**  | Start or resume the animation                   |
 | ⏸ **Pause** | Pause after current phase completes              |
 | ⏹ **Stop**  | Reset everything — animation, values, and graph  |
+
+Version 4 adds:
+
+| Button             | Action                                      |
+|--------------------|---------------------------------------------|
+| **f(x) = 2x + 1** | Switch to the first function                |
+| **f(x) = 2x − 1** | Switch to the second function               |
 
 ---
 
@@ -163,6 +227,7 @@ week03/
 ├── function-2x+1.html          # Version 1: Basic horizontal function machine
 ├── function-stacking.html       # Version 2: Vertical layout + X-Y graph
 ├── function-x-y-drawing.html    # Version 3: Horizontal layout + X-Y graph
+├── functions-two.html           # Version 4: Two-function comparison
 └── readme.md                    # This file
 ```
 
@@ -172,7 +237,7 @@ week03/
 
 ### View Online (GitHub Pages)
 
-Simply click any of the green/blue/purple **Open Live Demo** buttons above — no installation required.
+Simply click any of the colored **Open Live Demo** buttons above — no installation required.
 
 ### Run Locally
 
@@ -199,6 +264,7 @@ These visualizations support teaching **linear function concepts** in algebra:
 - **Slope and y-intercept** — slope = 2 (rise over run), y-intercept = 1
 - **Coordinate graphing** — plotting ordered pairs (x, y) to form a line
 - **Pattern recognition** — output increases by 2 for every input increase of 1
+- **Comparing functions** — how changing the y-intercept shifts a line (parallel lines)
 
 ---
 
