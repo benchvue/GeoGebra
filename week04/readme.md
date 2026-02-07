@@ -6,13 +6,23 @@ Interactive math function animations designed to help students understand how fu
 
 ## 📺 Live Demos
 
+> **Click any preview below to open the live interactive animation.**
+
+---
+
 ### 1. Function Machine — Original Animation
 
 > Basic function machine visualization: input flows through f(x) = x², output appears with step-by-step calculation.
 
-🔗 **[Open Full Page](https://benchvue.github.io/GeoGebra/week04/basic-diagram.html)**
+[![Open Demo 1](https://img.shields.io/badge/▶%20Open%20Live%20Demo-Function%20Machine-27ae60?style=for-the-badge&logo=github)](https://benchvue.github.io/GeoGebra/week04/basic-diagram.html)
 
-<iframe src="https://benchvue.github.io/GeoGebra/week04/basic-diagram.html" width="100%" height="500" style="border:2px solid #ddd; border-radius:12px;" allowfullscreen></iframe>
+```
+  ┌───┐       ┌────────────┐       ┌───┐
+  │ 3 │  ───► │ f(x) = x²  │  ───► │ 9 │
+  └───┘       │  3² = 3×3   │       └───┘
+  Input       │    = 9      │       Output
+              └────────────┘
+```
 
 **Features:**
 - Animated ball travels from **Input → Function Box → Output**
@@ -27,9 +37,20 @@ Interactive math function animations designed to help students understand how fu
 
 > Enhanced version with geometric visuals: a **green vertical line** shows the input as a side length (in inches), and a **blue square** shows the output as an area (in square inches).
 
-🔗 **[Open Full Page](https://benchvue.github.io/GeoGebra/week04/square-drawing.html)**
+[![Open Demo 2](https://img.shields.io/badge/▶%20Open%20Live%20Demo-Side%20Length%20%26%20Area-3498db?style=for-the-badge&logo=github)](https://benchvue.github.io/GeoGebra/week04/function-stacking.html)
 
-<iframe src="https://benchvue.github.io/GeoGebra/week04/square-drawing.html" width="100%" height="750" style="border:2px solid #ddd; border-radius:12px;" allowfullscreen></iframe>
+```
+  ┌───┐       ┌────────────┐       ┌───┐
+  │ 3 │  ───► │ f(x) = x²  │  ───► │ 9 │
+  └───┘       └────────────┘       └───┘
+
+   │                                 ┌───────────┐
+   │  3 in                           │           │
+   │                                 │   9 in²   │  3 in
+   │                                 │           │
+                                     └───────────┘
+  Side Length         →                   Area
+```
 
 **Features:**
 - Everything from Version 1, plus:
@@ -45,9 +66,22 @@ Interactive math function animations designed to help students understand how fu
 
 > Full visualization with coordinate graphing: after each step, the (x, y) point is plotted on a coordinate plane, building the **y = x² parabola** point by point.
 
-🔗 **[Open Full Page](https://benchvue.github.io/GeoGebra/week04/squre-x-y-drawing.html)**
+[![Open Demo 3](https://img.shields.io/badge/▶%20Open%20Live%20Demo-Coordinate%20Plane-9b59b6?style=for-the-badge&logo=github)](https://benchvue.github.io/GeoGebra/week04/function-x-y-drawing.html)
 
-<iframe src="https://benchvue.github.io/GeoGebra/week04/squre-x-y-drawing.html" width="100%" height="800" style="border:2px solid #ddd; border-radius:12px;" allowfullscreen></iframe>
+```
+  ┌───┐       ┌────────────┐       ┌───┐
+  │ 3 │  ───► │ f(x) = x²  │  ───► │ 9 │
+  └───┘       └────────────┘       └───┘
+
+                                     y
+   │           ┌─────────┐          │      E(5,25)
+   │           │         │          │    D(4,16)
+   │  3 in     │  9 in²  │ 3 in    │   C(3,9)
+   │           │         │          │  B(2,4)
+               └─────────┘          │ A(1,1)
+  Side          Area         →      └──────────── x
+  Length                            Coordinate Plane
+```
 
 **Features:**
 - Everything from Versions 1 & 2, plus:
@@ -79,16 +113,16 @@ Input (x)  →  f(x) = x²  →  Output (y = x²)
 | 4    | 4         | 4² = 4 × 4 | 16         | (4, 16)        |
 | 5    | 5         | 5² = 5 × 5 | 25         | (5, 25)        |
 
-### Visual Progression
+### Visual Progression Across Versions
 
 ```
-Version 1:  [Input] → [Function Box] → [Output]
+Version 1:  [ Input ] ──► [ Function Box ] ──► [ Output ]
 
-Version 2:  [Input] → [Function Box] → [Output]
-             |  Green Line  |  →  |  Blue Square  |
+Version 2:  [ Input ] ──► [ Function Box ] ──► [ Output ]
+            │ Green Line │       →        │ Blue Square │
 
-Version 3:  [Input] → [Function Box] → [Output]
-             |  Green Line  |  →  |  Blue Square  |  →  | X-Y Graph |
+Version 3:  [ Input ] ──► [ Function Box ] ──► [ Output ]
+            │ Green Line │  →  │ Blue Square │  →  │ X-Y Graph │
 ```
 
 ---
@@ -97,11 +131,11 @@ Version 3:  [Input] → [Function Box] → [Output]
 
 All three versions share the same controls:
 
-| Button   | Action                                           |
-|----------|--------------------------------------------------|
-| **Play** | Start or resume the animation                    |
-| **Pause**| Pause after current phase completes               |
-| **Stop** | Reset everything — animation, values, and graph   |
+| Button    | Action                                            |
+|-----------|---------------------------------------------------|
+| ▶ **Play**  | Start or resume the animation                   |
+| ⏸ **Pause** | Pause after current phase completes              |
+| ⏹ **Stop**  | Reset everything — animation, values, and graph  |
 
 ---
 
@@ -109,10 +143,10 @@ All three versions share the same controls:
 
 ```
 week04/
-├── basic-diagram.html         # Version 1: Basic function machine
-├── square-drawing.html      # Version 2: + Side length & area visuals
-├── squre-x-y-drawing.html   # Version 3: + Coordinate plane graphing
-└── README.md                   # This file
+├── basic-diagram.html          # Version 1: Basic function machine
+├── function-stacking.html      # Version 2: + Side length & area visuals
+├── function-x-y-drawing.html   # Version 3: + Coordinate plane graphing
+└── readme.md                   # This file
 ```
 
 ---
@@ -121,7 +155,7 @@ week04/
 
 ### View Online (GitHub Pages)
 
-Simply visit any of the live demo links above — no installation required.
+Simply click any of the green/blue/purple **Open Live Demo** buttons above — no installation required.
 
 ### Run Locally
 
@@ -151,13 +185,13 @@ These visualizations support teaching **function concepts** in algebra and pre-c
 
 ---
 
-## 📝 Notes
+## 📝 Technical Notes
 
-- All animations are pure HTML/CSS/JavaScript with **no external dependencies**
-- Canvas API is used for the coordinate plane graph
+- All animations are pure **HTML / CSS / JavaScript** with no external dependencies
+- Canvas API is used for the coordinate plane graph (Version 3)
+- CSS transitions and `setTimeout` for animation sequencing
 - Responsive design works on desktop and tablet browsers
-- Animations use CSS transitions and `setTimeout` for sequencing
-- The `iframe` previews above render on GitHub Pages but **not** in the GitHub repository README viewer (GitHub strips iframes for security). Use the "Open Full Page" links instead if viewing from GitHub directly.
+- Each HTML file is fully self-contained (single file, no build step)
 
 ---
 
