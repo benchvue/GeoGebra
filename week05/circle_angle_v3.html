@@ -37,10 +37,22 @@
         }
         
         .angle-display {
-            font-size: 24px;
+            font-size: 20px;
             font-weight: bold;
-            color: #2563eb;
             margin-top: 10px;
+            margin-bottom: 5px;
+        }
+        
+        .degree-angle {
+            color: #2563eb;
+        }
+        
+        .radian-angle {
+            color: #dc2626;
+        }
+        
+        .arc-length {
+            color: #ea580c;
             margin-bottom: 20px;
         }
         
@@ -49,19 +61,21 @@
             gap: 10px;
             justify-content: center;
             flex-wrap: wrap;
+            margin-bottom: 15px;
         }
         
         .angle-button {
             background: #2563eb;
             color: white;
             border: none;
-            padding: 12px 24px;
-            font-size: 16px;
+            padding: 12px 20px;
+            font-size: 15px;
             font-weight: bold;
             border-radius: 8px;
             cursor: pointer;
             transition: all 0.3s ease;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            line-height: 1.4;
         }
         
         .angle-button:hover {
@@ -74,19 +88,40 @@
             transform: translateY(0);
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
+        
+        .reset-button {
+            background: #dc2626;
+            padding: 10px 30px;
+            font-size: 14px;
+        }
+        
+        .reset-button:hover {
+            background: #b91c1c;
+        }
     </style>
 </head>
 <body>
     <div id="container">
-        <canvas id="canvas" width="700" height="700"></canvas>
+        <canvas id="canvas" width="800" height="800"></canvas>
         <div id="info">
             <div>Drag the endpoint to change the angle</div>
-            <div class="angle-display">Angle: <span id="angle">58.8</span>°</div>
+            <div class="angle-display degree-angle">
+                Degree angle: <span id="degree">58.8</span>°
+            </div>
+            <div class="angle-display radian-angle">
+                Radian angle: <span id="radian">1.03</span> rad = <span id="radian-fraction">arc length / radius</span>
+            </div>
+            <div class="angle-display arc-length">
+                Arc length: <span id="arc-length">1.03</span>
+            </div>
             <div class="button-container">
-                <button class="angle-button" onclick="increaseAngle(30)">+30°</button>
-                <button class="angle-button" onclick="increaseAngle(45)">+45°</button>
-                <button class="angle-button" onclick="increaseAngle(60)">+60°</button>
-                <button class="angle-button" onclick="increaseAngle(90)">+90°</button>
+                <button class="angle-button" onclick="increaseAngle(30)">+30° (π/6)</button>
+                <button class="angle-button" onclick="increaseAngle(45)">+45° (π/4)</button>
+                <button class="angle-button" onclick="increaseAngle(60)">+60° (π/3)</button>
+                <button class="angle-button" onclick="increaseAngle(90)">+90° (π/2)</button>
+            </div>
+            <div class="button-container">
+                <button class="angle-button reset-button" onclick="resetToZero()">Reset to 0°</button>
             </div>
         </div>
     </div>
@@ -94,16 +129,40 @@
     <script>
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
-        const angleDisplay = document.getElementById('angle');
+        const degreeDisplay = document.getElementById('degree');
+        const radianDisplay = document.getElementById('radian');
+        const radianFractionDisplay = document.getElementById('radian-fraction');
+        const arcLengthDisplay = document.getElementById('arc-length');
         
         // Configuration
         const centerX = canvas.width / 2;
         const centerY = canvas.height / 2;
-        const radius = 220;
-        const labelRadius = radius + 40; // Distance for angle labels
+        const radius = 240;
+        const degreeRadius = radius + 35; // Distance for degree labels
+        const radianRadius = radius + 65; // Distance for radian labels
         
         // Fundamental angles to display
         const fundamentalAngles = [0, 30, 45, 60, 90, 120, 135, 150, 180, 210, 225, 240, 270, 300, 315, 330];
+        
+        // Radian representations
+        const radianLabels = {
+            0: '0',
+            30: 'π/6',
+            45: 'π/4',
+            60: 'π/3',
+            90: 'π/2',
+            120: '2π/3',
+            135: '3π/4',
+            150: '5π/6',
+            180: 'π',
+            210: '7π/6',
+            225: '5π/4',
+            240: '4π/3',
+            270: '3π/2',
+            300: '5π/3',
+            315: '7π/4',
+            330: '11π/6'
+        };
         
         // State
         let angle = 58.8; // Initial angle in degrees
@@ -129,6 +188,40 @@
             let normalized = deg % 360;
             if (normalized < 0) normalized += 360;
             return normalized;
+        }
+        
+        // Get fraction representation of radian
+        function getRadianFraction(radians) {
+            const piMultiples = [
+                { value: 0, text: '0' },
+                { value: Math.PI / 6, text: 'π/6' },
+                { value: Math.PI / 4, text: 'π/4' },
+                { value: Math.PI / 3, text: 'π/3' },
+                { value: Math.PI / 2, text: 'π/2' },
+                { value: 2 * Math.PI / 3, text: '2π/3' },
+                { value: 3 * Math.PI / 4, text: '3π/4' },
+                { value: 5 * Math.PI / 6, text: '5π/6' },
+                { value: Math.PI, text: 'π' },
+                { value: 7 * Math.PI / 6, text: '7π/6' },
+                { value: 5 * Math.PI / 4, text: '5π/4' },
+                { value: 4 * Math.PI / 3, text: '4π/3' },
+                { value: 3 * Math.PI / 2, text: '3π/2' },
+                { value: 5 * Math.PI / 3, text: '5π/3' },
+                { value: 7 * Math.PI / 4, text: '7π/4' },
+                { value: 11 * Math.PI / 6, text: '11π/6' },
+                { value: 2 * Math.PI, text: '2π' }
+            ];
+            
+            const normalizedRad = radians % (2 * Math.PI);
+            const tolerance = 0.01;
+            
+            for (let mult of piMultiples) {
+                if (Math.abs(normalizedRad - mult.value) < tolerance) {
+                    return mult.text;
+                }
+            }
+            
+            return `${radians.toFixed(2)}`;
         }
         
         // Calculate endpoint position from angle
@@ -192,6 +285,25 @@
             requestAnimationFrame(animateAngle);
         }
         
+        // Reset angle to zero
+        function resetToZero() {
+            if (isAnimating) return;
+            
+            isAnimating = true;
+            animationStartAngle = angle;
+            
+            // Choose shortest path to zero
+            const normalized = normalizeAngle(angle);
+            if (normalized > 180) {
+                animationTargetAngle = 360; // Go clockwise to 360 (which is 0)
+            } else {
+                animationTargetAngle = 0; // Go counterclockwise to 0
+            }
+            
+            animationStartTime = 0;
+            requestAnimationFrame(animateAngle);
+        }
+        
         // Draw everything
         function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -217,17 +329,35 @@
             ctx.lineWidth = 2;
             ctx.stroke();
             
-            // Draw fundamental angle labels
+            // Draw arc length in red on the circle
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, 0, -toRadians(angle), true);
+            ctx.strokeStyle = '#ea580c';
+            ctx.lineWidth = 4;
+            ctx.stroke();
+            
+            // Draw degree labels
             ctx.fillStyle = '#333';
-            ctx.font = 'bold 16px Arial';
+            ctx.font = 'bold 15px Arial';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             
             fundamentalAngles.forEach(deg => {
                 const rad = toRadians(deg);
-                const x = centerX + labelRadius * Math.cos(rad);
-                const y = centerY - labelRadius * Math.sin(rad);
+                const x = centerX + degreeRadius * Math.cos(rad);
+                const y = centerY - degreeRadius * Math.sin(rad);
                 ctx.fillText(`${deg}°`, x, y);
+            });
+            
+            // Draw radian labels
+            ctx.fillStyle = '#dc2626';
+            ctx.font = 'bold 14px Arial';
+            
+            fundamentalAngles.forEach(deg => {
+                const rad = toRadians(deg);
+                const x = centerX + radianRadius * Math.cos(rad);
+                const y = centerY - radianRadius * Math.sin(rad);
+                ctx.fillText(radianLabels[deg], x, y);
             });
             
             // Calculate positions
@@ -250,11 +380,19 @@
             ctx.lineWidth = 3;
             ctx.stroke();
             
-            // Draw angle arc
-            const arcRadius = 50;
+            // Draw angle arc (filled sector for better visualization)
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY);
+            ctx.arc(centerX, centerY, 60, 0, -toRadians(angle), true);
+            ctx.closePath();
+            ctx.fillStyle = 'rgba(37, 99, 235, 0.15)';
+            ctx.fill();
+            
+            // Draw angle arc outline
+            const arcRadius = 60;
             ctx.beginPath();
             ctx.arc(centerX, centerY, arcRadius, 0, -toRadians(angle), true);
-            ctx.strokeStyle = '#666';
+            ctx.strokeStyle = '#2563eb';
             ctx.lineWidth = 2;
             ctx.stroke();
             
@@ -297,16 +435,79 @@
             // End label
             ctx.fillText('end', endpoint.x, endpoint.y - 15);
             
-            // Current angle label near the arc
-            const labelAngleRad = toRadians(angle / 2);
-            const labelX = centerX + 70 * Math.cos(labelAngleRad);
-            const labelY = centerY - 70 * Math.sin(labelAngleRad);
+            // Radius label on blue segment
+            const midRadiusX = centerX + (endpoint.x - centerX) / 2;
+            const midRadiusY = centerY + (endpoint.y - centerY) / 2;
+            ctx.fillStyle = '#2563eb';
+            ctx.font = 'bold 13px Arial';
+            
+            // Calculate offset perpendicular to the line
+            const dx = endpoint.x - centerX;
+            const dy = endpoint.y - centerY;
+            const length = Math.sqrt(dx * dx + dy * dy);
+            const perpX = -dy / length * 15;
+            const perpY = dx / length * 15;
+            
+            ctx.fillText('radius = 1', midRadiusX + perpX, midRadiusY + perpY);
+            
+            // Arc length label on the red arc
+            const normalizedAngle = normalizeAngle(angle);
+            const radianValue = toRadians(normalizedAngle);
+            const arcLength = radianValue * 1; // radius = 1
+            
+            const arcLabelAngle = toRadians(normalizedAngle / 2);
+            const arcLabelRadius = radius + 15;
+            const arcLabelX = centerX + arcLabelRadius * Math.cos(arcLabelAngle);
+            const arcLabelY = centerY - arcLabelRadius * Math.sin(arcLabelAngle);
+            
+            ctx.fillStyle = '#ea580c';
+            ctx.font = 'bold 13px Arial';
+            ctx.fillText(`arc length = ${arcLength.toFixed(2)}`, arcLabelX, arcLabelY);
+            
+            // Current angle labels inside the arc
+            const labelAngleRad = toRadians(normalizedAngle / 2);
+            const labelRadius = 85;
+            const labelX = centerX + labelRadius * Math.cos(labelAngleRad);
+            const labelY = centerY - labelRadius * Math.sin(labelAngleRad);
+            
+            // Draw white background for better readability
+            const degreeText = `${normalizedAngle.toFixed(1)}°`;
+            const radianFraction = getRadianFraction(radianValue);
+            const radianText = `${radianFraction} rad`;
+            const formulaText = `${arcLength.toFixed(2)}/1`;
+            
+            ctx.font = 'bold 14px Arial';
+            const degreeWidth = ctx.measureText(degreeText).width;
+            ctx.font = '12px Arial';
+            const radianWidth = ctx.measureText(radianText).width;
+            const formulaWidth = ctx.measureText(formulaText).width;
+            const maxWidth = Math.max(degreeWidth, radianWidth, formulaWidth);
+            
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+            ctx.fillRect(labelX - maxWidth/2 - 5, labelY - 28, maxWidth + 10, 50);
+            
+            // Draw degree angle text
             ctx.fillStyle = '#2563eb';
             ctx.font = 'bold 14px Arial';
-            ctx.fillText(`${angle.toFixed(1)}°`, labelX, labelY);
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(degreeText, labelX, labelY - 13);
             
-            // Update angle display
-            angleDisplay.textContent = normalizeAngle(angle).toFixed(1);
+            // Draw radian text
+            ctx.fillStyle = '#dc2626';
+            ctx.font = '12px Arial';
+            ctx.fillText(radianText, labelX, labelY + 3);
+            
+            // Draw formula text (arc length / radius)
+            ctx.fillStyle = '#dc2626';
+            ctx.font = '11px Arial';
+            ctx.fillText(`= ${formulaText}`, labelX, labelY + 17);
+            
+            // Update displays
+            degreeDisplay.textContent = normalizedAngle.toFixed(1);
+            radianDisplay.textContent = radianValue.toFixed(2);
+            radianFractionDisplay.textContent = `${arcLength.toFixed(2)} / 1`;
+            arcLengthDisplay.textContent = arcLength.toFixed(2);
         }
         
         // Mouse event handlers
