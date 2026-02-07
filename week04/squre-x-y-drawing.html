@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Function Animation — x²</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Arial', sans-serif;
+        }
+
+        .container {
+            background: white;
+            padding: 40px 48px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 1100px;
+        }
+
+        .step-indicator {
+            text-align: center;
+            margin-bottom: 18px;
+            font-size: 22px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        /* ===== TOP ROW: function machine (horizontal) ===== */
+        .machine-row {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            justify-content: center;
+            position: relative;
+            margin-bottom: 30px;
+        }
+
+        .value-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .value {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 30px;
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            flex-shrink: 0;
+        }
+
+        .input-value { background: linear-gradient(135deg, #27ae60 0%, #229954 100%); }
+        .output-value { background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); }
+
+        .val-label {
+            font-size: 14px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-top: 6px;
+            text-align: center;
+        }
+
+        .axis-hint {
+            font-size: 10px;
+            color: #7f8c8d;
+            font-weight: bold;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        /* Arrow: vertically centered with the circles */
+        .arrow-h {
+            width: 80px;
+            height: 4px;
+            background: #2c3e50;
+            position: relative;
+            flex-shrink: 0;
+            /* Push arrow up to align with circle center (circle 70px, label ~30px below) */
+            margin-bottom: 30px;
+        }
+
+        .arrow-h::after {
+            content: '';
+            position: absolute;
+            right: -10px;
+            top: -8px;
+            width: 0;
+            height: 0;
+            border-left: 18px solid #2c3e50;
+            border-top: 10px solid transparent;
+            border-bottom: 10px solid transparent;
+        }
+
+        .function-box {
+            width: 220px;
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            border: 4px solid #2c3e50;
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 14px 18px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            z-index: 2;
+            transition: transform 0.1s ease;
+            /* Also push up to align center with circles */
+            margin-bottom: 30px;
+        }
+
+        .function-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: rgba(255,255,255,0.9);
+            margin-bottom: 8px;
+        }
+
+        .calc-board {
+            background: rgba(255,255,255,0.92);
+            border-radius: 10px;
+            padding: 10px 14px;
+            width: 100%;
+            box-sizing: border-box;
+            min-height: 70px;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .calc-line {
+            font-size: 15px;
+            font-weight: bold;
+            color: #2c3e50;
+            opacity: 0;
+            transform: translateY(5px);
+            transition: opacity 0.35s ease, transform 0.35s ease;
+            white-space: nowrap;
+        }
+
+        .calc-line.visible { opacity: 1; transform: translateY(0); }
+        .calc-line.result { color: #2980b9; font-size: 17px; }
+
+        .moving-ball {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            position: absolute;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.35);
+            z-index: 10;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .moving-ball.green { background: linear-gradient(135deg, #27ae60 0%, #229954 100%); }
+        .moving-ball.blue { background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); }
+        .moving-ball.orange { background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%); }
+
+        @keyframes popIn {
+            0% { transform: translate(-50%, -50%) scale(0); }
+            70% { transform: translate(-50%, -50%) scale(1.15); }
+            100% { transform: translate(-50%, -50%) scale(1); }
+        }
+        @keyframes popOut {
+            0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+        }
+        @keyframes pulse {
+            0% { transform: scale(0.9); opacity: 0.7; }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* ===== BOTTOM ROW: visuals + graph ===== */
+        .bottom-row {
+            display: flex;
+            gap: 30px;
+            align-items: flex-start;
+            border-top: 2px dashed #ccc;
+            padding-top: 24px;
+        }
+
+        .visual-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .visual-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        /* FIXED-SIZE container for green line — reserves max space (5 in = 240px) */
+        .line-visual {
+            width: 50px;
+            height: 270px; /* 240px max line + 30px label */
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            position: relative;
+        }
+
+        .green-line {
+            width: 10px;
+            background: linear-gradient(to top, #27ae60, #2ecc71);
+            border-radius: 5px;
+            transition: height 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 2px 2px 10px rgba(39, 174, 96, 0.4);
+            position: relative;
+        }
+
+        .line-top-label {
+            position: absolute;
+            top: -26px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 14px;
+            font-weight: bold;
+            color: #27ae60;
+            white-space: nowrap;
+            transition: opacity 0.5s;
+        }
+
+        /* FIXED-SIZE container for blue square — reserves max space (5×5 in = 240×240px) */
+        .square-visual {
+            width: 260px; /* 240px max square + side label space */
+            height: 270px; /* 240px max square + bottom label */
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            position: relative;
+        }
+
+        .square-anchor {
+            position: absolute;
+            bottom: 24px; /* room for bottom label */
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .blue-square {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            border-radius: 6px;
+            transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1), height 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 3px 3px 14px rgba(52, 152, 219, 0.4);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .sq-center-label {
+            font-size: 15px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 1px 1px 4px rgba(0,0,0,0.4);
+            transition: opacity 0.5s;
+        }
+
+        .sq-dim {
+            position: absolute;
+            font-size: 12px;
+            font-weight: bold;
+            color: #2980b9;
+            white-space: nowrap;
+            transition: opacity 0.5s;
+        }
+
+        .sq-dim.right { right: -40px; top: 50%; transform: translateY(-50%); }
+        .sq-dim.bottom { bottom: -22px; left: 50%; transform: translateX(-50%); }
+
+        .visual-arrow {
+            font-size: 36px;
+            color: #2c3e50;
+            /* Vertically center the arrow in the fixed-height area */
+            margin-top: 150px;
+        }
+
+        /* Graph */
+        .graph-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+        }
+
+        .graph-container { position: relative; }
+
+        .graph-canvas {
+            border: 2px solid #bdc3c8;
+            border-radius: 8px;
+            background: #f9f9f9;
+        }
+
+        .points-list {
+            margin-top: 8px;
+            font-size: 13px;
+            font-weight: bold;
+            color: #2c3e50;
+            text-align: center;
+            min-height: 20px;
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 24px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 28px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            color: white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0,0,0,0.3); }
+        .btn:active { transform: translateY(0); box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .btn-play { background: linear-gradient(135deg, #27ae60 0%, #229954 100%); }
+        .btn-pause { background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%); }
+        .btn-stop { background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn:disabled:hover { transform: none; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="step-indicator" id="stepIndicator">Press Play to start</div>
+
+        <!-- ===== FUNCTION MACHINE (left → right) ===== -->
+        <div class="machine-row" id="machineRow">
+            <div class="value-wrapper" id="inputWrapper">
+                <div class="value input-value" id="inputValue">?</div>
+                <div class="val-label">Input (x)<br><span class="axis-hint">x-axis</span></div>
+            </div>
+
+            <div class="arrow-h"></div>
+
+            <div class="function-box" id="functionBox">
+                <div class="function-title">f(x) = x²</div>
+                <div class="calc-board" id="calcBoard">
+                    <div class="calc-line" id="line1"></div>
+                    <div class="calc-line" id="line2"></div>
+                    <div class="calc-line result" id="line3"></div>
+                </div>
+            </div>
+
+            <div class="arrow-h"></div>
+
+            <div class="value-wrapper" id="outputWrapper">
+                <div class="value output-value" id="outputValue">?</div>
+                <div class="val-label">Output (y)<br><span class="axis-hint">y-axis</span></div>
+            </div>
+
+            <div class="moving-ball green" id="movingBall">0</div>
+        </div>
+
+        <!-- ===== BOTTOM: side length + square + graph ===== -->
+        <div class="bottom-row">
+            <!-- Input side length — FIXED container -->
+            <div class="visual-section">
+                <div class="visual-title">Side Length (x)</div>
+                <div class="line-visual">
+                    <div class="green-line" id="greenLine" style="height:0px;">
+                        <span class="line-top-label" id="lineLabel" style="opacity:0;"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="visual-arrow">→</div>
+
+            <!-- Output area square — FIXED container -->
+            <div class="visual-section">
+                <div class="visual-title">Area = x²</div>
+                <div class="square-visual">
+                    <div class="square-anchor">
+                        <div class="blue-square" id="blueSquare" style="width:0px;height:0px;">
+                            <span class="sq-center-label" id="sqCenter" style="opacity:0;"></span>
+                            <span class="sq-dim right" id="sqRight" style="opacity:0;"></span>
+                            <span class="sq-dim bottom" id="sqBottom" style="opacity:0;"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="visual-arrow">→</div>
+
+            <!-- X-Y Coordinate Plane -->
+            <div class="graph-section">
+                <div class="visual-title">Coordinate Plane — y = x²</div>
+                <div class="graph-container">
+                    <canvas class="graph-canvas" id="graphCanvas" width="340" height="340"></canvas>
+                </div>
+                <div class="points-list" id="pointsList">Points: —</div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-play" id="playBtn" onclick="play()">Play</button>
+            <button class="btn btn-pause" id="pauseBtn" onclick="pause()" disabled>Pause</button>
+            <button class="btn btn-stop" id="stopBtn" onclick="stop()" disabled>Stop</button>
+        </div>
+    </div>
+
+    <script>
+        // ===== CONFIG =====
+        const PX_PER_INCH = 48;
+
+        const steps = [
+            { input: 1, output: 1 },
+            { input: 2, output: 4 },
+            { input: 3, output: 9 },
+            { input: 4, output: 16 },
+            { input: 5, output: 25 }
+        ];
+
+        let currentStep = 0;
+        let isPlaying = false;
+        let animationInProgress = false;
+        let timeouts = [];
+        let plottedPoints = [];
+
+        // ===== GRAPH =====
+        const canvas = document.getElementById('graphCanvas');
+        const ctx = canvas.getContext('2d');
+        const gPad = 38;
+        const gW = canvas.width - gPad * 2;
+        const gH = canvas.height - gPad * 2;
+        const xMin = -1, xMax = 6, yMin = -2, yMax = 28;
+
+        function toCanvasX(x) { return gPad + ((x - xMin) / (xMax - xMin)) * gW; }
+        function toCanvasY(y) { return gPad + ((yMax - y) / (yMax - yMin)) * gH; }
+
+        function drawGrid() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.save();
+            ctx.beginPath();
+            ctx.rect(gPad, gPad, gW, gH);
+            ctx.clip();
+
+            for (let x = Math.ceil(xMin); x <= Math.floor(xMax); x++) {
+                const cx = toCanvasX(x);
+                ctx.beginPath(); ctx.moveTo(cx, gPad); ctx.lineTo(cx, gPad + gH);
+                ctx.strokeStyle = (x === 0) ? '#2c3e50' : '#e0e3e6';
+                ctx.lineWidth = (x === 0) ? 2 : 1; ctx.stroke();
+            }
+            for (let y = Math.ceil(yMin); y <= Math.floor(yMax); y++) {
+                const cy = toCanvasY(y);
+                ctx.beginPath(); ctx.moveTo(gPad, cy); ctx.lineTo(gPad + gW, cy);
+                ctx.strokeStyle = (y === 0) ? '#2c3e50' : '#e0e3e6';
+                ctx.lineWidth = (y === 0) ? 2 : 1; ctx.stroke();
+            }
+
+            // Dashed x² background curve
+            ctx.beginPath(); ctx.setLineDash([6, 4]);
+            ctx.strokeStyle = 'rgba(41,128,185,0.3)'; ctx.lineWidth = 2;
+            for (let px = 0; px <= gW; px++) {
+                const x = xMin + (px / gW) * (xMax - xMin);
+                const y = x * x;
+                if (px === 0) ctx.moveTo(gPad + px, toCanvasY(y));
+                else ctx.lineTo(gPad + px, toCanvasY(y));
+            }
+            ctx.stroke(); ctx.setLineDash([]);
+            ctx.restore();
+
+            // Tick labels
+            ctx.fillStyle = '#7f8c8d'; ctx.font = 'bold 11px Arial';
+            for (let x = Math.ceil(xMin); x <= Math.floor(xMax); x++) {
+                if (x === 0) continue;
+                ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+                ctx.fillText(x, toCanvasX(x), toCanvasY(0) + 5);
+            }
+            for (let y = 0; y <= Math.floor(yMax); y += 5) {
+                if (y === 0) continue;
+                ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+                ctx.fillText(y, toCanvasX(0) - 6, toCanvasY(y));
+            }
+            ctx.textAlign = 'right'; ctx.textBaseline = 'top';
+            ctx.fillText('0', toCanvasX(0) - 6, toCanvasY(0) + 5);
+
+            // Arrows
+            ctx.fillStyle = '#2c3e50';
+            const xEnd = gPad + gW + 8, yZero = toCanvasY(0);
+            ctx.beginPath(); ctx.moveTo(xEnd, yZero); ctx.lineTo(xEnd-8, yZero-4); ctx.lineTo(xEnd-8, yZero+4); ctx.fill();
+            const xZero = toCanvasX(0), yEnd = gPad - 8;
+            ctx.beginPath(); ctx.moveTo(xZero, yEnd); ctx.lineTo(xZero-4, yEnd+8); ctx.lineTo(xZero+4, yEnd+8); ctx.fill();
+
+            ctx.fillStyle = '#2c3e50'; ctx.font = 'bold 13px Arial';
+            ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.fillText('x', xEnd-2, yZero+10);
+            ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillText('y', xZero+10, yEnd+2);
+        }
+
+        function drawPoints() {
+            const labels = ['A','B','C','D','E'];
+
+            plottedPoints.forEach((pt, idx) => {
+                const cx = toCanvasX(pt.x), cy = toCanvasY(pt.y);
+                ctx.save();
+                ctx.beginPath(); ctx.rect(gPad, gPad, gW, gH); ctx.clip();
+                ctx.setLineDash([4,3]); ctx.strokeStyle = 'rgba(231,76,60,0.5)'; ctx.lineWidth = 1.5;
+                ctx.beginPath(); ctx.moveTo(cx, toCanvasY(0)); ctx.lineTo(cx, cy); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(toCanvasX(0), cy); ctx.lineTo(cx, cy); ctx.stroke();
+                ctx.setLineDash([]); ctx.restore();
+
+                ctx.beginPath(); ctx.arc(cx, cy, 8, 0, Math.PI*2); ctx.fillStyle = '#2980b9'; ctx.fill();
+                ctx.beginPath(); ctx.arc(cx, cy, 4, 0, Math.PI*2); ctx.fillStyle = '#1a5276'; ctx.fill();
+
+                ctx.fillStyle = '#2980b9'; ctx.font = 'bold 12px Arial';
+                ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
+                ctx.fillText(labels[idx]||'', cx+10, cy-6);
+                ctx.fillStyle = '#555'; ctx.font = '11px Arial'; ctx.textBaseline = 'top';
+                ctx.fillText(`(${pt.x}, ${pt.y})`, cx+10, cy-4);
+            });
+
+            if (plottedPoints.length > 1) {
+                ctx.save();
+                ctx.beginPath(); ctx.rect(gPad, gPad, gW, gH); ctx.clip();
+                ctx.beginPath(); ctx.strokeStyle = '#2980b9'; ctx.lineWidth = 2.5;
+                const s = plottedPoints[0].x, e = plottedPoints[plottedPoints.length-1].x;
+                const sp = toCanvasX(s)-gPad, ep = toCanvasX(e)-gPad;
+                let first = true;
+                for (let px = sp; px <= ep; px++) {
+                    const x = xMin + (px/gW)*(xMax-xMin), y = x*x;
+                    if (first) { ctx.moveTo(gPad+px, toCanvasY(y)); first=false; }
+                    else ctx.lineTo(gPad+px, toCanvasY(y));
+                }
+                ctx.stroke(); ctx.restore();
+            }
+        }
+
+        function plotPoint(x, y) { plottedPoints.push({x,y}); redrawGraph(); updatePointsList(); }
+        function clearPoints() { plottedPoints = []; redrawGraph(); updatePointsList(); }
+        function redrawGraph() { drawGrid(); drawPoints(); }
+
+        function updatePointsList() {
+            const el = document.getElementById('pointsList');
+            if (!plottedPoints.length) { el.textContent = 'Points: —'; return; }
+            const labels = ['A','B','C','D','E'];
+            el.textContent = 'Points: ' + plottedPoints.map((pt,i) => `${labels[i]}(${pt.x}, ${pt.y})`).join('  ');
+        }
+
+        // ===== ANIMATION =====
+        function clearAllTimeouts() { timeouts.forEach(t => clearTimeout(t)); timeouts = []; }
+        function addTimeout(fn, delay) { const t = setTimeout(fn, delay); timeouts.push(t); return t; }
+
+        function getCenter(el) {
+            const container = document.getElementById('machineRow');
+            const cRect = container.getBoundingClientRect();
+            const eRect = el.getBoundingClientRect();
+            return { x: eRect.left + eRect.width/2 - cRect.left, y: eRect.top + eRect.height/2 - cRect.top };
+        }
+
+        function setCalcLines(input, output) {
+            document.getElementById('line1').textContent = `f(${input}) = ${input}²`;
+            document.getElementById('line2').textContent = `f(${input}) = ${input} × ${input}`;
+            document.getElementById('line3').textContent = `f(${input}) = ${output}`;
+        }
+
+        function hideAllLines() { for (let i=1;i<=3;i++) document.getElementById('line'+i).classList.remove('visible'); }
+        function showLine(n) { document.getElementById('line'+n).classList.add('visible'); }
+
+        function showInputLine(val) {
+            document.getElementById('greenLine').style.height = (val*PX_PER_INCH)+'px';
+            document.getElementById('lineLabel').textContent = val+' in';
+            document.getElementById('lineLabel').style.opacity = '1';
+        }
+
+        function showOutputSquare(inputVal, outputVal) {
+            const side = inputVal * PX_PER_INCH;
+            document.getElementById('blueSquare').style.width = side+'px';
+            document.getElementById('blueSquare').style.height = side+'px';
+            document.getElementById('sqCenter').textContent = outputVal+' in²';
+            document.getElementById('sqCenter').style.opacity = '1';
+            document.getElementById('sqRight').textContent = inputVal+' in';
+            document.getElementById('sqRight').style.opacity = '1';
+            document.getElementById('sqBottom').textContent = inputVal+' in';
+            document.getElementById('sqBottom').style.opacity = '1';
+        }
+
+        function hideVisuals() {
+            document.getElementById('greenLine').style.height = '0px';
+            document.getElementById('lineLabel').style.opacity = '0';
+            document.getElementById('blueSquare').style.width = '0px';
+            document.getElementById('blueSquare').style.height = '0px';
+            document.getElementById('sqCenter').style.opacity = '0';
+            document.getElementById('sqRight').style.opacity = '0';
+            document.getElementById('sqBottom').style.opacity = '0';
+        }
+
+        function animateStep() {
+            if (animationInProgress) return;
+            animationInProgress = true;
+            const step = steps[currentStep];
+            if (currentStep === 0 && plottedPoints.length > 0) clearPoints();
+
+            const ball = document.getElementById('movingBall');
+            const inputEl = document.getElementById('inputValue');
+            const outputEl = document.getElementById('outputValue');
+            const stepEl = document.getElementById('stepIndicator');
+            const functionBox = document.getElementById('functionBox');
+
+            stepEl.textContent = `Step ${currentStep+1}: x = ${step.input} → y = ?`;
+            hideAllLines(); setCalcLines(step.input, step.output);
+
+            inputEl.textContent = step.input;
+            inputEl.style.animation = 'none';
+            requestAnimationFrame(() => { inputEl.style.animation = 'pulse 0.4s ease'; });
+
+            showInputLine(step.input);
+            document.getElementById('blueSquare').style.width = '0px';
+            document.getElementById('blueSquare').style.height = '0px';
+            document.getElementById('sqCenter').style.opacity = '0';
+            document.getElementById('sqRight').style.opacity = '0';
+            document.getElementById('sqBottom').style.opacity = '0';
+
+            const inputPos = getCenter(document.getElementById('inputWrapper'));
+            const boxPos = getCenter(functionBox);
+            const outputPos = getCenter(document.getElementById('outputWrapper'));
+
+            ball.textContent = step.input;
+            ball.className = 'moving-ball green';
+            ball.style.transition = 'none';
+            ball.style.left = inputPos.x+'px'; ball.style.top = inputPos.y+'px';
+            ball.style.opacity = '1'; ball.style.animation = 'popIn 0.35s ease forwards';
+
+            addTimeout(() => {
+                ball.style.animation = '';
+                ball.style.transform = 'translate(-50%,-50%) scale(1)';
+                ball.style.transition = 'left 0.7s cubic-bezier(0.4,0,0.2,1), top 0.7s cubic-bezier(0.4,0,0.2,1)';
+                ball.style.left = boxPos.x+'px'; ball.style.top = boxPos.y+'px';
+            }, 600);
+
+            addTimeout(() => {
+                ball.className = 'moving-ball orange';
+                ball.style.transition = 'transform 0.25s ease, opacity 0.25s ease';
+                ball.style.transform = 'translate(-50%,-50%) scale(0.4)'; ball.style.opacity = '0.3';
+                functionBox.style.transform = 'scale(1.06)';
+                addTimeout(() => { functionBox.style.transform = 'scale(0.96)'; }, 100);
+                addTimeout(() => { functionBox.style.transform = 'scale(1.02)'; }, 200);
+                addTimeout(() => { functionBox.style.transform = 'scale(1)'; }, 300);
+            }, 1500);
+
+            addTimeout(() => { showLine(1); }, 2100);
+            addTimeout(() => { showLine(2); }, 2800);
+            addTimeout(() => { showLine(3); stepEl.textContent = `Step ${currentStep+1}: x = ${step.input} → y = ${step.output}`; }, 3500);
+
+            addTimeout(() => {
+                ball.textContent = step.output;
+                ball.className = 'moving-ball blue';
+                ball.style.opacity = '1';
+                ball.style.transition = 'transform 0.3s ease-out';
+                ball.style.transform = 'translate(-50%,-50%) scale(1)';
+                showOutputSquare(step.input, step.output);
+            }, 4200);
+
+            addTimeout(() => {
+                ball.style.transition = 'left 0.7s cubic-bezier(0.4,0,0.2,1), top 0.7s cubic-bezier(0.4,0,0.2,1)';
+                ball.style.left = outputPos.x+'px'; ball.style.top = outputPos.y+'px';
+            }, 4600);
+
+            addTimeout(() => {
+                outputEl.textContent = step.output;
+                outputEl.style.animation = 'none';
+                requestAnimationFrame(() => { outputEl.style.animation = 'pulse 0.4s ease'; });
+                ball.style.animation = 'popOut 0.3s ease forwards';
+            }, 5500);
+
+            addTimeout(() => { plotPoint(step.input, step.output); }, 5900);
+
+            addTimeout(() => {
+                ball.style.opacity = '0'; ball.style.animation = '';
+                animationInProgress = false;
+                currentStep = (currentStep+1) % steps.length;
+                if (isPlaying) addTimeout(animateStep, 800);
+            }, 6500);
+        }
+
+        function play() {
+            if (!isPlaying) {
+                isPlaying = true;
+                document.getElementById('playBtn').disabled = true;
+                document.getElementById('pauseBtn').disabled = false;
+                document.getElementById('stopBtn').disabled = false;
+                if (!animationInProgress) animateStep();
+            }
+        }
+
+        function pause() {
+            if (isPlaying) { isPlaying = false; document.getElementById('playBtn').disabled = false; document.getElementById('pauseBtn').disabled = true; }
+        }
+
+        function stop() {
+            isPlaying = false; animationInProgress = false; clearAllTimeouts(); currentStep = 0;
+            document.getElementById('movingBall').style.transition = 'none';
+            document.getElementById('movingBall').style.opacity = '0';
+            document.getElementById('movingBall').style.animation = '';
+            document.getElementById('inputValue').textContent = '?';
+            document.getElementById('outputValue').textContent = '?';
+            document.getElementById('stepIndicator').textContent = 'Press Play to start';
+            document.getElementById('functionBox').style.transform = 'scale(1)';
+            hideAllLines(); hideVisuals(); clearPoints();
+            document.getElementById('playBtn').disabled = false;
+            document.getElementById('pauseBtn').disabled = true;
+            document.getElementById('stopBtn').disabled = true;
+        }
+
+        hideAllLines(); redrawGraph();
+    </script>
+</body>
+</html>
