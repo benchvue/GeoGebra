@@ -66,7 +66,7 @@ Interactive math function animations designed to help students understand how fu
 
 > Full visualization with coordinate graphing: after each step, the (x, y) point is plotted on a coordinate plane, building the **y = x² parabola** point by point.
 
-[![Open Demo 3](https://img.shields.io/badge/▶%20Open%20Live%20Demo-Coordinate%20Plane-9b59b6?style=for-the-badge&logo=github)](https://benchvue.github.io/GeoGebra/week04/function-x-y-drawing.html)
+[![Open Demo 3](https://img.shields.io/badge/▶%20Open%20Live%20Demo-Coordinate%20Plane-9b59b6?style=for-the-badge&logo=github)](https://benchvue.github.io/GeoGebra/week04/squre-x-y-drawing.html)
 
 ```
   ┌───┐       ┌────────────┐       ┌───┐
@@ -145,7 +145,7 @@ All three versions share the same controls:
 week04/
 ├── basic-diagram.html          # Version 1: Basic function machine
 ├── function-stacking.html      # Version 2: + Side length & area visuals
-├── function-x-y-drawing.html   # Version 3: + Coordinate plane graphing
+├── squre-x-y-drawing.html   # Version 3: + Coordinate plane graphing
 └── readme.md                   # This file
 ```
 
