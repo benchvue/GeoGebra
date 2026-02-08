@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Triangle Interior Angles</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: #0f1117;
+            color: #e2e4e9;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        h1 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+            letter-spacing: -0.02em;
+            color: #f0f1f4;
+        }
+
+        .subtitle {
+            font-size: 0.85rem;
+            color: #6b7084;
+            margin-bottom: 18px;
+        }
+
+        .canvas-wrapper {
+            position: relative;
+            background: #181a22;
+            border-radius: 16px;
+            border: 1px solid #2a2d3a;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.4);
+            padding: 8px;
+        }
+
+        canvas {
+            display: block;
+            border-radius: 12px;
+            cursor: default;
+        }
+
+        .info-panel {
+            display: flex;
+            gap: 12px;
+            margin-top: 18px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .angle-card {
+            background: #181a22;
+            border: 1px solid #2a2d3a;
+            border-radius: 12px;
+            padding: 14px 20px;
+            min-width: 130px;
+            text-align: center;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .angle-card:hover {
+            border-color: #3a3e50;
+        }
+
+        .angle-card .label {
+            font-size: 0.72rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 4px;
+        }
+
+        .angle-card .value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.35rem;
+            font-weight: 500;
+        }
+
+        .angle-card.alpha .label { color: #f87171; }
+        .angle-card.alpha .value { color: #fca5a5; }
+        .angle-card.alpha { border-color: rgba(248,113,113,0.25); }
+
+        .angle-card.beta .label { color: #60a5fa; }
+        .angle-card.beta .value { color: #93c5fd; }
+        .angle-card.beta { border-color: rgba(96,165,250,0.25); }
+
+        .angle-card.gamma .label { color: #34d399; }
+        .angle-card.gamma .value { color: #6ee7b7; }
+        .angle-card.gamma { border-color: rgba(52,211,153,0.25); }
+
+        .sum-card {
+            background: linear-gradient(135deg, #1e1f2e, #1a1b28);
+            border: 1px solid #3a3e50;
+            border-radius: 12px;
+            padding: 14px 20px;
+            min-width: 180px;
+            text-align: center;
+        }
+
+        .sum-card .label {
+            font-size: 0.72rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #a78bfa;
+            margin-bottom: 4px;
+        }
+
+        .sum-card .value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.35rem;
+            font-weight: 500;
+            color: #c4b5fd;
+        }
+
+        .hint {
+            font-size: 0.75rem;
+            color: #4a4e62;
+            margin-top: 14px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Interactive Triangle Interior Angles</h1>
+    <p class="subtitle">Drag the vertices to change the triangle</p>
+    <div class="canvas-wrapper">
+        <canvas id="canvas" width="600" height="500"></canvas>
+    </div>
+    <div class="info-panel">
+        <div class="angle-card alpha">
+            <div class="label">α (Alpha)</div>
+            <div class="value" id="alphaVal">0°</div>
+        </div>
+        <div class="angle-card beta">
+            <div class="label">β (Beta)</div>
+            <div class="value" id="betaVal">0°</div>
+        </div>
+        <div class="angle-card gamma">
+            <div class="label">γ (Gamma)</div>
+            <div class="value" id="gammaVal">0°</div>
+        </div>
+        <div class="sum-card">
+            <div class="label">α + β + γ =</div>
+            <div class="value" id="sumVal">180°</div>
+        </div>
+    </div>
+    <p class="hint">The sum of interior angles of any triangle is always 180°</p>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        // Triangle vertices (draggable)
+        let vertices = [
+            { x: 300, y: 100, label: 'A', color: '#f87171', colorLight: '#fca5a5' },
+            { x: 120, y: 400, label: 'B', color: '#60a5fa', colorLight: '#93c5fd' },
+            { x: 480, y: 400, label: 'C', color: '#34d399', colorLight: '#6ee7b7' }
+        ];
+
+        const VERTEX_RADIUS = 10;
+        const ARC_RADIUS = 36;
+        let dragging = null;
+        let hovered = null;
+
+        function angleBetween(cx, cy, ax, ay, bx, by) {
+            const a1 = Math.atan2(ay - cy, ax - cx);
+            const a2 = Math.atan2(by - cy, bx - cx);
+            let angle = a1 - a2;
+            while (angle < 0) angle += 2 * Math.PI;
+            while (angle > 2 * Math.PI) angle -= 2 * Math.PI;
+            if (angle > Math.PI) angle = 2 * Math.PI - angle;
+            return angle;
+        }
+
+        function toDeg(rad) {
+            return rad * 180 / Math.PI;
+        }
+
+        function dist(x1, y1, x2, y2) {
+            return Math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2);
+        }
+
+        function drawArc(cx, cy, ax, ay, bx, by, color, label) {
+            const a1 = Math.atan2(ay - cy, ax - cx);
+            const a2 = Math.atan2(by - cy, bx - cx);
+            let start = a2, end = a1;
+            let diff = end - start;
+            while (diff < 0) diff += 2 * Math.PI;
+            if (diff > Math.PI) {
+                [start, end] = [end, start];
+                diff = 2 * Math.PI - diff;
+            }
+
+            // Draw arc fill
+            ctx.beginPath();
+            ctx.moveTo(cx, cy);
+            ctx.arc(cx, cy, ARC_RADIUS, start, start + diff);
+            ctx.closePath();
+            ctx.fillStyle = color + '18';
+            ctx.fill();
+
+            // Draw arc stroke
+            ctx.beginPath();
+            ctx.arc(cx, cy, ARC_RADIUS, start, start + diff);
+            ctx.strokeStyle = color + '80';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Label
+            const midAngle = start + diff / 2;
+            const labelR = ARC_RADIUS + 18;
+            const lx = cx + labelR * Math.cos(midAngle);
+            const ly = cy + labelR * Math.sin(midAngle);
+            ctx.font = '600 14px "DM Sans", sans-serif';
+            ctx.fillStyle = color;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(label, lx, ly);
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Subtle grid
+            ctx.strokeStyle = '#1f2130';
+            ctx.lineWidth = 1;
+            for (let x = 0; x < canvas.width; x += 30) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, canvas.height);
+                ctx.stroke();
+            }
+            for (let y = 0; y < canvas.height; y += 30) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+                ctx.stroke();
+            }
+
+            const [A, B, C] = vertices;
+
+            // Triangle fill
+            ctx.beginPath();
+            ctx.moveTo(A.x, A.y);
+            ctx.lineTo(B.x, B.y);
+            ctx.lineTo(C.x, C.y);
+            ctx.closePath();
+            ctx.fillStyle = 'rgba(139, 92, 246, 0.06)';
+            ctx.fill();
+
+            // Triangle edges
+            ctx.beginPath();
+            ctx.moveTo(A.x, A.y);
+            ctx.lineTo(B.x, B.y);
+            ctx.lineTo(C.x, C.y);
+            ctx.closePath();
+            ctx.strokeStyle = '#5a5e76';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Compute angles
+            const alpha = angleBetween(A.x, A.y, B.x, B.y, C.x, C.y);
+            const beta  = angleBetween(B.x, B.y, A.x, A.y, C.x, C.y);
+            const gamma = angleBetween(C.x, C.y, A.x, A.y, B.x, B.y);
+
+            // Draw arcs
+            drawArc(A.x, A.y, B.x, B.y, C.x, C.y, '#f87171', 'α');
+            drawArc(B.x, B.y, A.x, A.y, C.x, C.y, '#60a5fa', 'β');
+            drawArc(C.x, C.y, A.x, A.y, B.x, B.y, '#34d399', 'γ');
+
+            // Draw edge lengths
+            const edges = [
+                { from: A, to: B, name: 'c' },
+                { from: B, to: C, name: 'a' },
+                { from: A, to: C, name: 'b' }
+            ];
+            ctx.font = '500 12px "JetBrains Mono", monospace';
+            ctx.fillStyle = '#6b7084';
+            for (const e of edges) {
+                const mx = (e.from.x + e.to.x) / 2;
+                const my = (e.from.y + e.to.y) / 2;
+                const d = dist(e.from.x, e.from.y, e.to.x, e.to.y);
+                // Offset the label perpendicular to edge
+                const dx = e.to.x - e.from.x;
+                const dy = e.to.y - e.from.y;
+                const len = Math.sqrt(dx * dx + dy * dy);
+                const nx = -dy / len * 14;
+                const ny = dx / len * 14;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(`${d.toFixed(0)}px`, mx + nx, my + ny);
+            }
+
+            // Draw vertices
+            for (let i = 0; i < vertices.length; i++) {
+                const v = vertices[i];
+                const isHovered = hovered === i;
+                const isDragging = dragging === i;
+                const r = isDragging ? VERTEX_RADIUS + 3 : isHovered ? VERTEX_RADIUS + 2 : VERTEX_RADIUS;
+
+                // Glow
+                if (isHovered || isDragging) {
+                    ctx.beginPath();
+                    ctx.arc(v.x, v.y, r + 8, 0, Math.PI * 2);
+                    ctx.fillStyle = v.color + '20';
+                    ctx.fill();
+                }
+
+                // Circle
+                ctx.beginPath();
+                ctx.arc(v.x, v.y, r, 0, Math.PI * 2);
+                ctx.fillStyle = isDragging ? v.colorLight : v.color;
+                ctx.fill();
+                ctx.strokeStyle = '#0f1117';
+                ctx.lineWidth = 3;
+                ctx.stroke();
+
+                // Label
+                ctx.font = '700 15px "DM Sans", sans-serif';
+                ctx.fillStyle = '#0f1117';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(v.label, v.x, v.y + 1);
+            }
+
+            // Update info panel
+            const alphaDeg = toDeg(alpha);
+            const betaDeg = toDeg(beta);
+            const gammaDeg = toDeg(gamma);
+            const sum = alphaDeg + betaDeg + gammaDeg;
+
+            document.getElementById('alphaVal').textContent = alphaDeg.toFixed(1) + '°';
+            document.getElementById('betaVal').textContent = betaDeg.toFixed(1) + '°';
+            document.getElementById('gammaVal').textContent = gammaDeg.toFixed(1) + '°';
+            document.getElementById('sumVal').textContent = sum.toFixed(1) + '°';
+        }
+
+        function getMousePos(e) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            return {
+                x: (e.clientX - rect.left) * scaleX,
+                y: (e.clientY - rect.top) * scaleY
+            };
+        }
+
+        function getTouchPos(e) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            const touch = e.touches[0];
+            return {
+                x: (touch.clientX - rect.left) * scaleX,
+                y: (touch.clientY - rect.top) * scaleY
+            };
+        }
+
+        function findVertex(mx, my) {
+            for (let i = 0; i < vertices.length; i++) {
+                if (dist(mx, my, vertices[i].x, vertices[i].y) < VERTEX_RADIUS + 6) {
+                    return i;
+                }
+            }
+            return null;
+        }
+
+        function clamp(val, min, max) {
+            return Math.max(min, Math.min(max, val));
+        }
+
+        canvas.addEventListener('mousedown', (e) => {
+            const pos = getMousePos(e);
+            dragging = findVertex(pos.x, pos.y);
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            const pos = getMousePos(e);
+            if (dragging !== null) {
+                vertices[dragging].x = clamp(pos.x, 15, canvas.width - 15);
+                vertices[dragging].y = clamp(pos.y, 15, canvas.height - 15);
+                draw();
+            }
+            const newHover = findVertex(pos.x, pos.y);
+            if (newHover !== hovered) {
+                hovered = newHover;
+                canvas.style.cursor = hovered !== null ? 'grab' : 'default';
+                draw();
+            }
+        });
+
+        canvas.addEventListener('mouseup', () => { dragging = null; });
+        canvas.addEventListener('mouseleave', () => { dragging = null; hovered = null; draw(); });
+
+        // Touch support
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            const pos = getTouchPos(e);
+            dragging = findVertex(pos.x, pos.y);
+        }, { passive: false });
+
+        canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            if (dragging !== null) {
+                const pos = getTouchPos(e);
+                vertices[dragging].x = clamp(pos.x, 15, canvas.width - 15);
+                vertices[dragging].y = clamp(pos.y, 15, canvas.height - 15);
+                draw();
+            }
+        }, { passive: false });
+
+        canvas.addEventListener('touchend', () => { dragging = null; });
+
+        // Responsive canvas
+        function resize() {
+            const maxW = Math.min(window.innerWidth - 40, 600);
+            canvas.style.width = maxW + 'px';
+            canvas.style.height = (maxW * 500 / 600) + 'px';
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        draw();
+    </script>
+</body>
+</html>
