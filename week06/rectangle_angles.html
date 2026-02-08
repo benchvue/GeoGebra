@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Rectangle Interior Angles</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: #0f1117;
+            color: #e2e4e9;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        h1 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+            letter-spacing: -0.02em;
+            color: #f0f1f4;
+        }
+
+        .subtitle {
+            font-size: 0.85rem;
+            color: #6b7084;
+            margin-bottom: 18px;
+        }
+
+        .canvas-wrapper {
+            position: relative;
+            background: #181a22;
+            border-radius: 16px;
+            border: 1px solid #2a2d3a;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.4);
+            padding: 8px;
+        }
+
+        canvas {
+            display: block;
+            border-radius: 12px;
+            cursor: default;
+        }
+
+        .info-panel {
+            display: flex;
+            gap: 12px;
+            margin-top: 18px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .angle-card {
+            background: #181a22;
+            border: 1px solid #2a2d3a;
+            border-radius: 12px;
+            padding: 14px 20px;
+            min-width: 120px;
+            text-align: center;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .angle-card:hover {
+            border-color: #3a3e50;
+        }
+
+        .angle-card .label {
+            font-size: 0.72rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 4px;
+        }
+
+        .angle-card .value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.35rem;
+            font-weight: 500;
+        }
+
+        .angle-card.a .label { color: #f87171; }
+        .angle-card.a .value { color: #fca5a5; }
+        .angle-card.a { border-color: rgba(248,113,113,0.25); }
+
+        .angle-card.b .label { color: #60a5fa; }
+        .angle-card.b .value { color: #93c5fd; }
+        .angle-card.b { border-color: rgba(96,165,250,0.25); }
+
+        .angle-card.c .label { color: #34d399; }
+        .angle-card.c .value { color: #6ee7b7; }
+        .angle-card.c { border-color: rgba(52,211,153,0.25); }
+
+        .angle-card.d .label { color: #fbbf24; }
+        .angle-card.d .value { color: #fde68a; }
+        .angle-card.d { border-color: rgba(251,191,36,0.25); }
+
+        .sum-card {
+            background: linear-gradient(135deg, #1e1f2e, #1a1b28);
+            border: 1px solid #3a3e50;
+            border-radius: 12px;
+            padding: 14px 20px;
+            min-width: 180px;
+            text-align: center;
+        }
+
+        .sum-card .label {
+            font-size: 0.72rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #a78bfa;
+            margin-bottom: 4px;
+        }
+
+        .sum-card .value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.35rem;
+            font-weight: 500;
+            color: #c4b5fd;
+        }
+
+        .info-row {
+            display: flex;
+            gap: 12px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .dim-card {
+            background: #181a22;
+            border: 1px solid #2a2d3a;
+            border-radius: 12px;
+            padding: 10px 18px;
+            min-width: 140px;
+            text-align: center;
+        }
+
+        .dim-card .label {
+            font-size: 0.68rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #6b7084;
+            margin-bottom: 3px;
+        }
+
+        .dim-card .value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: #9ca0b4;
+        }
+
+        .hint {
+            font-size: 0.75rem;
+            color: #4a4e62;
+            margin-top: 14px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Interactive Rectangle Interior Angles</h1>
+    <p class="subtitle">Drag any vertex — the rectangle reshapes while keeping all right angles</p>
+    <div class="canvas-wrapper">
+        <canvas id="canvas" width="650" height="500"></canvas>
+    </div>
+    <div class="info-panel">
+        <div class="angle-card a">
+            <div class="label">∠A</div>
+            <div class="value" id="aVal">90°</div>
+        </div>
+        <div class="angle-card b">
+            <div class="label">∠B</div>
+            <div class="value" id="bVal">90°</div>
+        </div>
+        <div class="angle-card c">
+            <div class="label">∠C</div>
+            <div class="value" id="cVal">90°</div>
+        </div>
+        <div class="angle-card d">
+            <div class="label">∠D</div>
+            <div class="value" id="dVal">90°</div>
+        </div>
+        <div class="sum-card">
+            <div class="label">∠A + ∠B + ∠C + ∠D =</div>
+            <div class="value" id="sumVal">360°</div>
+        </div>
+    </div>
+    <div class="info-row">
+        <div class="dim-card">
+            <div class="label">Width (AB)</div>
+            <div class="value" id="widthVal">0</div>
+        </div>
+        <div class="dim-card">
+            <div class="label">Height (AD)</div>
+            <div class="value" id="heightVal">0</div>
+        </div>
+        <div class="dim-card">
+            <div class="label">Diagonal</div>
+            <div class="value" id="diagVal">0</div>
+        </div>
+        <div class="dim-card">
+            <div class="label">Area</div>
+            <div class="value" id="areaVal">0</div>
+        </div>
+    </div>
+    <p class="hint">The sum of interior angles of any rectangle is always 360° (4 × 90°)</p>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        /*
+         *  Rectangle defined by center + half-width + half-height + rotation.
+         *  Vertices: A (top-left), B (top-right), C (bottom-right), D (bottom-left)
+         *  in the rotated local frame.
+         *
+         *  When a user drags a vertex we recalculate the rectangle so that
+         *  ALL four corners stay at 90°.
+         */
+
+        let cx = 325, cy = 250;   // center
+        let hw = 160, hh = 110;   // half-width, half-height
+        let angle = 0;            // rotation (radians)
+
+        const VERTEX_RADIUS = 11;
+        const SQ_SIZE = 16;       // right-angle square size
+        let dragging = null;      // index 0-3
+        let hovered = null;
+
+        const COLORS = [
+            { main: '#f87171', light: '#fca5a5' },  // A – red
+            { main: '#60a5fa', light: '#93c5fd' },   // B – blue
+            { main: '#34d399', light: '#6ee7b7' },   // C – green
+            { main: '#fbbf24', light: '#fde68a' }    // D – yellow
+        ];
+        const LABELS = ['A', 'B', 'C', 'D'];
+
+        // Multipliers for corners in local space: A=TL, B=TR, C=BR, D=BL
+        const LOCAL = [[-1,-1],[1,-1],[1,1],[-1,1]];
+
+        function getVertices() {
+            const cos = Math.cos(angle), sin = Math.sin(angle);
+            return LOCAL.map(([lx, ly]) => ({
+                x: cx + lx * hw * cos - ly * hh * sin,
+                y: cy + lx * hw * sin + ly * hh * cos
+            }));
+        }
+
+        function dist(x1,y1,x2,y2) {
+            return Math.sqrt((x1-x2)**2+(y1-y2)**2);
+        }
+
+        // When dragging vertex i to (mx,my), recompute rectangle keeping it a rectangle.
+        function moveVertex(i, mx, my) {
+            const cos = Math.cos(angle), sin = Math.sin(angle);
+            // Convert mouse to local coords relative to center
+            const dx = mx - cx, dy = my - cy;
+            const lx = dx * cos + dy * sin;   // along width axis
+            const ly = -dx * sin + dy * cos;   // along height axis
+
+            // The dragged vertex is at LOCAL[i] * (hw, hh).
+            // We set hw = |lx|, hh = |ly| and adjust center so the opposite corner stays put.
+            const opp = (i + 2) % 4; // opposite vertex index
+            const verts = getVertices();
+            const oppX = verts[opp].x, oppY = verts[opp].y;
+
+            // New half-sizes from the drag
+            let newHW = Math.abs(lx);
+            let newHH = Math.abs(ly);
+            newHW = Math.max(newHW, 20);
+            newHH = Math.max(newHH, 20);
+
+            // New center is midpoint between dragged vertex and opposite vertex.
+            // Dragged vertex in world = cx + LOCAL[i][0]*newHW*cos - LOCAL[i][1]*newHH*sin, ...
+            // Opposite vertex should stay at oppX, oppY.
+            // opposite in new frame: cx + LOCAL[opp][0]*newHW*cos - LOCAL[opp][1]*newHH*sin = oppX
+            // dragged in new frame:  cx + LOCAL[i][0]*newHW*cos   - LOCAL[i][1]*newHH*sin   = mx (approx)
+            // Since LOCAL[opp] = -LOCAL[i], sum of both = 2*cx => cx = (draggedWorld + oppWorld)/2
+
+            // Place the dragged corner exactly at (mx, my) projected to the rect grid
+            // The dragged corner in world coords:
+            const dragWX = cx + LOCAL[i][0] * newHW * cos - LOCAL[i][1] * newHH * sin;
+            const dragWY = cy + LOCAL[i][0] * newHW * sin + LOCAL[i][1] * newHH * cos;
+
+            // Shift center so opposite corner stays fixed
+            const newOppX = cx + LOCAL[opp][0] * newHW * cos - LOCAL[opp][1] * newHH * sin;
+            const newOppY = cy + LOCAL[opp][0] * newHW * sin + LOCAL[opp][1] * newHH * cos;
+            cx += (oppX - newOppX);
+            cy += (oppY - newOppY);
+
+            hw = newHW;
+            hh = newHH;
+        }
+
+        // ── Drawing helpers ──
+
+        function drawRightAngleSquare(vx, vy, prevX, prevY, nextX, nextY) {
+            // Two unit vectors from vertex toward its neighbors
+            const d1 = dist(vx,vy,prevX,prevY);
+            const d2 = dist(vx,vy,nextX,nextY);
+            if (d1 < 1 || d2 < 1) return;
+            const u1x = (prevX-vx)/d1, u1y = (prevY-vy)/d1;
+            const u2x = (nextX-vx)/d2, u2y = (nextY-vy)/d2;
+            const s = SQ_SIZE;
+            ctx.beginPath();
+            ctx.moveTo(vx + u1x*s, vy + u1y*s);
+            ctx.lineTo(vx + u1x*s + u2x*s, vy + u1y*s + u2y*s);
+            ctx.lineTo(vx + u2x*s, vy + u2y*s);
+            ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Subtle grid
+            ctx.strokeStyle = '#1f2130';
+            ctx.lineWidth = 1;
+            for (let x = 0; x < canvas.width; x += 30) {
+                ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,canvas.height); ctx.stroke();
+            }
+            for (let y = 0; y < canvas.height; y += 30) {
+                ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(canvas.width,y); ctx.stroke();
+            }
+
+            const V = getVertices();
+
+            // ── Diagonals (faint) ──
+            ctx.setLineDash([6,6]);
+            ctx.strokeStyle = '#2e3148';
+            ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(V[0].x,V[0].y); ctx.lineTo(V[2].x,V[2].y); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(V[1].x,V[1].y); ctx.lineTo(V[3].x,V[3].y); ctx.stroke();
+            ctx.setLineDash([]);
+
+            // ── Rectangle fill ──
+            ctx.beginPath();
+            ctx.moveTo(V[0].x,V[0].y);
+            for (let i=1;i<4;i++) ctx.lineTo(V[i].x,V[i].y);
+            ctx.closePath();
+            ctx.fillStyle = 'rgba(139, 92, 246, 0.06)';
+            ctx.fill();
+
+            // ── Rectangle edges with color coding ──
+            const edgeColors = ['#f87171','#60a5fa','#34d399','#fbbf24'];
+            for (let i=0;i<4;i++) {
+                const j = (i+1)%4;
+                ctx.beginPath();
+                ctx.moveTo(V[i].x, V[i].y);
+                ctx.lineTo(V[j].x, V[j].y);
+                ctx.strokeStyle = '#5a5e76';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            }
+
+            // ── Right angle squares at each vertex ──
+            for (let i=0;i<4;i++) {
+                const prev = (i+3)%4, next = (i+1)%4;
+                drawRightAngleSquare(V[i].x, V[i].y, V[prev].x, V[prev].y, V[next].x, V[next].y);
+            }
+
+            // ── "90°" label at each corner ──
+            for (let i=0;i<4;i++) {
+                const prev = (i+3)%4, next = (i+1)%4;
+                // Label offset: bisector direction pointing inward
+                const d1 = dist(V[i].x,V[i].y,V[prev].x,V[prev].y);
+                const d2 = dist(V[i].x,V[i].y,V[next].x,V[next].y);
+                if (d1<1||d2<1) continue;
+                const u1x=(V[prev].x-V[i].x)/d1, u1y=(V[prev].y-V[i].y)/d1;
+                const u2x=(V[next].x-V[i].x)/d2, u2y=(V[next].y-V[i].y)/d2;
+                const bx = u1x+u2x, by = u1y+u2y;
+                const bl = Math.sqrt(bx*bx+by*by) || 1;
+                const off = 32;
+                ctx.font = '600 12px "JetBrains Mono", monospace';
+                ctx.fillStyle = COLORS[i].main;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('90°', V[i].x + bx/bl*off, V[i].y + by/bl*off);
+            }
+
+            // ── Edge length labels ──
+            ctx.font = '500 11px "JetBrains Mono", monospace';
+            ctx.fillStyle = '#6b7084';
+            for (let i=0;i<4;i++) {
+                const j=(i+1)%4;
+                const mx=(V[i].x+V[j].x)/2, my=(V[i].y+V[j].y)/2;
+                const ex=V[j].x-V[i].x, ey=V[j].y-V[i].y;
+                const el=Math.sqrt(ex*ex+ey*ey)||1;
+                const nx=-ey/el*16, ny=ex/el*16;
+                ctx.textAlign='center'; ctx.textBaseline='middle';
+                ctx.fillText(`${el.toFixed(0)}`, mx+nx, my+ny);
+            }
+
+            // ── Vertices ──
+            for (let i=0;i<4;i++) {
+                const v = V[i];
+                const isH = hovered===i, isD = dragging===i;
+                const r = isD ? VERTEX_RADIUS+3 : isH ? VERTEX_RADIUS+2 : VERTEX_RADIUS;
+
+                if (isH || isD) {
+                    ctx.beginPath(); ctx.arc(v.x,v.y,r+8,0,Math.PI*2);
+                    ctx.fillStyle = COLORS[i].main+'20'; ctx.fill();
+                }
+
+                ctx.beginPath(); ctx.arc(v.x,v.y,r,0,Math.PI*2);
+                ctx.fillStyle = isD ? COLORS[i].light : COLORS[i].main;
+                ctx.fill();
+                ctx.strokeStyle = '#0f1117'; ctx.lineWidth = 3; ctx.stroke();
+
+                ctx.font = '700 14px "DM Sans", sans-serif';
+                ctx.fillStyle = '#0f1117';
+                ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                ctx.fillText(LABELS[i], v.x, v.y+1);
+            }
+
+            // ── Center mark ──
+            const cmx = (V[0].x+V[2].x)/2, cmy = (V[0].y+V[2].y)/2;
+            ctx.beginPath(); ctx.arc(cmx,cmy,3,0,Math.PI*2);
+            ctx.fillStyle = '#4a4e62'; ctx.fill();
+
+            // ── Update info panel ──
+            document.getElementById('aVal').textContent = '90.0°';
+            document.getElementById('bVal').textContent = '90.0°';
+            document.getElementById('cVal').textContent = '90.0°';
+            document.getElementById('dVal').textContent = '90.0°';
+            document.getElementById('sumVal').textContent = '360.0°';
+
+            // Dimensions
+            const w = dist(V[0].x,V[0].y,V[1].x,V[1].y);
+            const h = dist(V[0].x,V[0].y,V[3].x,V[3].y);
+            const diag = dist(V[0].x,V[0].y,V[2].x,V[2].y);
+            document.getElementById('widthVal').textContent = w.toFixed(1) + ' px';
+            document.getElementById('heightVal').textContent = h.toFixed(1) + ' px';
+            document.getElementById('diagVal').textContent = diag.toFixed(1) + ' px';
+            document.getElementById('areaVal').textContent = (w*h).toFixed(0) + ' px²';
+        }
+
+        // ── Interaction ──
+        function getMousePos(e) {
+            const r=canvas.getBoundingClientRect();
+            return { x:(e.clientX-r.left)*canvas.width/r.width, y:(e.clientY-r.top)*canvas.height/r.height };
+        }
+        function getTouchPos(e) {
+            const r=canvas.getBoundingClientRect(); const t=e.touches[0];
+            return { x:(t.clientX-r.left)*canvas.width/r.width, y:(t.clientY-r.top)*canvas.height/r.height };
+        }
+        function findVertex(mx,my) {
+            const V=getVertices();
+            for (let i=0;i<4;i++) {
+                if (dist(mx,my,V[i].x,V[i].y)<VERTEX_RADIUS+8) return i;
+            }
+            return null;
+        }
+
+        canvas.addEventListener('mousedown', e => {
+            const p=getMousePos(e);
+            dragging=findVertex(p.x,p.y);
+        });
+        canvas.addEventListener('mousemove', e => {
+            const p=getMousePos(e);
+            if (dragging!==null) {
+                moveVertex(dragging, p.x, p.y);
+                draw();
+            }
+            const h=findVertex(p.x,p.y);
+            if (h!==hovered) { hovered=h; canvas.style.cursor=h!==null?'grab':'default'; draw(); }
+        });
+        canvas.addEventListener('mouseup', ()=>{ dragging=null; });
+        canvas.addEventListener('mouseleave', ()=>{ dragging=null; hovered=null; draw(); });
+
+        canvas.addEventListener('touchstart', e => {
+            e.preventDefault(); const p=getTouchPos(e); dragging=findVertex(p.x,p.y);
+        }, {passive:false});
+        canvas.addEventListener('touchmove', e => {
+            e.preventDefault();
+            if (dragging!==null) { const p=getTouchPos(e); moveVertex(dragging,p.x,p.y); draw(); }
+        }, {passive:false});
+        canvas.addEventListener('touchend', ()=>{ dragging=null; });
+
+        // Responsive
+        function resize() {
+            const maxW=Math.min(window.innerWidth-40,650);
+            canvas.style.width=maxW+'px';
+            canvas.style.height=(maxW*500/650)+'px';
+        }
+        window.addEventListener('resize',resize);
+        resize();
+
+        draw();
+    </script>
+</body>
+</html>
