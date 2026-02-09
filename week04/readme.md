@@ -97,6 +97,89 @@ Interactive math function animations designed to help students understand how fu
 
 ---
 
+### 4. Coefficient Explorer — x², 2x², ½x² (the "a" in ax²)
+
+> Explore how the leading coefficient **a** affects the parabola's shape and area. Switch between three functions to see narrow, normal, and wide parabolas with visual area comparisons.
+
+[![Open Demo 4](https://img.shields.io/badge/▶%20Open%20Live%20Demo-Coefficient%20Explorer-e74c3c?style=for-the-badge&logo=github)](https://benchvue.github.io/GeoGebra/week04/quadratic-a.html)
+
+```
+         ┌──────┐   ┌──────┐   ┌──────┐
+         │  x²  │   │ 2x²  │   │ ½x²  │
+         │ a=1  │   │ a=2  │   │ a=½  │
+         └──────┘   └──────┘   └──────┘
+
+  ┌───┐       ┌────────────┐       ┌────┐
+  │ 3 │  ───► │ f(x) = 2x² │  ───► │ 18 │
+  └───┘       └────────────┘       └────┘
+
+                  ┌─────────┐         y
+   │              │ x²=9    │        │ ╱ 2x²
+   │              ├─────────│        │╱   x²
+   │  3 units     │ 2x²=18 │        ╱  ╱
+   │              │ (2 layers)       ╱ ╱  ½x²
+                  └─────────┘       └──────── x
+  Side            Area (stacked)    All 3 curves
+```
+
+**Features:**
+- Everything from Versions 1–3, plus:
+- **Three function buttons**: `x²` (a=1), `2x²` (a=2), `½x²` (a=½) — color-coded red, purple, green
+- **Coefficient comparison for area visualization**:
+  - **x²** — standard square (baseline reference)
+  - **2x²** — double-height rectangle with dashed midline showing two stacked layers over the x² reference outline
+  - **½x²** — full x² square with only bottom half solid; top half uses a **dot pattern** to show the missing 50%
+- **All three reference parabolas** drawn as dashed curves on the coordinate plane for shape comparison
+- Solid curve drawn in the selected function's color as points are plotted
+- **Info bar** explains the current coefficient's effect on slope and area
+- Function selector disabled during playback to prevent conflicts
+- Graph legend identifies all three curves
+
+---
+
+### 5. Y-Intercept Explorer — x², x²+1, x²−1 (the "c" in x²+c)
+
+> Explore how the constant term **c** shifts the parabola up or down. Switch between three functions to see the vertical shift effect on the y-intercept and area visualization.
+
+[![Open Demo 5](https://img.shields.io/badge/▶%20Open%20Live%20Demo-Y--Intercept%20Explorer-16a085?style=for-the-badge&logo=github)](https://benchvue.github.io/GeoGebra/week04/quadratic-c.html)
+
+```
+         ┌──────┐   ┌───────┐   ┌───────┐
+         │  x²  │   │ x²+1  │   │ x²−1  │
+         │ c=0  │   │ c=+1  │   │ c=−1  │
+         └──────┘   └───────┘   └───────┘
+
+  ┌───┐       ┌──────────────┐       ┌────┐
+  │ 3 │  ───► │ f(x) = x²+1  │  ───► │ 10 │
+  └───┘       └──────────────┘       └────┘
+
+                  ┌─────────┐         y
+   │              │░░ +1 ░░░│        │    x²+1
+   │              ├─────────│        │   x²
+   │  3 units     │  x²=9  │        │  x²−1
+   │              │         │        ● (0,1)
+                  └─────────┘       ●└(0,0)──── x
+  Side            Area + strip      ● (0,−1)
+```
+
+**Features:**
+- Everything from Versions 1–3, plus:
+- **Three function buttons**: `x²` (c=0), `x²+1` (c=+1), `x²−1` (c=−1) — color-coded red, teal, orange
+- **Y-intercept shift visualized in the area panel**:
+  - **x²** — standard square (baseline reference)
+  - **x²+1** — x² square with a **striped band on top** showing the +1 added area
+  - **x²−1** — x² square with a **hatched band at the bottom** showing the −1 removed area
+- **4-line calculation board** showing the extra step: `f(3) = 3² + 1 → 3 × 3 + 1 → 9 + 1 → 10`
+- **All three reference parabolas** drawn as dashed curves, clearly showing vertical offset
+- **Y-intercept markers** at (0, 0), (0, 1), and (0, −1) on the coordinate plane
+- Graph y-axis range extended to include negative values (down to −3)
+- Solid curve drawn in the selected function's color as points are plotted
+- **Info bar** explains the current c value's effect on vertex position and y-intercept
+- Function selector disabled during playback to prevent conflicts
+- Graph legend identifies all three curves
+
+---
+
 ## 🧠 How It Works
 
 Each animation demonstrates the same core concept in increasing detail:
@@ -113,6 +196,26 @@ Input (x)  →  f(x) = x²  →  Output (y = x²)
 | 4    | 4         | 4² = 4 × 4 | 16         | (4, 16)        |
 | 5    | 5         | 5² = 5 × 5 | 25         | (5, 25)        |
 
+### Version 4 — Coefficient Comparison Table (a)
+
+| Step | Input (x) | x² (a=1) | 2x² (a=2) | ½x² (a=½) |
+|------|-----------|----------|------------|------------|
+| 1    | 1         | 1        | 2          | 0.5        |
+| 2    | 2         | 4        | 8          | 2          |
+| 3    | 3         | 9        | 18         | 4.5        |
+| 4    | 4         | 16       | 32         | 8          |
+| 5    | 5         | 25       | 50         | 12.5       |
+
+### Version 5 — Y-Intercept Comparison Table (c)
+
+| Step | Input (x) | x² (c=0) | x²+1 (c=+1) | x²−1 (c=−1) |
+|------|-----------|----------|--------------|--------------|
+| 1    | 1         | 1        | 2            | 0            |
+| 2    | 2         | 4        | 5            | 3            |
+| 3    | 3         | 9        | 10           | 8            |
+| 4    | 4         | 16       | 17           | 15           |
+| 5    | 5         | 25       | 26           | 24           |
+
 ### Visual Progression Across Versions
 
 ```
@@ -123,19 +226,43 @@ Version 2:  [ Input ] ──► [ Function Box ] ──► [ Output ]
 
 Version 3:  [ Input ] ──► [ Function Box ] ──► [ Output ]
             │ Green Line │  →  │ Blue Square │  →  │ X-Y Graph │
+
+Version 4:  [ x² ] [ 2x² ] [ ½x² ]  ← "a" Selector (narrow / wide)
+            [ Input ] ──► [ Function Box ] ──► [ Output ]
+            │ Green Line │  →  │ Area (with overlays) │  →  │ X-Y Graph (3 curves) │
+
+Version 5:  [ x² ] [ x²+1 ] [ x²−1 ]  ← "c" Selector (shift up / down)
+            [ Input ] ──► [ Function Box ] ──► [ Output ]
+            │ Green Line │  →  │ Area (with ±c strip) │  →  │ X-Y Graph (3 curves) │
 ```
 
 ---
 
 ## 🎮 Controls
 
-All three versions share the same controls:
+All versions share the same controls:
 
 | Button    | Action                                            |
 |-----------|---------------------------------------------------|
 | ▶ **Play**  | Start or resume the animation                   |
 | ⏸ **Pause** | Pause after current phase completes              |
 | ⏹ **Stop**  | Reset everything — animation, values, and graph  |
+
+Version 4 adds:
+
+| Button       | Action                                         |
+|--------------|------------------------------------------------|
+| **x²**       | Select normal parabola (a = 1)                |
+| **2x²**      | Select narrow/steep parabola (a = 2)          |
+| **½x²**      | Select wide/flat parabola (a = ½)             |
+
+Version 5 adds:
+
+| Button       | Action                                         |
+|--------------|------------------------------------------------|
+| **x²**       | Select base parabola (c = 0, vertex at origin)|
+| **x²+1**     | Select shifted-up parabola (c = +1)           |
+| **x²−1**     | Select shifted-down parabola (c = −1)         |
 
 ---
 
@@ -145,7 +272,9 @@ All three versions share the same controls:
 week04/
 ├── basic-diagram.html          # Version 1: Basic function machine
 ├── function-stacking.html      # Version 2: + Side length & area visuals
-├── squre-x-y-drawing.html   # Version 3: + Coordinate plane graphing
+├── squre-x-y-drawing.html      # Version 3: + Coordinate plane graphing
+├── quadratic-a.html            # Version 4: + Coefficient explorer (x², 2x², ½x²)
+├── quadratic-c.html            # Version 5: + Y-intercept explorer (x², x²+1, x²−1)
 └── readme.md                   # This file
 ```
 
@@ -155,7 +284,7 @@ week04/
 
 ### View Online (GitHub Pages)
 
-Simply click any of the green/blue/purple **Open Live Demo** buttons above — no installation required.
+Simply click any of the **Open Live Demo** buttons above — no installation required.
 
 ### Run Locally
 
@@ -182,13 +311,15 @@ These visualizations support teaching **function concepts** in algebra and pre-c
 - **Geometric interpretation** — side length vs. area of a square
 - **Coordinate graphing** — plotting ordered pairs (x, y) to form a curve
 - **Parabola shape** — seeing how y = x² creates the classic U-shaped curve
+- **Effect of coefficients** — how the leading coefficient *a* stretches or compresses the parabola and scales the output area (Version 4)
+- **Vertical shifts** — how the constant *c* moves the parabola up or down, changing the y-intercept without changing the shape (Version 5)
 
 ---
 
 ## 📝 Technical Notes
 
 - All animations are pure **HTML / CSS / JavaScript** with no external dependencies
-- Canvas API is used for the coordinate plane graph (Version 3)
+- Canvas API is used for the coordinate plane graph (Versions 3, 4 & 5)
 - CSS transitions and `setTimeout` for animation sequencing
 - Responsive design works on desktop and tablet browsers
 - Each HTML file is fully self-contained (single file, no build step)

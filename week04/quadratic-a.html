@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Function Animation — Coefficient Explorer</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,500;0,9..40,700&family=JetBrains+Mono:wght@500;700&display=swap');
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        .container {
+            background: white;
+            padding: 36px 44px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 1150px;
+            width: 100%;
+        }
+
+        .step-indicator {
+            text-align: center;
+            margin-bottom: 18px;
+            font-size: 22px;
+            font-weight: 700;
+            color: #2c3e50;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* ===== FUNCTION SELECTOR ROW ===== */
+        .function-selector {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 22px;
+        }
+
+        .func-btn {
+            padding: 10px 28px;
+            font-size: 17px;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            border: 3px solid #bdc3c7;
+            border-radius: 12px;
+            cursor: pointer;
+            background: #f8f9fa;
+            color: #555;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .func-btn::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 4px;
+            background: transparent;
+            transition: background 0.3s;
+        }
+
+        .func-btn:hover {
+            border-color: #95a5a6;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .func-btn.active-x2 {
+            border-color: #e74c3c;
+            background: linear-gradient(135deg, #fff5f5, #fff);
+            color: #c0392b;
+            box-shadow: 0 4px 16px rgba(231,76,60,0.25);
+        }
+        .func-btn.active-x2::after { background: #e74c3c; }
+
+        .func-btn.active-2x2 {
+            border-color: #8e44ad;
+            background: linear-gradient(135deg, #faf5ff, #fff);
+            color: #6c3483;
+            box-shadow: 0 4px 16px rgba(142,68,173,0.25);
+        }
+        .func-btn.active-2x2::after { background: #8e44ad; }
+
+        .func-btn.active-halfx2 {
+            border-color: #27ae60;
+            background: linear-gradient(135deg, #f0fff4, #fff);
+            color: #1e8449;
+            box-shadow: 0 4px 16px rgba(39,174,96,0.25);
+        }
+        .func-btn.active-halfx2::after { background: #27ae60; }
+
+        .func-btn .coeff-label {
+            display: block;
+            font-size: 10px;
+            font-weight: 500;
+            color: #999;
+            margin-top: 2px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .func-btn.active-x2 .coeff-label { color: #e74c3c; }
+        .func-btn.active-2x2 .coeff-label { color: #8e44ad; }
+        .func-btn.active-halfx2 .coeff-label { color: #27ae60; }
+
+        /* ===== TOP ROW: function machine ===== */
+        .machine-row {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            justify-content: center;
+            position: relative;
+            margin-bottom: 30px;
+        }
+
+        .value-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .value {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 28px;
+            font-weight: 700;
+            color: white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            flex-shrink: 0;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .input-value { background: linear-gradient(135deg, #27ae60 0%, #229954 100%); }
+        .output-value { background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); }
+
+        .val-label {
+            font-size: 13px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-top: 6px;
+            text-align: center;
+        }
+
+        .axis-hint {
+            font-size: 10px;
+            color: #7f8c8d;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .arrow-h {
+            width: 70px;
+            height: 4px;
+            background: #2c3e50;
+            position: relative;
+            flex-shrink: 0;
+            margin-bottom: 30px;
+        }
+
+        .arrow-h::after {
+            content: '';
+            position: absolute;
+            right: -10px;
+            top: -8px;
+            width: 0; height: 0;
+            border-left: 18px solid #2c3e50;
+            border-top: 10px solid transparent;
+            border-bottom: 10px solid transparent;
+        }
+
+        .function-box {
+            width: 240px;
+            border: 4px solid #2c3e50;
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 14px 18px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            z-index: 2;
+            transition: transform 0.1s ease, background 0.5s ease;
+            margin-bottom: 30px;
+        }
+
+        .function-box.mode-x2 { background: linear-gradient(135deg, #e74c3c, #c0392b); }
+        .function-box.mode-2x2 { background: linear-gradient(135deg, #8e44ad, #6c3483); }
+        .function-box.mode-halfx2 { background: linear-gradient(135deg, #27ae60, #1e8449); }
+
+        .function-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: rgba(255,255,255,0.95);
+            margin-bottom: 8px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .calc-board {
+            background: rgba(255,255,255,0.92);
+            border-radius: 10px;
+            padding: 10px 14px;
+            width: 100%;
+            min-height: 70px;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .calc-line {
+            font-size: 15px;
+            font-weight: 700;
+            color: #2c3e50;
+            opacity: 0;
+            transform: translateY(5px);
+            transition: opacity 0.35s ease, transform 0.35s ease;
+            white-space: nowrap;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .calc-line.visible { opacity: 1; transform: translateY(0); }
+        .calc-line.result { color: #2980b9; font-size: 17px; }
+
+        .moving-ball {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            position: absolute;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 18px;
+            font-weight: 700;
+            color: white;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.35);
+            z-index: 10;
+            opacity: 0;
+            pointer-events: none;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .moving-ball.green { background: linear-gradient(135deg, #27ae60, #229954); }
+        .moving-ball.blue { background: linear-gradient(135deg, #3498db, #2980b9); }
+        .moving-ball.orange { background: linear-gradient(135deg, #f39c12, #e67e22); }
+
+        @keyframes popIn {
+            0% { transform: translate(-50%, -50%) scale(0); }
+            70% { transform: translate(-50%, -50%) scale(1.15); }
+            100% { transform: translate(-50%, -50%) scale(1); }
+        }
+        @keyframes popOut {
+            0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+        }
+        @keyframes pulse {
+            0% { transform: scale(0.9); opacity: 0.7; }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* ===== BOTTOM ROW ===== */
+        .bottom-row {
+            display: flex;
+            gap: 24px;
+            align-items: flex-start;
+            border-top: 2px dashed #ddd;
+            padding-top: 24px;
+        }
+
+        .visual-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .visual-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .line-visual {
+            width: 50px;
+            height: 270px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            position: relative;
+        }
+
+        .green-line {
+            width: 10px;
+            background: linear-gradient(to top, #27ae60, #2ecc71);
+            border-radius: 5px;
+            transition: height 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 2px 2px 10px rgba(39, 174, 96, 0.4);
+            position: relative;
+        }
+
+        .line-top-label {
+            position: absolute;
+            top: -26px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 14px;
+            font-weight: 700;
+            color: #27ae60;
+            white-space: nowrap;
+            transition: opacity 0.5s;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* ===== AREA VISUAL ===== */
+        .square-visual {
+            width: 270px;
+            height: 290px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            position: relative;
+        }
+
+        .square-anchor {
+            position: absolute;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        /* The reference x² square (outline) */
+        .ref-square {
+            position: absolute;
+            bottom: 0; left: 0;
+            border: 2.5px dashed rgba(231,76,60,0.5);
+            border-radius: 6px;
+            transition: width 0.8s cubic-bezier(0.4,0,0.2,1), height 0.8s cubic-bezier(0.4,0,0.2,1);
+            pointer-events: none;
+        }
+
+        .ref-square-label {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 11px;
+            font-weight: 700;
+            color: #e74c3c;
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.5s;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* The actual area rectangle */
+        .area-rect {
+            border-radius: 6px;
+            transition: width 0.8s cubic-bezier(0.4,0,0.2,1), height 0.8s cubic-bezier(0.4,0,0.2,1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .area-rect.mode-x2 {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            box-shadow: 3px 3px 14px rgba(52,152,219,0.4);
+        }
+
+        .area-rect.mode-2x2 {
+            background: linear-gradient(135deg, #8e44ad, #6c3483);
+            box-shadow: 3px 3px 14px rgba(142,68,173,0.4);
+        }
+
+        .area-rect.mode-halfx2 {
+            background: linear-gradient(135deg, #27ae60, #1e8449);
+            box-shadow: 3px 3px 14px rgba(39,174,96,0.4);
+        }
+
+        /* Dot pattern overlay for ½x² */
+        .dot-overlay {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+
+        /* Second-layer overlay for 2x² (shows double stacking) */
+        .double-overlay {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.5s;
+            border-radius: 6px;
+        }
+
+        .sq-center-label {
+            font-size: 14px;
+            font-weight: 700;
+            color: white;
+            text-shadow: 1px 1px 4px rgba(0,0,0,0.5);
+            transition: opacity 0.5s;
+            z-index: 2;
+            font-family: 'JetBrains Mono', monospace;
+            text-align: center;
+            line-height: 1.3;
+        }
+
+        .sq-dim {
+            position: absolute;
+            font-size: 12px;
+            font-weight: 700;
+            white-space: nowrap;
+            transition: opacity 0.5s;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .sq-dim.right { right: -44px; top: 50%; transform: translateY(-50%); color: #2980b9; }
+        .sq-dim.bottom { bottom: -22px; left: 50%; transform: translateX(-50%); color: #2980b9; }
+
+        .visual-arrow {
+            font-size: 36px;
+            color: #2c3e50;
+            margin-top: 150px;
+        }
+
+        /* ===== GRAPH ===== */
+        .graph-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+        }
+
+        .graph-container { position: relative; }
+
+        .graph-canvas {
+            border: 2px solid #bdc3c8;
+            border-radius: 8px;
+            background: #fafafa;
+        }
+
+        .points-list {
+            margin-top: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            color: #2c3e50;
+            text-align: center;
+            min-height: 20px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* ===== COEFFICIENT INFO BAR ===== */
+        .coeff-info {
+            text-align: center;
+            margin-top: 14px;
+            padding: 10px 18px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.4s ease;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .coeff-info.info-x2 {
+            background: #fdf2f2;
+            border: 2px solid #fadbd8;
+            color: #c0392b;
+        }
+
+        .coeff-info.info-2x2 {
+            background: #f5eef8;
+            border: 2px solid #e8daef;
+            color: #6c3483;
+        }
+
+        .coeff-info.info-halfx2 {
+            background: #eafaf1;
+            border: 2px solid #d5f5e3;
+            color: #1e8449;
+        }
+
+        /* ===== LEGEND ===== */
+        .graph-legend {
+            display: flex;
+            gap: 14px;
+            justify-content: center;
+            margin-top: 6px;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #555;
+        }
+
+        .legend-line {
+            width: 20px;
+            height: 3px;
+            border-radius: 2px;
+        }
+
+        .legend-line.dashed {
+            background: repeating-linear-gradient(90deg, var(--c) 0, var(--c) 5px, transparent 5px, transparent 8px);
+            height: 2px;
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 28px;
+            font-size: 16px;
+            font-weight: 700;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            color: white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            transition: transform 0.2s, box-shadow 0.2s;
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0,0,0,0.3); }
+        .btn:active { transform: translateY(0); box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .btn-play { background: linear-gradient(135deg, #27ae60, #229954); }
+        .btn-pause { background: linear-gradient(135deg, #f39c12, #e67e22); }
+        .btn-stop { background: linear-gradient(135deg, #e74c3c, #c0392b); }
+        .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+        .btn:disabled:hover { transform: none; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="step-indicator" id="stepIndicator">Pick a function, then press Play</div>
+
+        <!-- ===== FUNCTION SELECTOR ===== -->
+        <div class="function-selector">
+            <button class="func-btn active-x2" id="btnX2" onclick="selectFunction('x2')">
+                x²
+                <span class="coeff-label">a = 1 (normal)</span>
+            </button>
+            <button class="func-btn" id="btn2X2" onclick="selectFunction('2x2')">
+                2x²
+                <span class="coeff-label">a = 2 (narrow)</span>
+            </button>
+            <button class="func-btn" id="btnHalfX2" onclick="selectFunction('halfx2')">
+                ½x²
+                <span class="coeff-label">a = ½ (wide)</span>
+            </button>
+        </div>
+
+        <!-- ===== FUNCTION MACHINE ===== -->
+        <div class="machine-row" id="machineRow">
+            <div class="value-wrapper" id="inputWrapper">
+                <div class="value input-value" id="inputValue">?</div>
+                <div class="val-label">Input (x)<br><span class="axis-hint">x-axis</span></div>
+            </div>
+
+            <div class="arrow-h"></div>
+
+            <div class="function-box mode-x2" id="functionBox">
+                <div class="function-title" id="fnTitle">f(x) = x²</div>
+                <div class="calc-board" id="calcBoard">
+                    <div class="calc-line" id="line1"></div>
+                    <div class="calc-line" id="line2"></div>
+                    <div class="calc-line result" id="line3"></div>
+                </div>
+            </div>
+
+            <div class="arrow-h"></div>
+
+            <div class="value-wrapper" id="outputWrapper">
+                <div class="value output-value" id="outputValue">?</div>
+                <div class="val-label">Output (y)<br><span class="axis-hint">y-axis</span></div>
+            </div>
+
+            <div class="moving-ball green" id="movingBall">0</div>
+        </div>
+
+        <!-- ===== BOTTOM: visuals + graph ===== -->
+        <div class="bottom-row">
+            <div class="visual-section">
+                <div class="visual-title">Side Length (x)</div>
+                <div class="line-visual">
+                    <div class="green-line" id="greenLine" style="height:0px;">
+                        <span class="line-top-label" id="lineLabel" style="opacity:0;"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="visual-arrow">→</div>
+
+            <div class="visual-section">
+                <div class="visual-title" id="areaTitle">Area = x²</div>
+                <div class="square-visual">
+                    <div class="square-anchor" id="squareAnchor">
+                        <!-- Reference square (x² outline) shown for comparison -->
+                        <div class="ref-square" id="refSquare" style="width:0px;height:0px;">
+                            <span class="ref-square-label" id="refLabel" style="opacity:0;">x²</span>
+                        </div>
+                        <!-- Actual area rectangle -->
+                        <div class="area-rect mode-x2" id="areaRect" style="width:0px;height:0px;">
+                            <canvas class="dot-overlay" id="dotOverlay"></canvas>
+                            <div class="double-overlay" id="doubleOverlay"></div>
+                            <span class="sq-center-label" id="sqCenter" style="opacity:0;"></span>
+                            <span class="sq-dim right" id="sqRight" style="opacity:0;"></span>
+                            <span class="sq-dim bottom" id="sqBottom" style="opacity:0;"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="visual-arrow">→</div>
+
+            <div class="graph-section">
+                <div class="visual-title">Coordinate Plane</div>
+                <div class="graph-container">
+                    <canvas class="graph-canvas" id="graphCanvas" width="340" height="340"></canvas>
+                </div>
+                <div class="graph-legend">
+                    <div class="legend-item"><div class="legend-line" style="background:#e74c3c;"></div>x²</div>
+                    <div class="legend-item"><div class="legend-line" style="background:#8e44ad;"></div>2x²</div>
+                    <div class="legend-item"><div class="legend-line" style="background:#27ae60;"></div>½x²</div>
+                </div>
+                <div class="points-list" id="pointsList">Points: —</div>
+            </div>
+        </div>
+
+        <!-- COEFFICIENT INFO -->
+        <div class="coeff-info info-x2" id="coeffInfo">
+            <strong>a = 1 →</strong>&nbsp; Normal parabola. Area = x × x = x². The base reference.
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-play" id="playBtn" onclick="play()">▶ Play</button>
+            <button class="btn btn-pause" id="pauseBtn" onclick="pause()" disabled>⏸ Pause</button>
+            <button class="btn btn-stop" id="stopBtn" onclick="stop()" disabled>⏹ Reset</button>
+        </div>
+    </div>
+
+    <script>
+        // ===== CONFIG =====
+        const PX_PER_UNIT = 46;
+
+        const funcs = {
+            x2:     { a: 1,   label: 'x²',   title: 'f(x) = x²',   mode: 'x2',     color: '#e74c3c', graphColor: '#e74c3c' },
+            '2x2':  { a: 2,   label: '2x²',  title: 'f(x) = 2x²',  mode: '2x2',    color: '#8e44ad', graphColor: '#8e44ad' },
+            halfx2: { a: 0.5, label: '½x²',  title: 'f(x) = ½x²',  mode: 'halfx2', color: '#27ae60', graphColor: '#27ae60' }
+        };
+
+        const inputs = [1, 2, 3, 4, 5];
+
+        let currentFunc = 'x2';
+        let currentStep = 0;
+        let isPlaying = false;
+        let animationInProgress = false;
+        let timeouts = [];
+        let plottedPoints = [];
+
+        // ===== FUNCTION SELECTION =====
+        function selectFunction(fn) {
+            if (animationInProgress) return;
+            stop();
+            currentFunc = fn;
+
+            // Update selector buttons
+            document.querySelectorAll('.func-btn').forEach(b => b.className = 'func-btn');
+            const activeClass = { x2: 'active-x2', '2x2': 'active-2x2', halfx2: 'active-halfx2' };
+            document.getElementById({ x2: 'btnX2', '2x2': 'btn2X2', halfx2: 'btnHalfX2' }[fn]).classList.add(activeClass[fn]);
+
+            // Update function box
+            const box = document.getElementById('functionBox');
+            box.className = 'function-box mode-' + funcs[fn].mode;
+            document.getElementById('fnTitle').textContent = funcs[fn].title;
+
+            // Area title
+            const areaLabels = { x2: 'Area = x²', '2x2': 'Area = 2x²', halfx2: 'Area = ½x²' };
+            document.getElementById('areaTitle').textContent = areaLabels[fn];
+
+            // Area rect color
+            const rect = document.getElementById('areaRect');
+            rect.className = 'area-rect mode-' + funcs[fn].mode;
+
+            // Coeff info
+            const info = document.getElementById('coeffInfo');
+            const infoTexts = {
+                x2:     '<strong>a = 1 →</strong>&nbsp; Normal parabola. Area = x × x = x². The base reference.',
+                '2x2':  '<strong>a = 2 →</strong>&nbsp; Narrow / steep parabola. Area doubles! Shown as two stacked layers over the x² reference.',
+                halfx2: '<strong>a = ½ →</strong>&nbsp; Wide / flat parabola. Area is halved! Only 50% is filled — the dotted region shows the missing half.'
+            };
+            const infoClasses = { x2: 'info-x2', '2x2': 'info-2x2', halfx2: 'info-halfx2' };
+            info.className = 'coeff-info ' + infoClasses[fn];
+            info.innerHTML = infoTexts[fn];
+
+            document.getElementById('stepIndicator').textContent = `Selected ${funcs[fn].label} — Press Play`;
+            redrawGraph();
+        }
+
+        // ===== GRAPH =====
+        const canvas = document.getElementById('graphCanvas');
+        const ctx = canvas.getContext('2d');
+        const gPad = 38;
+        const gW = canvas.width - gPad * 2;
+        const gH = canvas.height - gPad * 2;
+        const xMin = -1, xMax = 6, yMin = -2, yMax = 28;
+
+        function toCanvasX(x) { return gPad + ((x - xMin) / (xMax - xMin)) * gW; }
+        function toCanvasY(y) { return gPad + ((yMax - y) / (yMax - yMin)) * gH; }
+
+        function drawGrid() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.save();
+            ctx.beginPath();
+            ctx.rect(gPad, gPad, gW, gH);
+            ctx.clip();
+
+            // Grid lines
+            for (let x = Math.ceil(xMin); x <= Math.floor(xMax); x++) {
+                const cx = toCanvasX(x);
+                ctx.beginPath(); ctx.moveTo(cx, gPad); ctx.lineTo(cx, gPad + gH);
+                ctx.strokeStyle = (x === 0) ? '#2c3e50' : '#e8eaed';
+                ctx.lineWidth = (x === 0) ? 2 : 1; ctx.stroke();
+            }
+            for (let y = Math.ceil(yMin); y <= Math.floor(yMax); y++) {
+                const cy = toCanvasY(y);
+                ctx.beginPath(); ctx.moveTo(gPad, cy); ctx.lineTo(gPad + gW, cy);
+                ctx.strokeStyle = (y === 0) ? '#2c3e50' : '#e8eaed';
+                ctx.lineWidth = (y === 0) ? 2 : 1; ctx.stroke();
+            }
+
+            // Draw ALL three reference curves (dashed)
+            const curveDefs = [
+                { a: 1,   color: 'rgba(231,76,60,0.2)',   dash: [6,4] },
+                { a: 2,   color: 'rgba(142,68,173,0.2)',   dash: [6,4] },
+                { a: 0.5, color: 'rgba(39,174,96,0.2)',    dash: [6,4] }
+            ];
+
+            curveDefs.forEach(cd => {
+                ctx.beginPath(); ctx.setLineDash(cd.dash);
+                ctx.strokeStyle = cd.color; ctx.lineWidth = 2;
+                for (let px = 0; px <= gW; px++) {
+                    const x = xMin + (px / gW) * (xMax - xMin);
+                    const y = cd.a * x * x;
+                    if (px === 0) ctx.moveTo(gPad + px, toCanvasY(y));
+                    else ctx.lineTo(gPad + px, toCanvasY(y));
+                }
+                ctx.stroke(); ctx.setLineDash([]);
+            });
+
+            ctx.restore();
+
+            // Tick labels
+            ctx.fillStyle = '#7f8c8d'; ctx.font = 'bold 11px "JetBrains Mono", monospace';
+            for (let x = Math.ceil(xMin); x <= Math.floor(xMax); x++) {
+                if (x === 0) continue;
+                ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+                ctx.fillText(x, toCanvasX(x), toCanvasY(0) + 5);
+            }
+            for (let y = 0; y <= Math.floor(yMax); y += 5) {
+                if (y === 0) continue;
+                ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+                ctx.fillText(y, toCanvasX(0) - 6, toCanvasY(y));
+            }
+            ctx.textAlign = 'right'; ctx.textBaseline = 'top';
+            ctx.fillText('0', toCanvasX(0) - 6, toCanvasY(0) + 5);
+
+            // Axis arrows
+            ctx.fillStyle = '#2c3e50';
+            const xEnd = gPad + gW + 8, yZero = toCanvasY(0);
+            ctx.beginPath(); ctx.moveTo(xEnd, yZero); ctx.lineTo(xEnd-8, yZero-4); ctx.lineTo(xEnd-8, yZero+4); ctx.fill();
+            const xZero = toCanvasX(0), yEnd = gPad - 8;
+            ctx.beginPath(); ctx.moveTo(xZero, yEnd); ctx.lineTo(xZero-4, yEnd+8); ctx.lineTo(xZero+4, yEnd+8); ctx.fill();
+
+            ctx.fillStyle = '#2c3e50'; ctx.font = 'bold 13px "JetBrains Mono", monospace';
+            ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.fillText('x', xEnd-2, yZero+10);
+            ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillText('y', xZero+10, yEnd+2);
+        }
+
+        function drawPoints() {
+            const labels = ['A','B','C','D','E'];
+            const fc = funcs[currentFunc];
+
+            // Solid curve through plotted points
+            if (plottedPoints.length > 1) {
+                ctx.save();
+                ctx.beginPath(); ctx.rect(gPad, gPad, gW, gH); ctx.clip();
+                ctx.beginPath(); ctx.strokeStyle = fc.graphColor; ctx.lineWidth = 3;
+                const s = plottedPoints[0].x, e = plottedPoints[plottedPoints.length-1].x;
+                const sp = toCanvasX(s)-gPad, ep = toCanvasX(e)-gPad;
+                let first = true;
+                for (let px = sp; px <= ep; px++) {
+                    const x = xMin + (px/gW)*(xMax-xMin), y = fc.a * x * x;
+                    if (first) { ctx.moveTo(gPad+px, toCanvasY(y)); first=false; }
+                    else ctx.lineTo(gPad+px, toCanvasY(y));
+                }
+                ctx.stroke(); ctx.restore();
+            }
+
+            plottedPoints.forEach((pt, idx) => {
+                const cx = toCanvasX(pt.x), cy = toCanvasY(pt.y);
+                ctx.save();
+                ctx.beginPath(); ctx.rect(gPad, gPad, gW, gH); ctx.clip();
+                ctx.setLineDash([4,3]); ctx.strokeStyle = 'rgba(100,100,100,0.3)'; ctx.lineWidth = 1.5;
+                ctx.beginPath(); ctx.moveTo(cx, toCanvasY(0)); ctx.lineTo(cx, cy); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(toCanvasX(0), cy); ctx.lineTo(cx, cy); ctx.stroke();
+                ctx.setLineDash([]); ctx.restore();
+
+                // Dot
+                ctx.beginPath(); ctx.arc(cx, cy, 7, 0, Math.PI*2);
+                ctx.fillStyle = fc.graphColor; ctx.fill();
+                ctx.beginPath(); ctx.arc(cx, cy, 3, 0, Math.PI*2);
+                ctx.fillStyle = '#fff'; ctx.fill();
+
+                ctx.fillStyle = fc.graphColor; ctx.font = 'bold 11px "JetBrains Mono", monospace';
+                ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
+                ctx.fillText(labels[idx]||'', cx+10, cy-6);
+                ctx.fillStyle = '#555'; ctx.font = '10px "JetBrains Mono", monospace'; ctx.textBaseline = 'top';
+                ctx.fillText(`(${pt.x}, ${pt.y})`, cx+10, cy-3);
+            });
+        }
+
+        function plotPoint(x, y) { plottedPoints.push({x,y}); redrawGraph(); updatePointsList(); }
+        function clearPoints() { plottedPoints = []; redrawGraph(); updatePointsList(); }
+        function redrawGraph() { drawGrid(); drawPoints(); }
+
+        function updatePointsList() {
+            const el = document.getElementById('pointsList');
+            if (!plottedPoints.length) { el.textContent = 'Points: —'; return; }
+            const labels = ['A','B','C','D','E'];
+            el.textContent = 'Points: ' + plottedPoints.map((pt,i) => `${labels[i]}(${pt.x}, ${pt.y})`).join('  ');
+        }
+
+        // ===== AREA VISUAL HELPERS =====
+        function drawDotPattern(inputVal) {
+            // For ½x² — fill the rect area but show half as dots
+            const cvs = document.getElementById('dotOverlay');
+            const side = inputVal * PX_PER_UNIT;
+            const fullH = side; // x² height
+            const halfH = side * 0.5; // actual ½x² height relative to side
+
+            cvs.width = side;
+            cvs.height = side; // canvas is same size as the full reference
+            const dctx = cvs.getContext('2d');
+            dctx.clearRect(0, 0, side, side);
+
+            // Draw dots in the top portion to show the "missing" half
+            // The actual filled area is the bottom half, dots represent what's missing
+            dctx.fillStyle = 'rgba(255,255,255,0.5)';
+            const dotR = 2;
+            const gap = 8;
+            for (let dx = gap; dx < side; dx += gap) {
+                for (let dy = gap; dy < side; dy += gap) {
+                    // top half: dotted (missing area)
+                    if (dy < side * 0.5) {
+                        dctx.beginPath();
+                        dctx.arc(dx, dy, dotR, 0, Math.PI*2);
+                        dctx.fill();
+                    }
+                }
+            }
+        }
+
+        function showAreaVisual(inputVal) {
+            const fc = funcs[currentFunc];
+            const a = fc.a;
+            const output = a * inputVal * inputVal;
+            const side = inputVal * PX_PER_UNIT;
+            const rect = document.getElementById('areaRect');
+            const refSq = document.getElementById('refSquare');
+            const refLabel = document.getElementById('refLabel');
+            const dotOvl = document.getElementById('dotOverlay');
+            const dblOvl = document.getElementById('doubleOverlay');
+
+            // Reset overlays
+            dotOvl.style.opacity = '0';
+            dblOvl.style.opacity = '0';
+
+            if (currentFunc === 'x2') {
+                // Normal: simple square
+                rect.style.width = side + 'px';
+                rect.style.height = side + 'px';
+                refSq.style.width = '0px';
+                refSq.style.height = '0px';
+                refLabel.style.opacity = '0';
+
+            } else if (currentFunc === '2x2') {
+                // 2x²: show x² reference outline, then double-height rect (stacked)
+                // The area is 2× the square, so we show rect with height = 2×side, width = side
+                rect.style.width = side + 'px';
+                rect.style.height = (side * 2) + 'px';
+
+                // Reference square outline
+                refSq.style.width = side + 'px';
+                refSq.style.height = side + 'px';
+                refLabel.textContent = 'x² = ' + (inputVal*inputVal);
+                refLabel.style.opacity = '1';
+
+                // Double overlay: show dividing line at midpoint
+                dblOvl.style.opacity = '1';
+                dblOvl.style.background = 'none';
+                dblOvl.style.borderBottom = 'none';
+                // Draw a dashed line in the middle to show "two layers"
+                dblOvl.style.borderTop = '2.5px dashed rgba(255,255,255,0.7)';
+                dblOvl.style.height = '50%';
+                dblOvl.style.top = '50%';
+
+            } else if (currentFunc === 'halfx2') {
+                // ½x²: show full x² reference, fill only half
+                // Show as same-width square but half the height filled, rest dotted
+                rect.style.width = side + 'px';
+                rect.style.height = side + 'px';
+
+                // Reference square outline
+                refSq.style.width = side + 'px';
+                refSq.style.height = side + 'px';
+                refLabel.textContent = 'x² = ' + (inputVal*inputVal);
+                refLabel.style.opacity = '1';
+
+                // Dot overlay for missing area
+                drawDotPattern(inputVal);
+                dotOvl.style.opacity = '1';
+            }
+
+            // Labels
+            document.getElementById('sqCenter').textContent = output + (Number.isInteger(output) ? '' : '') + ' units²';
+            if (currentFunc === '2x2') {
+                document.getElementById('sqCenter').innerHTML = output + ' units²<br><span style="font-size:11px;opacity:0.8;">= 2 × ' + (inputVal*inputVal) + '</span>';
+            } else if (currentFunc === 'halfx2') {
+                document.getElementById('sqCenter').innerHTML = output + ' units²<br><span style="font-size:11px;opacity:0.8;">= ½ × ' + (inputVal*inputVal) + '</span>';
+            }
+            document.getElementById('sqCenter').style.opacity = '1';
+
+            document.getElementById('sqRight').textContent = (currentFunc === '2x2' ? (inputVal*2) + ' h' : inputVal + ' w');
+            document.getElementById('sqRight').style.opacity = '1';
+            document.getElementById('sqBottom').textContent = inputVal + ' w';
+            document.getElementById('sqBottom').style.opacity = '1';
+        }
+
+        // ===== ANIMATION =====
+        function clearAllTimeouts() { timeouts.forEach(t => clearTimeout(t)); timeouts = []; }
+        function addTimeout(fn, delay) { const t = setTimeout(fn, delay); timeouts.push(t); return t; }
+
+        function getCenter(el) {
+            const container = document.getElementById('machineRow');
+            const cRect = container.getBoundingClientRect();
+            const eRect = el.getBoundingClientRect();
+            return { x: eRect.left + eRect.width/2 - cRect.left, y: eRect.top + eRect.height/2 - cRect.top };
+        }
+
+        function setCalcLines(input) {
+            const fc = funcs[currentFunc];
+            const a = fc.a;
+            const output = a * input * input;
+            const aStr = a === 1 ? '' : (a === 0.5 ? '½·' : '2·');
+            const aStrCalc = a === 1 ? '' : (a === 0.5 ? '½ × ' : '2 × ');
+
+            document.getElementById('line1').textContent = `f(${input}) = ${aStr}${input}²`;
+            document.getElementById('line2').textContent = `f(${input}) = ${aStrCalc}${input} × ${input}`;
+            document.getElementById('line3').textContent = `f(${input}) = ${output}`;
+        }
+
+        function hideAllLines() { for (let i=1;i<=3;i++) document.getElementById('line'+i).classList.remove('visible'); }
+        function showLine(n) { document.getElementById('line'+n).classList.add('visible'); }
+
+        function showInputLine(val) {
+            document.getElementById('greenLine').style.height = (val * PX_PER_UNIT) + 'px';
+            document.getElementById('lineLabel').textContent = val + ' units';
+            document.getElementById('lineLabel').style.opacity = '1';
+        }
+
+        function hideVisuals() {
+            document.getElementById('greenLine').style.height = '0px';
+            document.getElementById('lineLabel').style.opacity = '0';
+            document.getElementById('areaRect').style.width = '0px';
+            document.getElementById('areaRect').style.height = '0px';
+            document.getElementById('refSquare').style.width = '0px';
+            document.getElementById('refSquare').style.height = '0px';
+            document.getElementById('refLabel').style.opacity = '0';
+            document.getElementById('sqCenter').style.opacity = '0';
+            document.getElementById('sqRight').style.opacity = '0';
+            document.getElementById('sqBottom').style.opacity = '0';
+            document.getElementById('dotOverlay').style.opacity = '0';
+            document.getElementById('doubleOverlay').style.opacity = '0';
+        }
+
+        function animateStep() {
+            if (animationInProgress) return;
+            animationInProgress = true;
+
+            const fc = funcs[currentFunc];
+            const input = inputs[currentStep];
+            const output = fc.a * input * input;
+            if (currentStep === 0 && plottedPoints.length > 0) clearPoints();
+
+            const ball = document.getElementById('movingBall');
+            const inputEl = document.getElementById('inputValue');
+            const outputEl = document.getElementById('outputValue');
+            const stepEl = document.getElementById('stepIndicator');
+            const functionBox = document.getElementById('functionBox');
+
+            stepEl.textContent = `Step ${currentStep+1}: ${fc.label} → x = ${input} → y = ?`;
+            hideAllLines(); setCalcLines(input);
+
+            inputEl.textContent = input;
+            inputEl.style.animation = 'none';
+            requestAnimationFrame(() => { inputEl.style.animation = 'pulse 0.4s ease'; });
+
+            showInputLine(input);
+            // Reset area
+            document.getElementById('areaRect').style.width = '0px';
+            document.getElementById('areaRect').style.height = '0px';
+            document.getElementById('refSquare').style.width = '0px';
+            document.getElementById('refSquare').style.height = '0px';
+            document.getElementById('refLabel').style.opacity = '0';
+            document.getElementById('sqCenter').style.opacity = '0';
+            document.getElementById('sqRight').style.opacity = '0';
+            document.getElementById('sqBottom').style.opacity = '0';
+            document.getElementById('dotOverlay').style.opacity = '0';
+            document.getElementById('doubleOverlay').style.opacity = '0';
+
+            const inputPos = getCenter(document.getElementById('inputWrapper'));
+            const boxPos = getCenter(functionBox);
+            const outputPos = getCenter(document.getElementById('outputWrapper'));
+
+            ball.textContent = input;
+            ball.className = 'moving-ball green';
+            ball.style.transition = 'none';
+            ball.style.left = inputPos.x+'px'; ball.style.top = inputPos.y+'px';
+            ball.style.opacity = '1'; ball.style.animation = 'popIn 0.35s ease forwards';
+
+            addTimeout(() => {
+                ball.style.animation = '';
+                ball.style.transform = 'translate(-50%,-50%) scale(1)';
+                ball.style.transition = 'left 0.7s cubic-bezier(0.4,0,0.2,1), top 0.7s cubic-bezier(0.4,0,0.2,1)';
+                ball.style.left = boxPos.x+'px'; ball.style.top = boxPos.y+'px';
+            }, 600);
+
+            addTimeout(() => {
+                ball.className = 'moving-ball orange';
+                ball.style.transition = 'transform 0.25s ease, opacity 0.25s ease';
+                ball.style.transform = 'translate(-50%,-50%) scale(0.4)'; ball.style.opacity = '0.3';
+                functionBox.style.transform = 'scale(1.06)';
+                addTimeout(() => { functionBox.style.transform = 'scale(0.96)'; }, 100);
+                addTimeout(() => { functionBox.style.transform = 'scale(1.02)'; }, 200);
+                addTimeout(() => { functionBox.style.transform = 'scale(1)'; }, 300);
+            }, 1500);
+
+            addTimeout(() => { showLine(1); }, 2100);
+            addTimeout(() => { showLine(2); }, 2800);
+            addTimeout(() => { showLine(3); stepEl.textContent = `Step ${currentStep+1}: ${fc.label} → x = ${input} → y = ${output}`; }, 3500);
+
+            addTimeout(() => {
+                ball.textContent = output;
+                ball.className = 'moving-ball blue';
+                ball.style.opacity = '1';
+                ball.style.transition = 'transform 0.3s ease-out';
+                ball.style.transform = 'translate(-50%,-50%) scale(1)';
+                showAreaVisual(input);
+            }, 4200);
+
+            addTimeout(() => {
+                ball.style.transition = 'left 0.7s cubic-bezier(0.4,0,0.2,1), top 0.7s cubic-bezier(0.4,0,0.2,1)';
+                ball.style.left = outputPos.x+'px'; ball.style.top = outputPos.y+'px';
+            }, 4600);
+
+            addTimeout(() => {
+                outputEl.textContent = output;
+                outputEl.style.animation = 'none';
+                requestAnimationFrame(() => { outputEl.style.animation = 'pulse 0.4s ease'; });
+                ball.style.animation = 'popOut 0.3s ease forwards';
+            }, 5500);
+
+            addTimeout(() => { plotPoint(input, output); }, 5900);
+
+            addTimeout(() => {
+                ball.style.opacity = '0'; ball.style.animation = '';
+                animationInProgress = false;
+                currentStep = (currentStep + 1) % inputs.length;
+                if (isPlaying) addTimeout(animateStep, 800);
+            }, 6500);
+        }
+
+        function play() {
+            if (!isPlaying) {
+                isPlaying = true;
+                document.getElementById('playBtn').disabled = true;
+                document.getElementById('pauseBtn').disabled = false;
+                document.getElementById('stopBtn').disabled = false;
+                // Disable function selector during play
+                document.querySelectorAll('.func-btn').forEach(b => b.style.pointerEvents = 'none');
+                if (!animationInProgress) animateStep();
+            }
+        }
+
+        function pause() {
+            if (isPlaying) {
+                isPlaying = false;
+                document.getElementById('playBtn').disabled = false;
+                document.getElementById('pauseBtn').disabled = true;
+            }
+        }
+
+        function stop() {
+            isPlaying = false; animationInProgress = false; clearAllTimeouts(); currentStep = 0;
+            document.getElementById('movingBall').style.transition = 'none';
+            document.getElementById('movingBall').style.opacity = '0';
+            document.getElementById('movingBall').style.animation = '';
+            document.getElementById('inputValue').textContent = '?';
+            document.getElementById('outputValue').textContent = '?';
+            document.getElementById('stepIndicator').textContent = `Selected ${funcs[currentFunc].label} — Press Play`;
+            document.getElementById('functionBox').style.transform = 'scale(1)';
+            hideAllLines(); hideVisuals(); clearPoints();
+            document.getElementById('playBtn').disabled = false;
+            document.getElementById('pauseBtn').disabled = true;
+            document.getElementById('stopBtn').disabled = true;
+            // Re-enable function selector
+            document.querySelectorAll('.func-btn').forEach(b => b.style.pointerEvents = 'auto');
+        }
+
+        // Init
+        hideAllLines(); redrawGraph();
+    </script>
+</body>
+</html>
