@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Linear Function y = mx + b</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Syne:wght@400;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #0f0f13;
+    color: #e8e8f0;
+    font-family: 'Syne', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    gap: 28px;
+    padding: 24px;
+  }
+
+  h1 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.1rem;
+    letter-spacing: 0.15em;
+    color: #7fdbca;
+    text-transform: uppercase;
+    opacity: 0.85;
+  }
+
+  .equation {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 2rem;
+    font-weight: 600;
+    color: #ffffff;
+    letter-spacing: 0.05em;
+    min-width: 220px;
+    text-align: center;
+  }
+
+  .equation span { color: #7fdbca; }
+
+  canvas {
+    border: 1.5px solid #ccc;
+    border-radius: 6px;
+    background: #fff;
+    box-shadow: 0 4px 24px #0001;
+    cursor: crosshair;
+  }
+
+  .controls {
+    display: flex;
+    gap: 32px;
+    align-items: flex-start;
+  }
+
+  .slider-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 200px;
+  }
+
+  .slider-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .slider-label .name {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.95rem;
+    color: #9999bb;
+    letter-spacing: 0.1em;
+  }
+
+  .slider-label .value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #7fdbca;
+    min-width: 40px;
+    text-align: right;
+  }
+
+  input[type=range] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 4px;
+    background: #2a2a3a;
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+  }
+
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    background: #7fdbca;
+    border-radius: 50%;
+    box-shadow: 0 0 8px #7fdbca88;
+    transition: transform 0.15s;
+  }
+
+  input[type=range]::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+  }
+
+  input[type=range].m-slider::-webkit-slider-thumb { background: #7fdbca; box-shadow: 0 0 10px #7fdbca66; }
+  input[type=range].b-slider::-webkit-slider-thumb { background: #ff9f7f; box-shadow: 0 0 10px #ff9f7f66; }
+  input[type=range].b-slider { }
+  .b-group .value { color: #ff9f7f; }
+</style>
+</head>
+<body>
+
+<h1>Linear Function Visualizer</h1>
+<div class="equation" id="eq">f(x) = <span id="eqM">2</span>x + <span id="eqB">0</span></div>
+
+<canvas id="graph" width="540" height="540"></canvas>
+
+<div class="controls">
+  <div class="slider-group">
+    <div class="slider-label">
+      <span class="name">m (slope)</span>
+      <span class="value" id="mVal">2</span>
+    </div>
+    <input type="range" class="m-slider" id="mSlider" min="-5" max="5" step="0.1" value="2">
+  </div>
+  <div class="slider-group b-group">
+    <div class="slider-label">
+      <span class="name">b (intercept)</span>
+      <span class="value" id="bVal">0</span>
+    </div>
+    <input type="range" class="b-slider" id="bSlider" min="-5" max="5" step="0.1" value="0">
+  </div>
+</div>
+
+<script>
+  const canvas = document.getElementById('graph');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const PAD = 50;
+  const RANGE = 7; // -7 to 7 on each axis
+
+  function toCanvas(x, y) {
+    const cx = PAD + (x + RANGE) / (2 * RANGE) * (W - 2 * PAD);
+    const cy = PAD + (RANGE - y) / (2 * RANGE) * (H - 2 * PAD);
+    return [cx, cy];
+  }
+
+  function draw(m, b) {
+    ctx.clearRect(0, 0, W, H);
+
+    const gridColor = '#1e1e2e';
+    const axisColor = '#3a3a5a';
+    const labelColor = '#555577';
+    const lineColor = '#7fdbca';
+
+    // Grid lines
+    ctx.strokeStyle = gridColor;
+    ctx.lineWidth = 1;
+    for (let i = -RANGE; i <= RANGE; i++) {
+      const [x1, y1] = toCanvas(i, -RANGE);
+      const [x2, y2] = toCanvas(i, RANGE);
+      ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+      const [a1, b1] = toCanvas(-RANGE, i);
+      const [a2, b2] = toCanvas(RANGE, i);
+      ctx.beginPath(); ctx.moveTo(a1, b1); ctx.lineTo(a2, b2); ctx.stroke();
+    }
+
+    // Axes
+    ctx.strokeStyle = axisColor;
+    ctx.lineWidth = 1.5;
+    const [ax1, ay1] = toCanvas(-RANGE, 0);
+    const [ax2, ay2] = toCanvas(RANGE, 0);
+    ctx.beginPath(); ctx.moveTo(ax1, ay1); ctx.lineTo(ax2, ay2); ctx.stroke();
+    const [bx1, by1] = toCanvas(0, -RANGE);
+    const [bx2, by2] = toCanvas(0, RANGE);
+    ctx.beginPath(); ctx.moveTo(bx1, by1); ctx.lineTo(bx2, by2); ctx.stroke();
+
+    // Axis labels
+    ctx.fillStyle = labelColor;
+    ctx.font = '11px JetBrains Mono, monospace';
+    ctx.textAlign = 'center';
+    for (let i = -6; i <= 6; i++) {
+      if (i === 0) continue;
+      const [cx, cy] = toCanvas(i, 0);
+      ctx.fillText(i, cx, cy + 16);
+      const [cx2, cy2] = toCanvas(0, i);
+      ctx.textAlign = 'right';
+      ctx.fillText(i, cx2 - 6, cy2 + 4);
+      ctx.textAlign = 'center';
+    }
+
+    // Axis arrows
+    ctx.strokeStyle = axisColor;
+    ctx.lineWidth = 1.5;
+    const [arx, ary] = toCanvas(RANGE, 0);
+    ctx.beginPath(); ctx.moveTo(arx - 8, ary - 5); ctx.lineTo(arx, ary); ctx.lineTo(arx - 8, ary + 5); ctx.stroke();
+    const [ary2x, ary2y] = toCanvas(0, RANGE);
+    ctx.beginPath(); ctx.moveTo(ary2x - 5, ary2y + 8); ctx.lineTo(ary2x, ary2y); ctx.lineTo(ary2x + 5, ary2y + 8); ctx.stroke();
+
+    // Axis labels x, y
+    ctx.fillStyle = '#6666aa';
+    ctx.font = '13px Syne, sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText('x', arx + 5, ary + 5);
+    ctx.fillText('y', ary2x + 6, ary2y + 5);
+
+    // Function line with gradient
+    const grad = ctx.createLinearGradient(...toCanvas(-RANGE, 0), ...toCanvas(RANGE, 0));
+    grad.addColorStop(0, '#7fdbca88');
+    grad.addColorStop(0.5, '#7fdbca');
+    grad.addColorStop(1, '#7fdbca88');
+
+    ctx.strokeStyle = grad;
+    ctx.lineWidth = 2.5;
+    ctx.lineJoin = 'round';
+    ctx.beginPath();
+
+    let started = false;
+    for (let px = 0; px <= W; px++) {
+      const x = -RANGE + (px - PAD) / (W - 2 * PAD) * 2 * RANGE;
+      const y = m * x + b;
+      const [cx, cy] = toCanvas(x, y);
+      if (!started) { ctx.moveTo(cx, cy); started = true; }
+      else ctx.lineTo(cx, cy);
+    }
+    ctx.stroke();
+
+    // Y-intercept dot
+    const [bpx, bpy] = toCanvas(0, b);
+    ctx.beginPath();
+    ctx.arc(bpx, bpy, 6, 0, Math.PI * 2);
+    ctx.fillStyle = '#ff9f7f';
+    ctx.shadowColor = '#ff9f7f';
+    ctx.shadowBlur = 12;
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    // Origin dot (if b==0)
+    if (Math.abs(b) < 0.05) {
+      ctx.beginPath();
+      ctx.arc(bpx, bpy, 6, 0, Math.PI * 2);
+      ctx.fillStyle = '#ff9f7f';
+      ctx.fill();
+    }
+  }
+
+  function getVals() {
+    return {
+      m: parseFloat(document.getElementById('mSlider').value),
+      b: parseFloat(document.getElementById('bSlider').value)
+    };
+  }
+
+  function fmt(v) {
+    const n = parseFloat(v.toFixed(1));
+    return n % 1 === 0 ? n.toFixed(0) : n.toFixed(1);
+  }
+
+  function updateEquation(m, b) {
+    const mStr = fmt(m);
+    const bVal = parseFloat(fmt(b));
+    let bStr = '';
+    if (bVal > 0) bStr = ` + ${fmt(b)}`;
+    else if (bVal < 0) bStr = ` − ${fmt(Math.abs(b))}`;
+    document.getElementById('eqM').textContent = mStr;
+    const eqB = document.getElementById('eqB');
+    eqB.textContent = bVal !== 0 ? fmt(Math.abs(b)) : '0';
+
+    // Rebuild equation display
+    const eq = document.getElementById('eq');
+    const sign = bVal > 0 ? ' + ' : bVal < 0 ? ' − ' : ' + ';
+    eq.innerHTML = `f(x) = <span id="eqM" style="color:#7fdbca">${mStr}</span>x${bVal !== 0 ? `<span style="color:#aaa">${sign}</span><span id="eqB" style="color:#ff9f7f">${fmt(Math.abs(b))}</span>` : `<span style="color:#aaa"> + </span><span id="eqB" style="color:#ff9f7f">0</span>`}`;
+  }
+
+  function update() {
+    const { m, b } = getVals();
+    document.getElementById('mVal').textContent = fmt(m);
+    document.getElementById('bVal').textContent = fmt(b);
+    updateEquation(m, b);
+    draw(m, b);
+  }
+
+  document.getElementById('mSlider').addEventListener('input', update);
+  document.getElementById('bSlider').addEventListener('input', update);
+
+  update();
+</script>
+</body>
+</html>
