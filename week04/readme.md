@@ -10,17 +10,47 @@ Interactive math function animations designed to help students understand how fu
 
 ---
 
-### 1. Function Machine — Original Animation
+### 1. Function Machine + Side Length & Area Calculation
+
+> Interactive calculator: drag a slider to select a side length (1–5 inches), and toggle to reveal the computed square area. Input is shown as a green line; output is shown as a blue square.
+
+[![Open Demo 1](https://img.shields.io/badge/▶%20Open%20Live%20Demo-Side%20Length%20%26%20Area%20Calc-27ae60?style=for-the-badge&logo=github)](https://benchvue.github.io/GeoGebra/week04/calculate-square.html)
+
+```
+  ┌───┐       ┌──────────────────────┐       ┌───┐
+  │ 3 │  ───► │ f(x) = x²            │  ───► │ ? │
+  └───┘       │ Calculate Square Area│       └───┘
+  Input       └──────────────────────┘       Output
+
+   │                                 ┌───────────┐
+   │  3 in                           │           │
+   │  (slider)                       │   9 in²   │  3 in
+   │                                 │  (toggle) │
+                                     └───────────┘
+  Side Length              →              Area
+```
+
+**Features:**
+- **Slider** to select integer side length: 1, 2, 3, 4, or 5 inches (no decimals)
+- **Green vertical line** — height equals the selected side length in inches
+- **Show/Hide Area toggle button** — output defaults to `?`; click to reveal the blue square and area value
+- **Blue square** grows to match the selected side length with dimension labels (`x in` on right and bottom edges)
+- Area label displayed in white at the center (e.g., `9 in²`)
+- Input and output circles update live as the slider moves
+
+---
+
+### 2. Function Machine — Original Animation
 
 > Basic function machine visualization: input flows through f(x) = x², output appears with step-by-step calculation.
 
-[![Open Demo 1](https://img.shields.io/badge/▶%20Open%20Live%20Demo-Function%20Machine-27ae60?style=for-the-badge&logo=github)](https://benchvue.github.io/GeoGebra/week04/basic-diagram.html)
+[![Open Demo 2](https://img.shields.io/badge/▶%20Open%20Live%20Demo-Function%20Machine-27ae60?style=for-the-badge&logo=github)](https://benchvue.github.io/GeoGebra/week04/basic-diagram.html)
 
 ```
   ┌───┐       ┌────────────┐       ┌───┐
   │ 3 │  ───► │ f(x) = x²  │  ───► │ 9 │
-  └───┘       │  3² = 3×3   │       └───┘
-  Input       │    = 9      │       Output
+  └───┘       │  3² = 3×3  │       └───┘
+  Input       │    = 9     │       Output
               └────────────┘
 ```
 
@@ -33,11 +63,11 @@ Interactive math function animations designed to help students understand how fu
 
 ---
 
-### 2. Function Machine + Side Length & Area Drawing
+### 3. Function Machine + Side Length & Area Drawing
 
 > Enhanced version with geometric visuals: a **green vertical line** shows the input as a side length (in inches), and a **blue square** shows the output as an area (in square inches).
 
-[![Open Demo 2](https://img.shields.io/badge/▶%20Open%20Live%20Demo-Side%20Length%20%26%20Area-3498db?style=for-the-badge&logo=github)](https://benchvue.github.io/GeoGebra/week04/square-drawing.html)
+[![Open Demo 3](https://img.shields.io/badge/▶%20Open%20Live%20Demo-Side%20Length%20%26%20Area-3498db?style=for-the-badge&logo=github)](https://benchvue.github.io/GeoGebra/week04/square-drawing.html)
 
 ```
   ┌───┐       ┌────────────┐       ┌───┐
@@ -53,7 +83,7 @@ Interactive math function animations designed to help students understand how fu
 ```
 
 **Features:**
-- Everything from Version 1, plus:
+- Everything from Version 2, plus:
 - **Green vertical line** — height equals the input value in inches (1 in = 48px)
 - **Blue square** — side length equals input, area label displayed in white at the center (e.g., `9 in²`)
 - Dimension labels on the right and bottom edges of the square (e.g., `3 in`)
@@ -62,11 +92,11 @@ Interactive math function animations designed to help students understand how fu
 
 ---
 
-### 3. Function Machine + Geometry + X-Y Coordinate Plane
+### 4. Function Machine + Geometry + X-Y Coordinate Plane
 
 > Full visualization with coordinate graphing: after each step, the (x, y) point is plotted on a coordinate plane, building the **y = x² parabola** point by point.
 
-[![Open Demo 3](https://img.shields.io/badge/▶%20Open%20Live%20Demo-Coordinate%20Plane-9b59b6?style=for-the-badge&logo=github)](https://benchvue.github.io/GeoGebra/week04/squre-x-y-drawing.html)
+[![Open Demo 4](https://img.shields.io/badge/▶%20Open%20Live%20Demo-Coordinate%20Plane-9b59b6?style=for-the-badge&logo=github)](https://benchvue.github.io/GeoGebra/week04/squre-x-y-drawing.html)
 
 ```
   ┌───┐       ┌────────────┐       ┌───┐
@@ -76,7 +106,7 @@ Interactive math function animations designed to help students understand how fu
                                      y
    │           ┌─────────┐          │      E(5,25)
    │           │         │          │    D(4,16)
-   │  3 in     │  9 in²  │ 3 in    │   C(3,9)
+   │  3 in     │  9 in²  │ 3 in     │   C(3,9)
    │           │         │          │  B(2,4)
                └─────────┘          │ A(1,1)
   Side          Area         →      └──────────── x
@@ -84,7 +114,7 @@ Interactive math function animations designed to help students understand how fu
 ```
 
 **Features:**
-- Everything from Versions 1 & 2, plus:
+- Everything from Versions 2 & 3, plus:
 - **X-Y Coordinate Plane** with labeled axes and grid
 - Points plotted one by one: **(1,1) → (2,4) → (3,9) → (4,16) → (5,25)**
 - Each point labeled A through E with coordinate text (e.g., `A(1, 1)`)
@@ -97,11 +127,11 @@ Interactive math function animations designed to help students understand how fu
 
 ---
 
-### 4. Coefficient Explorer — x², 2x², ½x² (the "a" in ax²)
+### 5. Coefficient Explorer — x², 2x², ½x² (the "a" in ax²)
 
 > Explore how the leading coefficient **a** affects the parabola's shape and area. Switch between three functions to see narrow, normal, and wide parabolas with visual area comparisons.
 
-[![Open Demo 4](https://img.shields.io/badge/▶%20Open%20Live%20Demo-Coefficient%20Explorer-e74c3c?style=for-the-badge&logo=github)](https://benchvue.github.io/GeoGebra/week04/quadratic-a.html)
+[![Open Demo 5](https://img.shields.io/badge/▶%20Open%20Live%20Demo-Coefficient%20Explorer-e74c3c?style=for-the-badge&logo=github)](https://benchvue.github.io/GeoGebra/week04/quadratic-a.html)
 
 ```
          ┌──────┐   ┌──────┐   ┌──────┐
@@ -116,14 +146,14 @@ Interactive math function animations designed to help students understand how fu
                   ┌─────────┐         y
    │              │ x²=9    │        │ ╱ 2x²
    │              ├─────────│        │╱   x²
-   │  3 units     │ 2x²=18 │        ╱  ╱
+   │  3 units     │ 2x²=18  │        ╱  ╱
    │              │ (2 layers)       ╱ ╱  ½x²
                   └─────────┘       └──────── x
   Side            Area (stacked)    All 3 curves
 ```
 
 **Features:**
-- Everything from Versions 1–3, plus:
+- Everything from Versions 2–4, plus:
 - **Three function buttons**: `x²` (a=1), `2x²` (a=2), `½x²` (a=½) — color-coded red, purple, green
 - **Coefficient comparison for area visualization**:
   - **x²** — standard square (baseline reference)
@@ -137,11 +167,11 @@ Interactive math function animations designed to help students understand how fu
 
 ---
 
-### 5. Y-Intercept Explorer — x², x²+5, x²−5 (the "c" in x²+c)
+### 6. Y-Intercept Explorer — x², x²+5, x²−5 (the "c" in x²+c)
 
 > Explore how the constant term **c** shifts the parabola up or down. Switch between three functions to see the vertical shift effect on the y-intercept and area visualization. A large shift of ±5 makes the difference dramatically visible.
 
-[![Open Demo 5](https://img.shields.io/badge/▶%20Open%20Live%20Demo-Y--Intercept%20Explorer-16a085?style=for-the-badge&logo=github)](https://benchvue.github.io/GeoGebra/week04/quadratic-c.html)
+[![Open Demo 6](https://img.shields.io/badge/▶%20Open%20Live%20Demo-Y--Intercept%20Explorer-16a085?style=for-the-badge&logo=github)](https://benchvue.github.io/GeoGebra/week04/quadratic-c.html)
 
 ```
          ┌──────┐   ┌───────┐   ┌───────┐
@@ -156,14 +186,14 @@ Interactive math function animations designed to help students understand how fu
                   ┌─────────┐         y
    │              │░░ +5 ░░░│        │    x²+5
    │              │░░░░░░░░░│        │   x²
-   │  3 units     │  x²=9  │        │  x²−5
+   │  3 units     │  x²=9   │        │  x²−5
    │              │         │        ● (0,5)
                   └─────────┘       ●└(0,0)──── x
   Side            Area + strip      ● (0,−5)
 ```
 
 **Features:**
-- Everything from Versions 1–3, plus:
+- Everything from Versions 2–4, plus:
 - **Three function buttons**: `x²` (c=0), `x²+5` (c=+5), `x²−5` (c=−5) — color-coded red, teal, orange
 - **Y-intercept shift visualized in the area panel**:
   - **x²** — standard square (baseline reference)
@@ -180,16 +210,16 @@ Interactive math function animations designed to help students understand how fu
 
 ---
 
-### 6. Quadratic Explorer — f(x) = m(x − a)² + b (vertex form with sliders)
+### 7. Quadratic Explorer — f(x) = m(x − a)² + b (vertex form with sliders)
 
 > Full vertex-form explorer: **three real-time sliders** control the shape and position of the parabola, showing how each parameter independently affects the curve, the vertex, and its projections onto the axes.
 
-[![Open Demo 6](https://img.shields.io/badge/▶%20Open%20Live%20Demo-Quadratic%20Explorer-e67e22?style=for-the-badge&logo=github)](https://benchvue.github.io/GeoGebra/week04/function-quadratic.html)
+[![Open Demo 7](https://img.shields.io/badge/▶%20Open%20Live%20Demo-Quadratic%20Explorer-e67e22?style=for-the-badge&logo=github)](https://benchvue.github.io/GeoGebra/week04/function-quadratic.html)
 
 ```
          ┌──────────────┐   ┌──────────────┐   ┌──────────────┐
          │    m = 2     │   │    a = 1     │   │    b = 1     │
-         │  narrowness  │   │  x-offset   │   │  y-offset   │
+         │  narrowness  │   │  x-offset    │   │  y-offset    │
          └──────────────┘   └──────────────┘   └──────────────┘
                     ◄────────────── sliders ──────────────►
 
@@ -240,7 +270,7 @@ Input (x)  →  f(x) = x²  →  Output (y = x²)
 | 4    | 4         | 4² = 4 × 4 | 16         | (4, 16)        |
 | 5    | 5         | 5² = 5 × 5 | 25         | (5, 25)        |
 
-### Version 4 — Coefficient Comparison Table (a)
+### Version 5 — Coefficient Comparison Table (a)
 
 | Step | Input (x) | x² (a=1) | 2x² (a=2) | ½x² (a=½) |
 |------|-----------|----------|------------|------------|
@@ -250,7 +280,7 @@ Input (x)  →  f(x) = x²  →  Output (y = x²)
 | 4    | 4         | 16       | 32         | 8          |
 | 5    | 5         | 25       | 50         | 12.5       |
 
-### Version 5 — Y-Intercept Comparison Table (c)
+### Version 6 — Y-Intercept Comparison Table (c)
 
 | Step | Input (x) | x² (c=0) | x²+5 (c=+5) | x²−5 (c=−5) |
 |------|-----------|----------|--------------|--------------|
@@ -260,7 +290,7 @@ Input (x)  →  f(x) = x²  →  Output (y = x²)
 | 4    | 4         | 16       | 21           | 11           |
 | 5    | 5         | 25       | 30           | 20           |
 
-### Version 6 — Vertex Form Parameter Effects (m, a, b)
+### Version 7 — Vertex Form Parameter Effects (m, a, b)
 
 | Parameter | Default | Effect on Parabola                                      |
 |-----------|---------|---------------------------------------------------------|
@@ -271,23 +301,27 @@ Input (x)  →  f(x) = x²  →  Output (y = x²)
 ### Visual Progression Across Versions
 
 ```
-Version 1:  [ Input ] ──► [ Function Box ] ──► [ Output ]
+Version 1:  ◄── Slider (1–5) ──►  [ Show/Hide Area Toggle ]
+            [ Input ] ──► [ Function Box ] ──► [ Output (? / revealed) ]
+            │ Green Line │       →        │ Blue Square (on toggle) │
 
 Version 2:  [ Input ] ──► [ Function Box ] ──► [ Output ]
-            │ Green Line │       →        │ Blue Square │
 
 Version 3:  [ Input ] ──► [ Function Box ] ──► [ Output ]
+            │ Green Line │       →        │ Blue Square │
+
+Version 4:  [ Input ] ──► [ Function Box ] ──► [ Output ]
             │ Green Line │  →  │ Blue Square │  →  │ X-Y Graph │
 
-Version 4:  [ x² ] [ 2x² ] [ ½x² ]  ← "a" Selector (narrow / wide)
+Version 5:  [ x² ] [ 2x² ] [ ½x² ]  ← "a" Selector (narrow / wide)
             [ Input ] ──► [ Function Box ] ──► [ Output ]
             │ Green Line │  →  │ Area (with overlays) │  →  │ X-Y Graph (3 curves) │
 
-Version 5:  [ x² ] [ x²+5 ] [ x²−5 ]  ← "c" Selector (shift up / down)
+Version 6:  [ x² ] [ x²+5 ] [ x²−5 ]  ← "c" Selector (shift up / down)
             [ Input ] ──► [ Function Box ] ──► [ Output ]
             │ Green Line │  →  │ Area (with ±5 strip) │  →  │ X-Y Graph (3 curves) │
 
-Version 6:  ◄── m slider ──►  ◄── a slider ──►  ◄── b slider ──►
+Version 7:  ◄── m slider ──►  ◄── a slider ──►  ◄── b slider ──►
             │ Live coordinate plane │ → │ O(a,b) vertex │ → │ A(a,0) + B(0,b) projections │
 ```
 
@@ -295,7 +329,7 @@ Version 6:  ◄── m slider ──►  ◄── a slider ──►  ◄─�
 
 ## 🎮 Controls
 
-All versions share the same controls:
+Versions 2–4 share the same controls:
 
 | Button    | Action                                            |
 |-----------|---------------------------------------------------|
@@ -303,7 +337,15 @@ All versions share the same controls:
 | ⏸ **Pause** | Pause after current phase completes              |
 | ⏹ **Stop**  | Reset everything — animation, values, and graph  |
 
-Version 4 adds:
+Version 1 adds:
+
+| Control           | Action                                                    |
+|-------------------|-----------------------------------------------------------|
+| **Slider (1–5)**  | Select integer side length (1, 2, 3, 4, or 5 inches)    |
+| **Show Area**     | Reveal the blue square and computed area value           |
+| **Hide Area**     | Hide the output square, reset output circle to `?`       |
+
+Version 5 adds:
 
 | Button       | Action                                         |
 |--------------|------------------------------------------------|
@@ -311,7 +353,7 @@ Version 4 adds:
 | **2x²**      | Select narrow/steep parabola (a = 2)          |
 | **½x²**      | Select wide/flat parabola (a = ½)             |
 
-Version 5 adds:
+Version 6 adds:
 
 | Button       | Action                                           |
 |--------------|--------------------------------------------------|
@@ -319,7 +361,7 @@ Version 5 adds:
 | **x²+5**     | Select shifted-up parabola (c = +5)             |
 | **x²−5**     | Select shifted-down parabola (c = −5)           |
 
-Version 6 adds:
+Version 7 adds:
 
 | Control      | Action                                                   |
 |--------------|----------------------------------------------------------|
@@ -333,12 +375,13 @@ Version 6 adds:
 
 ```
 week04/
-├── basic-diagram.html          # Version 1: Basic function machine
-├── square-drawing.html         # Version 2: + Side length & area visuals
-├── squre-x-y-drawing.html      # Version 3: + Coordinate plane graphing
-├── quadratic-a.html            # Version 4: + Coefficient explorer (x², 2x², ½x²)
-├── quadratic-c.html            # Version 5: + Y-intercept explorer (x², x²+5, x²−5)
-├── function-quadratic.html     # Version 6: + Quadratic explorer f(x) = m(x−a)²+b
+├── calculate-square.html       # Version 1: Slider + Show/Hide Area toggle
+├── basic-diagram.html          # Version 2: Basic function machine
+├── square-drawing.html         # Version 3: + Side length & area visuals
+├── squre-x-y-drawing.html      # Version 4: + Coordinate plane graphing
+├── quadratic-a.html            # Version 5: + Coefficient explorer (x², 2x², ½x²)
+├── quadratic-c.html            # Version 6: + Y-intercept explorer (x², x²+5, x²−5)
+├── function-quadratic.html     # Version 7: + Quadratic explorer f(x) = m(x−a)²+b
 └── readme.md                   # This file
 ```
 
@@ -358,7 +401,7 @@ Simply click any of the **Open Live Demo** buttons above — no installation req
    ```
 2. Open any HTML file directly in your browser:
    ```bash
-   open GeoGebra/week04/basic-diagram.html
+   open GeoGebra/week04/calculate-square.html
    ```
 
 No build tools, dependencies, or server required — each file is a self-contained HTML page with embedded CSS and JavaScript.
@@ -375,16 +418,16 @@ These visualizations support teaching **function concepts** in algebra and pre-c
 - **Geometric interpretation** — side length vs. area of a square
 - **Coordinate graphing** — plotting ordered pairs (x, y) to form a curve
 - **Parabola shape** — seeing how y = x² creates the classic U-shaped curve
-- **Effect of coefficients** — how the leading coefficient *a* stretches or compresses the parabola and scales the output area (Version 4)
-- **Vertical shifts** — how the constant *c* moves the parabola up or down, changing the y-intercept without changing the shape; using ±5 makes the shift dramatically visible compared to the curve (Version 5)
-- **Vertex form** — how m, a, and b in f(x) = m(x − a)² + b each independently control the shape, horizontal position, and vertical position of the parabola (Version 6)
+- **Effect of coefficients** — how the leading coefficient *a* stretches or compresses the parabola and scales the output area (Version 5)
+- **Vertical shifts** — how the constant *c* moves the parabola up or down, changing the y-intercept without changing the shape; using ±5 makes the shift dramatically visible compared to the curve (Version 6)
+- **Vertex form** — how m, a, and b in f(x) = m(x − a)² + b each independently control the shape, horizontal position, and vertical position of the parabola (Version 7)
 
 ---
 
 ## 📝 Technical Notes
 
 - All animations are pure **HTML / CSS / JavaScript** with no external dependencies
-- Canvas API is used for the coordinate plane graph (Versions 3, 4, 5 & 6)
+- Canvas API is used for the coordinate plane graph (Versions 4, 5, 6 & 7)
 - CSS transitions and `setTimeout` for animation sequencing
 - Responsive design works on desktop and tablet browsers
 - Each HTML file is fully self-contained (single file, no build step)
