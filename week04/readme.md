@@ -137,42 +137,42 @@ Interactive math function animations designed to help students understand how fu
 
 ---
 
-### 5. Y-Intercept Explorer — x², x²+1, x²−1 (the "c" in x²+c)
+### 5. Y-Intercept Explorer — x², x²+5, x²−5 (the "c" in x²+c)
 
-> Explore how the constant term **c** shifts the parabola up or down. Switch between three functions to see the vertical shift effect on the y-intercept and area visualization.
+> Explore how the constant term **c** shifts the parabola up or down. Switch between three functions to see the vertical shift effect on the y-intercept and area visualization. A large shift of ±5 makes the difference dramatically visible.
 
 [![Open Demo 5](https://img.shields.io/badge/▶%20Open%20Live%20Demo-Y--Intercept%20Explorer-16a085?style=for-the-badge&logo=github)](https://benchvue.github.io/GeoGebra/week04/quadratic-c.html)
 
 ```
          ┌──────┐   ┌───────┐   ┌───────┐
-         │  x²  │   │ x²+1  │   │ x²−1  │
-         │ c=0  │   │ c=+1  │   │ c=−1  │
+         │  x²  │   │ x²+5  │   │ x²−5  │
+         │ c=0  │   │ c=+5  │   │ c=−5  │
          └──────┘   └───────┘   └───────┘
 
   ┌───┐       ┌──────────────┐       ┌────┐
-  │ 3 │  ───► │ f(x) = x²+1  │  ───► │ 10 │
+  │ 3 │  ───► │ f(x) = x²+5  │  ───► │ 14 │
   └───┘       └──────────────┘       └────┘
 
                   ┌─────────┐         y
-   │              │░░ +1 ░░░│        │    x²+1
-   │              ├─────────│        │   x²
-   │  3 units     │  x²=9  │        │  x²−1
-   │              │         │        ● (0,1)
+   │              │░░ +5 ░░░│        │    x²+5
+   │              │░░░░░░░░░│        │   x²
+   │  3 units     │  x²=9  │        │  x²−5
+   │              │         │        ● (0,5)
                   └─────────┘       ●└(0,0)──── x
-  Side            Area + strip      ● (0,−1)
+  Side            Area + strip      ● (0,−5)
 ```
 
 **Features:**
 - Everything from Versions 1–3, plus:
-- **Three function buttons**: `x²` (c=0), `x²+1` (c=+1), `x²−1` (c=−1) — color-coded red, teal, orange
+- **Three function buttons**: `x²` (c=0), `x²+5` (c=+5), `x²−5` (c=−5) — color-coded red, teal, orange
 - **Y-intercept shift visualized in the area panel**:
   - **x²** — standard square (baseline reference)
-  - **x²+1** — x² square with a **striped band on top** showing the +1 added area
-  - **x²−1** — x² square with a **hatched band at the bottom** showing the −1 removed area
-- **4-line calculation board** showing the extra step: `f(3) = 3² + 1 → 3 × 3 + 1 → 9 + 1 → 10`
-- **All three reference parabolas** drawn as dashed curves, clearly showing vertical offset
-- **Y-intercept markers** at (0, 0), (0, 1), and (0, −1) on the coordinate plane
-- Graph y-axis range extended to include negative values (down to −3)
+  - **x²+5** — x² square with a **striped band on top** showing the +5 added area (5 units tall, clearly visible)
+  - **x²−5** — x² square with a **hatched band at the bottom** showing the −5 removed area (5 units tall, clearly visible)
+- **4-line calculation board** showing the extra step: `f(3) = 3² + 5 → 3 × 3 + 5 → 9 + 5 → 14`
+- **All three reference parabolas** drawn as dashed curves, clearly showing the large vertical offset
+- **Y-intercept markers** at (0, 0), (0, 5), and (0, −5) on the coordinate plane
+- Graph y-axis range extended to show full shift — from −8 up to 35
 - Solid curve drawn in the selected function's color as points are plotted
 - **Info bar** explains the current c value's effect on vertex position and y-intercept
 - Function selector disabled during playback to prevent conflicts
@@ -252,13 +252,13 @@ Input (x)  →  f(x) = x²  →  Output (y = x²)
 
 ### Version 5 — Y-Intercept Comparison Table (c)
 
-| Step | Input (x) | x² (c=0) | x²+1 (c=+1) | x²−1 (c=−1) |
+| Step | Input (x) | x² (c=0) | x²+5 (c=+5) | x²−5 (c=−5) |
 |------|-----------|----------|--------------|--------------|
-| 1    | 1         | 1        | 2            | 0            |
-| 2    | 2         | 4        | 5            | 3            |
-| 3    | 3         | 9        | 10           | 8            |
-| 4    | 4         | 16       | 17           | 15           |
-| 5    | 5         | 25       | 26           | 24           |
+| 1    | 1         | 1        | 6            | −4           |
+| 2    | 2         | 4        | 9            | −1           |
+| 3    | 3         | 9        | 14           | 4            |
+| 4    | 4         | 16       | 21           | 11           |
+| 5    | 5         | 25       | 30           | 20           |
 
 ### Version 6 — Vertex Form Parameter Effects (m, a, b)
 
@@ -283,9 +283,9 @@ Version 4:  [ x² ] [ 2x² ] [ ½x² ]  ← "a" Selector (narrow / wide)
             [ Input ] ──► [ Function Box ] ──► [ Output ]
             │ Green Line │  →  │ Area (with overlays) │  →  │ X-Y Graph (3 curves) │
 
-Version 5:  [ x² ] [ x²+1 ] [ x²−1 ]  ← "c" Selector (shift up / down)
+Version 5:  [ x² ] [ x²+5 ] [ x²−5 ]  ← "c" Selector (shift up / down)
             [ Input ] ──► [ Function Box ] ──► [ Output ]
-            │ Green Line │  →  │ Area (with ±c strip) │  →  │ X-Y Graph (3 curves) │
+            │ Green Line │  →  │ Area (with ±5 strip) │  →  │ X-Y Graph (3 curves) │
 
 Version 6:  ◄── m slider ──►  ◄── a slider ──►  ◄── b slider ──►
             │ Live coordinate plane │ → │ O(a,b) vertex │ → │ A(a,0) + B(0,b) projections │
@@ -313,11 +313,11 @@ Version 4 adds:
 
 Version 5 adds:
 
-| Button       | Action                                         |
-|--------------|------------------------------------------------|
-| **x²**       | Select base parabola (c = 0, vertex at origin)|
-| **x²+1**     | Select shifted-up parabola (c = +1)           |
-| **x²−1**     | Select shifted-down parabola (c = −1)         |
+| Button       | Action                                           |
+|--------------|--------------------------------------------------|
+| **x²**       | Select base parabola (c = 0, vertex at origin)  |
+| **x²+5**     | Select shifted-up parabola (c = +5)             |
+| **x²−5**     | Select shifted-down parabola (c = −5)           |
 
 Version 6 adds:
 
@@ -334,10 +334,10 @@ Version 6 adds:
 ```
 week04/
 ├── basic-diagram.html          # Version 1: Basic function machine
-├── square-drawing.html      # Version 2: + Side length & area visuals
+├── square-drawing.html         # Version 2: + Side length & area visuals
 ├── squre-x-y-drawing.html      # Version 3: + Coordinate plane graphing
 ├── quadratic-a.html            # Version 4: + Coefficient explorer (x², 2x², ½x²)
-├── quadratic-c.html            # Version 5: + Y-intercept explorer (x², x²+1, x²−1)
+├── quadratic-c.html            # Version 5: + Y-intercept explorer (x², x²+5, x²−5)
 ├── function-quadratic.html     # Version 6: + Quadratic explorer f(x) = m(x−a)²+b
 └── readme.md                   # This file
 ```
@@ -376,7 +376,7 @@ These visualizations support teaching **function concepts** in algebra and pre-c
 - **Coordinate graphing** — plotting ordered pairs (x, y) to form a curve
 - **Parabola shape** — seeing how y = x² creates the classic U-shaped curve
 - **Effect of coefficients** — how the leading coefficient *a* stretches or compresses the parabola and scales the output area (Version 4)
-- **Vertical shifts** — how the constant *c* moves the parabola up or down, changing the y-intercept without changing the shape (Version 5)
+- **Vertical shifts** — how the constant *c* moves the parabola up or down, changing the y-intercept without changing the shape; using ±5 makes the shift dramatically visible compared to the curve (Version 5)
 - **Vertex form** — how m, a, and b in f(x) = m(x − a)² + b each independently control the shape, horizontal position, and vertical position of the parabola (Version 6)
 
 ---

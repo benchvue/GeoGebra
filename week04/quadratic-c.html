@@ -85,7 +85,7 @@
         }
         .func-btn.active-base::after { background: #e74c3c; }
 
-        /* x²+1 — teal/blue */
+        /* x²+5 — teal/blue */
         .func-btn.active-plus {
             border-color: #16a085;
             background: linear-gradient(135deg, #e8fdf5, #fff);
@@ -94,7 +94,7 @@
         }
         .func-btn.active-plus::after { background: #16a085; }
 
-        /* x²-1 — orange */
+        /* x²-5 — orange */
         .func-btn.active-minus {
             border-color: #e67e22;
             background: linear-gradient(135deg, #fef5e7, #fff);
@@ -188,7 +188,7 @@
         }
 
         .function-box {
-            width: 250px;
+            width: 260px;
             border: 4px solid #2c3e50;
             border-radius: 15px;
             display: flex;
@@ -219,14 +219,14 @@
             border-radius: 10px;
             padding: 10px 14px;
             width: 100%;
-            min-height: 78px;
+            min-height: 88px;
             display: flex;
             flex-direction: column;
             gap: 3px;
         }
 
         .calc-line {
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 700;
             color: #2c3e50;
             opacity: 0;
@@ -237,7 +237,7 @@
         }
 
         .calc-line.visible { opacity: 1; transform: translateY(0); }
-        .calc-line.result { color: #2980b9; font-size: 16px; }
+        .calc-line.result { color: #2980b9; font-size: 15px; }
 
         .moving-ball {
             width: 44px;
@@ -247,7 +247,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 700;
             color: white;
             box-shadow: 0 5px 20px rgba(0,0,0,0.35);
@@ -301,7 +301,7 @@
 
         .line-visual {
             width: 50px;
-            height: 270px;
+            height: 290px;
             display: flex;
             align-items: flex-end;
             justify-content: center;
@@ -331,27 +331,35 @@
         }
 
         /* ===== AREA VISUAL ===== */
+        /* 
+          Layout: fixed-height container with a zero-line at the bottom.
+          The x² square grows upward from the zero-line.
+          The +5 strip sits above the x² square.
+          The -5 hatched strip sits at the bottom of the x² square.
+          
+          Max x=5: side = 5*40 = 200px, strip = 5*18 = 90px → total = 290px.
+          Container height = 290px to fit the tallest case.
+        */
         .square-visual {
             width: 280px;
-            height: 310px;
-            display: flex;
-            align-items: flex-end;
-            justify-content: center;
+            height: 320px;   /* tall enough for x²+5 at x=5 */
             position: relative;
         }
 
+        /* Anchor sits at the bottom of the container; everything grows upward */
         .square-anchor {
             position: absolute;
             bottom: 24px;
             left: 50%;
             transform: translateX(-50%);
+            /* width/height set by JS */
         }
 
-        /* The base x² square (reference outline) */
+        /* The base x² square reference outline (dashed red) */
         .ref-square {
             position: absolute;
             bottom: 0; left: 0;
-            border: 2.5px dashed rgba(231,76,60,0.5);
+            border: 2.5px dashed rgba(231,76,60,0.6);
             border-radius: 6px;
             transition: width 0.8s cubic-bezier(0.4,0,0.2,1), height 0.8s cubic-bezier(0.4,0,0.2,1);
             pointer-events: none;
@@ -371,15 +379,26 @@
             font-family: 'JetBrains Mono', monospace;
         }
 
-        /* The actual area rectangle */
-        .area-rect {
-            border-radius: 6px;
+        /* Wrapper that positions the colored rect relative to the anchor bottom */
+        .area-rect-wrapper {
+            position: absolute;
+            bottom: 0; left: 0;
             transition: width 0.8s cubic-bezier(0.4,0,0.2,1), height 0.8s cubic-bezier(0.4,0,0.2,1);
+            overflow: visible;
+        }
+
+        /* The actual colored area rectangle */
+        .area-rect {
+            position: absolute;
+            left: 0;
+            width: 100%;
+            border-radius: 6px;
             display: flex;
             justify-content: center;
             align-items: center;
-            position: relative;
             overflow: hidden;
+            transition: height 0.8s cubic-bezier(0.4,0,0.2,1),
+                        bottom 0.8s cubic-bezier(0.4,0,0.2,1);
         }
 
         .area-rect.mode-base {
@@ -397,52 +416,65 @@
             box-shadow: 3px 3px 14px rgba(230,126,34,0.4);
         }
 
-        /* +c strip overlay (added row on top) */
-        .c-strip {
+        /* +c striped band shown ABOVE the x² square */
+        .c-strip-above {
             position: absolute;
             left: 0;
             width: 100%;
             pointer-events: none;
-            transition: height 0.6s cubic-bezier(0.4,0,0.2,1), opacity 0.5s;
+            transition: height 0.8s cubic-bezier(0.4,0,0.2,1),
+                        bottom 0.8s cubic-bezier(0.4,0,0.2,1),
+                        opacity 0.5s;
             opacity: 0;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 700;
             font-family: 'JetBrains Mono', monospace;
             color: white;
-            text-shadow: 0 1px 3px rgba(0,0,0,0.4);
-        }
-
-        .c-strip.top-strip {
-            top: 0;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.5);
             background: repeating-linear-gradient(
                 45deg,
-                rgba(22,160,133,0.85),
-                rgba(22,160,133,0.85) 4px,
-                rgba(22,160,133,0.6) 4px,
-                rgba(22,160,133,0.6) 8px
+                rgba(22,160,133,0.9),
+                rgba(22,160,133,0.9) 4px,
+                rgba(22,160,133,0.65) 4px,
+                rgba(22,160,133,0.65) 8px
             );
             border-radius: 6px 6px 0 0;
-            border-bottom: 2px dashed rgba(255,255,255,0.7);
+            border-bottom: 2px dashed rgba(255,255,255,0.8);
         }
 
-        .c-strip.bottom-strip {
+        /* -c hatched band shown at the BOTTOM of the x² square */
+        .c-strip-below {
+            position: absolute;
+            left: 0;
             bottom: 0;
+            width: 100%;
+            pointer-events: none;
+            transition: height 0.8s cubic-bezier(0.4,0,0.2,1), opacity 0.5s;
+            opacity: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            color: rgba(255,255,255,0.9);
+            text-shadow: 0 1px 3px rgba(0,0,0,0.5);
             background: repeating-linear-gradient(
                 -45deg,
-                rgba(230,126,34,0.25),
-                rgba(230,126,34,0.25) 4px,
-                rgba(230,126,34,0.08) 4px,
-                rgba(230,126,34,0.08) 8px
+                rgba(230,126,34,0.35),
+                rgba(230,126,34,0.35) 4px,
+                rgba(230,126,34,0.10) 4px,
+                rgba(230,126,34,0.10) 8px
             );
             border-radius: 0 0 6px 6px;
-            border-top: 2px dashed rgba(230,126,34,0.8);
+            border-top: 2.5px dashed rgba(230,126,34,0.9);
         }
 
         .sq-center-label {
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 700;
             color: white;
             text-shadow: 1px 1px 4px rgba(0,0,0,0.5);
@@ -450,25 +482,26 @@
             z-index: 2;
             font-family: 'JetBrains Mono', monospace;
             text-align: center;
-            line-height: 1.3;
+            line-height: 1.4;
+            position: relative;
         }
 
         .sq-dim {
             position: absolute;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 700;
             white-space: nowrap;
             transition: opacity 0.5s;
             font-family: 'JetBrains Mono', monospace;
         }
 
-        .sq-dim.right { right: -44px; top: 50%; transform: translateY(-50%); color: #2980b9; }
+        .sq-dim.right { right: -48px; top: 50%; transform: translateY(-50%); color: #2980b9; }
         .sq-dim.bottom { bottom: -22px; left: 50%; transform: translateX(-50%); color: #2980b9; }
 
         .visual-arrow {
             font-size: 36px;
             color: #2c3e50;
-            margin-top: 150px;
+            margin-top: 155px;
         }
 
         /* ===== GRAPH ===== */
@@ -512,23 +545,9 @@
             justify-content: center;
         }
 
-        .coeff-info.info-base {
-            background: #fdf2f2;
-            border: 2px solid #fadbd8;
-            color: #c0392b;
-        }
-
-        .coeff-info.info-plus {
-            background: #e8fdf5;
-            border: 2px solid #d1f2eb;
-            color: #0e6655;
-        }
-
-        .coeff-info.info-minus {
-            background: #fef5e7;
-            border: 2px solid #fdebd0;
-            color: #ca6f1e;
-        }
+        .coeff-info.info-base  { background: #fdf2f2; border: 2px solid #fadbd8; color: #c0392b; }
+        .coeff-info.info-plus  { background: #e8fdf5; border: 2px solid #d1f2eb; color: #0e6655; }
+        .coeff-info.info-minus { background: #fef5e7; border: 2px solid #fdebd0; color: #ca6f1e; }
 
         /* ===== LEGEND ===== */
         .graph-legend {
@@ -578,9 +597,9 @@
 
         .btn:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0,0,0,0.3); }
         .btn:active { transform: translateY(0); box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
-        .btn-play { background: linear-gradient(135deg, #27ae60, #229954); }
+        .btn-play  { background: linear-gradient(135deg, #27ae60, #229954); }
         .btn-pause { background: linear-gradient(135deg, #f39c12, #e67e22); }
-        .btn-stop { background: linear-gradient(135deg, #e74c3c, #c0392b); }
+        .btn-stop  { background: linear-gradient(135deg, #e74c3c, #c0392b); }
         .btn:disabled { opacity: 0.45; cursor: not-allowed; }
         .btn:disabled:hover { transform: none; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
     </style>
@@ -596,12 +615,12 @@
                 <span class="coeff-label">c = 0 (baseline)</span>
             </button>
             <button class="func-btn" id="btnPlus" onclick="selectFunction('plus')">
-                x² + 1
-                <span class="coeff-label">c = +1 (shift up)</span>
+                x² + 5
+                <span class="coeff-label">c = +5 (shift up)</span>
             </button>
             <button class="func-btn" id="btnMinus" onclick="selectFunction('minus')">
-                x² − 1
-                <span class="coeff-label">c = −1 (shift down)</span>
+                x² − 5
+                <span class="coeff-label">c = −5 (shift down)</span>
             </button>
         </div>
 
@@ -636,6 +655,8 @@
 
         <!-- ===== BOTTOM: visuals + graph ===== -->
         <div class="bottom-row">
+
+            <!-- Side length line -->
             <div class="visual-section">
                 <div class="visual-title">Side Length (x)</div>
                 <div class="line-visual">
@@ -647,25 +668,33 @@
 
             <div class="visual-arrow">→</div>
 
+            <!-- Area rectangle -->
             <div class="visual-section">
                 <div class="visual-title" id="areaTitle">Area = x²</div>
-                <div class="square-visual">
+                <div class="square-visual" id="squareVisual">
+
+                    <!-- anchor grows upward from the bottom -->
                     <div class="square-anchor" id="squareAnchor">
-                        <!-- Reference x² square outline -->
-                        <div class="ref-square" id="refSquare" style="width:0px;height:0px;">
-                            <span class="ref-square-label" id="refLabel" style="opacity:0;">x²</span>
+
+                        <!-- Reference x² dashed outline (only shown for ±5 modes) -->
+                        <div class="ref-square" id="refSquare" style="width:0;height:0;">
+                            <span class="ref-square-label" id="refLabel"></span>
                         </div>
-                        <!-- Actual area rectangle -->
-                        <div class="area-rect mode-base" id="areaRect" style="width:0px;height:0px;">
-                            <!-- +c strip on top (for x²+1) -->
-                            <div class="c-strip top-strip" id="topStrip" style="height:0px;">+1</div>
-                            <!-- -c hatched strip at bottom (for x²-1) -->
-                            <div class="c-strip bottom-strip" id="bottomStrip" style="height:0px;">−1</div>
+
+                        <!-- +5 striped band above x² square -->
+                        <div class="c-strip-above" id="stripAbove" style="height:0;bottom:0;"></div>
+
+                        <!-- Main colored rect (x² tall, or x²-5 tall) -->
+                        <div class="area-rect mode-base" id="areaRect" style="height:0;bottom:0;">
+                            <!-- -5 hatched band at bottom of main rect -->
+                            <div class="c-strip-below" id="stripBelow" style="height:0;"></div>
                             <span class="sq-center-label" id="sqCenter" style="opacity:0;"></span>
-                            <span class="sq-dim right" id="sqRight" style="opacity:0;"></span>
-                            <span class="sq-dim bottom" id="sqBottom" style="opacity:0;"></span>
                         </div>
+
+                        <span class="sq-dim right"  id="sqRight"  style="opacity:0;"></span>
+                        <span class="sq-dim bottom" id="sqBottom" style="opacity:0;"></span>
                     </div>
+
                 </div>
             </div>
 
@@ -675,12 +704,12 @@
             <div class="graph-section">
                 <div class="visual-title">Coordinate Plane — Vertical Shift</div>
                 <div class="graph-container">
-                    <canvas class="graph-canvas" id="graphCanvas" width="340" height="340"></canvas>
+                    <canvas class="graph-canvas" id="graphCanvas" width="350" height="370"></canvas>
                 </div>
                 <div class="graph-legend">
                     <div class="legend-item"><div class="legend-swatch" style="background:#e74c3c;"></div>x²</div>
-                    <div class="legend-item"><div class="legend-swatch" style="background:#16a085;"></div>x²+1</div>
-                    <div class="legend-item"><div class="legend-swatch" style="background:#e67e22;"></div>x²−1</div>
+                    <div class="legend-item"><div class="legend-swatch" style="background:#16a085;"></div>x²+5</div>
+                    <div class="legend-item"><div class="legend-swatch" style="background:#e67e22;"></div>x²−5</div>
                 </div>
                 <div class="points-list" id="pointsList">Points: —</div>
             </div>
@@ -692,22 +721,23 @@
         </div>
 
         <div class="controls">
-            <button class="btn btn-play" id="playBtn" onclick="play()">▶ Play</button>
+            <button class="btn btn-play"  id="playBtn"  onclick="play()">▶ Play</button>
             <button class="btn btn-pause" id="pauseBtn" onclick="pause()" disabled>⏸ Pause</button>
-            <button class="btn btn-stop" id="stopBtn" onclick="stop()" disabled>⏹ Reset</button>
+            <button class="btn btn-stop"  id="stopBtn"  onclick="stop()"  disabled>⏹ Reset</button>
         </div>
     </div>
 
     <script>
         // ===== CONFIG =====
-        const PX_PER_UNIT = 46;
-        // Extra px per +/-1 unit of c for the area strip
-        const C_PX = 46;
+        // Pixels per 1 unit of side-length
+        const PX_PER_UNIT = 40;
+        // Pixels per 1 unit of c-strip (same scale so it reads naturally)
+        const C_PX_PER_UNIT = 18;   // 5 units → 90px strip
 
         const funcs = {
-            base:  { c: 0,  label: 'x²',     title: 'f(x) = x²',     mode: 'base',  color: '#e74c3c', graphColor: '#e74c3c' },
-            plus:  { c: 1,  label: 'x²+1',   title: 'f(x) = x² + 1', mode: 'plus',  color: '#16a085', graphColor: '#16a085' },
-            minus: { c: -1, label: 'x²−1',   title: 'f(x) = x² − 1', mode: 'minus', color: '#e67e22', graphColor: '#e67e22' }
+            base:  { c: 0,  label: 'x²',     title: 'f(x) = x²',     mode: 'base',  graphColor: '#e74c3c' },
+            plus:  { c: 5,  label: 'x²+5',   title: 'f(x) = x² + 5', mode: 'plus',  graphColor: '#16a085' },
+            minus: { c: -5, label: 'x²−5',   title: 'f(x) = x² − 5', mode: 'minus', graphColor: '#e67e22' }
         };
 
         const inputs = [1, 2, 3, 4, 5];
@@ -728,28 +758,28 @@
             // Update selector buttons
             document.querySelectorAll('.func-btn').forEach(b => b.className = 'func-btn');
             const activeClass = { base: 'active-base', plus: 'active-plus', minus: 'active-minus' };
-            const btnIds = { base: 'btnBase', plus: 'btnPlus', minus: 'btnMinus' };
+            const btnIds     = { base: 'btnBase',      plus: 'btnPlus',     minus: 'btnMinus' };
             document.getElementById(btnIds[fn]).classList.add(activeClass[fn]);
 
-            // Update function box
+            // Update function box colour
             const box = document.getElementById('functionBox');
             box.className = 'function-box mode-' + funcs[fn].mode;
             document.getElementById('fnTitle').textContent = funcs[fn].title;
 
             // Area title
-            const areaLabels = { base: 'Area = x²', plus: 'Area = x² + 1', minus: 'Area = x² − 1' };
+            const areaLabels = { base: 'Area = x²', plus: 'Area = x² + 5', minus: 'Area = x² − 5' };
             document.getElementById('areaTitle').textContent = areaLabels[fn];
 
-            // Area rect color
+            // Area rect colour class
             const rect = document.getElementById('areaRect');
             rect.className = 'area-rect mode-' + funcs[fn].mode;
 
-            // Coeff info
+            // Coeff info bar
             const info = document.getElementById('coeffInfo');
             const infoTexts = {
                 base:  '<strong>c = 0 →</strong>&nbsp; Base parabola y = x². Vertex at the origin (0, 0). No vertical shift.',
-                plus:  '<strong>c = +1 →</strong>&nbsp; Shifted UP by 1. Vertex moves to (0, 1). Every output is 1 more than x². The striped band shows the +1.',
-                minus: '<strong>c = −1 →</strong>&nbsp; Shifted DOWN by 1. Vertex moves to (0, −1). Every output is 1 less than x². The hatched band shows the −1 removed.'
+                plus:  '<strong>c = +5 →</strong>&nbsp; Shifted UP by 5. Vertex moves to (0, 5). Every output is 5 more than x². The striped band shows the +5.',
+                minus: '<strong>c = −5 →</strong>&nbsp; Shifted DOWN by 5. Vertex moves to (0, −5). Every output is 5 less than x². The hatched band shows the −5 removed.'
             };
             const infoClasses = { base: 'info-base', plus: 'info-plus', minus: 'info-minus' };
             info.className = 'coeff-info ' + infoClasses[fn];
@@ -761,11 +791,14 @@
 
         // ===== GRAPH =====
         const canvas = document.getElementById('graphCanvas');
-        const ctx = canvas.getContext('2d');
-        const gPad = 38;
-        const gW = canvas.width - gPad * 2;
-        const gH = canvas.height - gPad * 2;
-        const xMin = -1, xMax = 6, yMin = -3, yMax = 28;
+        const ctx    = canvas.getContext('2d');
+        const gPad   = 42;
+        const gW     = canvas.width  - gPad * 2;
+        const gH     = canvas.height - gPad * 2;
+
+        // Extended y-range to show ±5 shift clearly
+        const xMin = -1, xMax = 6;
+        const yMin = -8, yMax = 35;
 
         function toCanvasX(x) { return gPad + ((x - xMin) / (xMax - xMin)) * gW; }
         function toCanvasY(y) { return gPad + ((yMax - y) / (yMax - yMin)) * gH; }
@@ -777,45 +810,47 @@
             ctx.rect(gPad, gPad, gW, gH);
             ctx.clip();
 
+            // Vertical grid lines
             for (let x = Math.ceil(xMin); x <= Math.floor(xMax); x++) {
                 const cx = toCanvasX(x);
                 ctx.beginPath(); ctx.moveTo(cx, gPad); ctx.lineTo(cx, gPad + gH);
                 ctx.strokeStyle = (x === 0) ? '#2c3e50' : '#e8eaed';
-                ctx.lineWidth = (x === 0) ? 2 : 1; ctx.stroke();
+                ctx.lineWidth   = (x === 0) ? 2 : 1;
+                ctx.stroke();
             }
-            for (let y = Math.ceil(yMin); y <= Math.floor(yMax); y++) {
+            // Horizontal grid lines
+            for (let y = Math.ceil(yMin); y <= Math.floor(yMax); y += 1) {
                 const cy = toCanvasY(y);
                 ctx.beginPath(); ctx.moveTo(gPad, cy); ctx.lineTo(gPad + gW, cy);
-                ctx.strokeStyle = (y === 0) ? '#2c3e50' : '#e8eaed';
-                ctx.lineWidth = (y === 0) ? 2 : 1; ctx.stroke();
+                ctx.strokeStyle = (y === 0) ? '#2c3e50' : (y % 5 === 0 ? '#d5d8dc' : '#eaecee');
+                ctx.lineWidth   = (y === 0) ? 2 : (y % 5 === 0 ? 1.2 : 0.6);
+                ctx.stroke();
             }
 
-            // Draw ALL three reference curves (dashed)
+            // All three reference curves (dashed, faint)
             const curveDefs = [
-                { c: 0,  color: 'rgba(231,76,60,0.2)' },
-                { c: 1,  color: 'rgba(22,160,133,0.2)' },
-                { c: -1, color: 'rgba(230,126,34,0.2)' }
+                { c:  0, color: 'rgba(231,76,60,0.20)' },
+                { c:  5, color: 'rgba(22,160,133,0.20)' },
+                { c: -5, color: 'rgba(230,126,34,0.20)' }
             ];
-
             curveDefs.forEach(cd => {
                 ctx.beginPath(); ctx.setLineDash([6, 4]);
                 ctx.strokeStyle = cd.color; ctx.lineWidth = 2;
                 for (let px = 0; px <= gW; px++) {
                     const x = xMin + (px / gW) * (xMax - xMin);
                     const y = x * x + cd.c;
-                    if (px === 0) ctx.moveTo(gPad + px, toCanvasY(y));
-                    else ctx.lineTo(gPad + px, toCanvasY(y));
+                    px === 0 ? ctx.moveTo(gPad + px, toCanvasY(y))
+                             : ctx.lineTo(gPad + px, toCanvasY(y));
                 }
                 ctx.stroke(); ctx.setLineDash([]);
             });
 
-            // Draw y-intercept markers for all three
+            // Y-intercept markers for all three functions
             const interceptDefs = [
-                { c: 0,  color: 'rgba(231,76,60,0.5)',  label: '(0,0)' },
-                { c: 1,  color: 'rgba(22,160,133,0.5)',  label: '(0,1)' },
-                { c: -1, color: 'rgba(230,126,34,0.5)',   label: '(0,−1)' }
+                { c:  0, color: 'rgba(231,76,60,0.7)',  label: '(0, 0)' },
+                { c:  5, color: 'rgba(22,160,133,0.7)', label: '(0, 5)' },
+                { c: -5, color: 'rgba(230,126,34,0.7)', label: '(0,−5)' }
             ];
-
             interceptDefs.forEach(ic => {
                 const cx = toCanvasX(0), cy = toCanvasY(ic.c);
                 ctx.beginPath(); ctx.arc(cx, cy, 5, 0, Math.PI * 2);
@@ -828,22 +863,27 @@
 
             ctx.restore();
 
-            // Tick labels
+            // Tick labels — x axis
             ctx.fillStyle = '#7f8c8d'; ctx.font = 'bold 11px "JetBrains Mono", monospace';
             for (let x = Math.ceil(xMin); x <= Math.floor(xMax); x++) {
                 if (x === 0) continue;
                 ctx.textAlign = 'center'; ctx.textBaseline = 'top';
                 ctx.fillText(x, toCanvasX(x), toCanvasY(0) + 5);
             }
-            for (let y = Math.floor(yMin); y <= Math.floor(yMax); y += 5) {
-                if (y === 0) continue;
+            // Tick labels — y axis (every 5 units)
+            for (let y = Math.ceil(yMin); y <= Math.floor(yMax); y += 5) {
                 ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
                 ctx.fillText(y, toCanvasX(0) - 6, toCanvasY(y));
             }
-            // -1 label
-            ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
-            ctx.fillText('-1', toCanvasX(0) - 6, toCanvasY(-1));
+            // Extra labels for -5 and 5 if not already covered
+            [-5, 5].forEach(y => {
+                if (y % 5 !== 0) { // already drawn above, skip duplicates
+                    ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+                    ctx.fillText(y, toCanvasX(0) - 6, toCanvasY(y));
+                }
+            });
 
+            // Origin label
             ctx.textAlign = 'right'; ctx.textBaseline = 'top';
             ctx.fillText('0', toCanvasX(0) - 6, toCanvasY(0) + 5);
 
@@ -855,139 +895,167 @@
             ctx.beginPath(); ctx.moveTo(xZero, yEnd); ctx.lineTo(xZero-4, yEnd+8); ctx.lineTo(xZero+4, yEnd+8); ctx.fill();
 
             ctx.fillStyle = '#2c3e50'; ctx.font = 'bold 13px "JetBrains Mono", monospace';
-            ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.fillText('x', xEnd-2, yZero+10);
-            ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillText('y', xZero+10, yEnd+2);
+            ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.fillText('x', xEnd - 2, yZero + 10);
+            ctx.textAlign = 'left';   ctx.textBaseline = 'middle'; ctx.fillText('y', xZero + 10, yEnd + 2);
         }
 
         function drawPoints() {
             const labels = ['A','B','C','D','E'];
             const fc = funcs[currentFunc];
 
-            // Solid curve through plotted points
+            // Solid curve through plotted range
             if (plottedPoints.length > 1) {
                 ctx.save();
                 ctx.beginPath(); ctx.rect(gPad, gPad, gW, gH); ctx.clip();
                 ctx.beginPath(); ctx.strokeStyle = fc.graphColor; ctx.lineWidth = 3;
-                const s = plottedPoints[0].x, e = plottedPoints[plottedPoints.length-1].x;
-                const sp = toCanvasX(s)-gPad, ep = toCanvasX(e)-gPad;
+                const startPx = toCanvasX(plottedPoints[0].x) - gPad;
+                const endPx   = toCanvasX(plottedPoints[plottedPoints.length - 1].x) - gPad;
                 let first = true;
-                for (let px = sp; px <= ep; px++) {
-                    const x = xMin + (px/gW)*(xMax-xMin), y = x*x + fc.c;
-                    if (first) { ctx.moveTo(gPad+px, toCanvasY(y)); first=false; }
-                    else ctx.lineTo(gPad+px, toCanvasY(y));
+                for (let px = startPx; px <= endPx; px++) {
+                    const x = xMin + (px / gW) * (xMax - xMin);
+                    const y = x * x + fc.c;
+                    if (first) { ctx.moveTo(gPad + px, toCanvasY(y)); first = false; }
+                    else ctx.lineTo(gPad + px, toCanvasY(y));
                 }
                 ctx.stroke(); ctx.restore();
             }
 
             plottedPoints.forEach((pt, idx) => {
                 const cx = toCanvasX(pt.x), cy = toCanvasY(pt.y);
+
                 ctx.save();
                 ctx.beginPath(); ctx.rect(gPad, gPad, gW, gH); ctx.clip();
-                ctx.setLineDash([4,3]); ctx.strokeStyle = 'rgba(100,100,100,0.3)'; ctx.lineWidth = 1.5;
+                // Dashed crosshairs
+                ctx.setLineDash([4, 3]); ctx.strokeStyle = 'rgba(100,100,100,0.3)'; ctx.lineWidth = 1.5;
                 ctx.beginPath(); ctx.moveTo(cx, toCanvasY(0)); ctx.lineTo(cx, cy); ctx.stroke();
                 ctx.beginPath(); ctx.moveTo(toCanvasX(0), cy); ctx.lineTo(cx, cy); ctx.stroke();
                 ctx.setLineDash([]); ctx.restore();
 
                 // Dot
-                ctx.beginPath(); ctx.arc(cx, cy, 7, 0, Math.PI*2);
+                ctx.beginPath(); ctx.arc(cx, cy, 7, 0, Math.PI * 2);
                 ctx.fillStyle = fc.graphColor; ctx.fill();
-                ctx.beginPath(); ctx.arc(cx, cy, 3, 0, Math.PI*2);
+                ctx.beginPath(); ctx.arc(cx, cy, 3, 0, Math.PI * 2);
                 ctx.fillStyle = '#fff'; ctx.fill();
 
+                // Label
                 ctx.fillStyle = fc.graphColor; ctx.font = 'bold 11px "JetBrains Mono", monospace';
                 ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
-                ctx.fillText(labels[idx]||'', cx+10, cy-6);
+                ctx.fillText(labels[idx] || '', cx + 10, cy - 5);
                 ctx.fillStyle = '#555'; ctx.font = '10px "JetBrains Mono", monospace'; ctx.textBaseline = 'top';
-                ctx.fillText(`(${pt.x}, ${pt.y})`, cx+10, cy-3);
+                ctx.fillText(`(${pt.x}, ${pt.y})`, cx + 10, cy - 2);
             });
         }
 
-        function plotPoint(x, y) { plottedPoints.push({x,y}); redrawGraph(); updatePointsList(); }
-        function clearPoints() { plottedPoints = []; redrawGraph(); updatePointsList(); }
-        function redrawGraph() { drawGrid(); drawPoints(); }
+        function plotPoint(x, y) { plottedPoints.push({x, y}); redrawGraph(); updatePointsList(); }
+        function clearPoints()   { plottedPoints = []; redrawGraph(); updatePointsList(); }
+        function redrawGraph()   { drawGrid(); drawPoints(); }
 
         function updatePointsList() {
             const el = document.getElementById('pointsList');
             if (!plottedPoints.length) { el.textContent = 'Points: —'; return; }
             const labels = ['A','B','C','D','E'];
-            el.textContent = 'Points: ' + plottedPoints.map((pt,i) => `${labels[i]}(${pt.x}, ${pt.y})`).join('  ');
+            el.textContent = 'Points: ' + plottedPoints.map((pt, i) => `${labels[i]}(${pt.x}, ${pt.y})`).join('  ');
         }
 
         // ===== AREA VISUAL =====
+        /*
+          Layout (all anchored bottom=0 inside .square-anchor):
+
+          mode=base:
+            areaRect  → width=side, height=side  (the x² square, blue)
+            strips hidden
+
+          mode=plus (c=+5):
+            refSquare → width=side, height=side  (dashed red outline = x²)
+            areaRect  → width=side, height=side  (solid teal = the x² portion, bottom=0)
+            stripAbove→ width=side, height=stripH, bottom=side (floats above x²)
+
+          mode=minus (c=-5):
+            refSquare → width=side, height=side  (dashed red outline = x²)
+            areaRect  → width=side, height=side  (full orange rect)
+            stripBelow→ height=stripH  (hatched at bottom of rect = the removed −5)
+        */
         function showAreaVisual(inputVal) {
-            const fc = funcs[currentFunc];
-            const c = fc.c;
-            const x2 = inputVal * inputVal;
+            const fc    = funcs[currentFunc];
+            const c     = fc.c;
+            const x2    = inputVal * inputVal;
             const output = x2 + c;
-            const side = inputVal * PX_PER_UNIT;
-            const rect = document.getElementById('areaRect');
-            const refSq = document.getElementById('refSquare');
-            const refLabel = document.getElementById('refLabel');
-            const topStrip = document.getElementById('topStrip');
-            const bottomStrip = document.getElementById('bottomStrip');
+            const side   = inputVal * PX_PER_UNIT;           // px for x²
+            const stripH = Math.abs(c) * C_PX_PER_UNIT;     // px for ±c strip
+
+            const anchor      = document.getElementById('squareAnchor');
+            const refSq       = document.getElementById('refSquare');
+            const refLabel    = document.getElementById('refLabel');
+            const areaRect    = document.getElementById('areaRect');
+            const stripAbove  = document.getElementById('stripAbove');
+            const stripBelow  = document.getElementById('stripBelow');
+            const sqCenter    = document.getElementById('sqCenter');
+            const sqRight     = document.getElementById('sqRight');
+            const sqBottom    = document.getElementById('sqBottom');
+
+            // Set anchor width so dim labels sit correctly
+            anchor.style.width = side + 'px';
 
             // Reset strips
-            topStrip.style.opacity = '0';
-            topStrip.style.height = '0px';
-            bottomStrip.style.opacity = '0';
-            bottomStrip.style.height = '0px';
+            stripAbove.style.opacity = '0'; stripAbove.style.height = '0';
+            stripBelow.style.opacity = '0'; stripBelow.style.height = '0';
+            refSq.style.width  = '0'; refSq.style.height = '0';
+            refLabel.style.opacity = '0';
 
             if (currentFunc === 'base') {
-                // Normal x² square
-                rect.style.width = side + 'px';
-                rect.style.height = side + 'px';
-                refSq.style.width = '0px';
-                refSq.style.height = '0px';
-                refLabel.style.opacity = '0';
-
-                document.getElementById('sqCenter').textContent = x2 + ' units²';
+                // Simple x² square
+                areaRect.style.width  = side + 'px';
+                areaRect.style.height = side + 'px';
+                areaRect.style.bottom = '0';
+                sqCenter.innerHTML = `${x2} units²`;
 
             } else if (currentFunc === 'plus') {
-                // x² + 1: show x² square + a striped band on top for the +1
-                const stripH = C_PX; // 1 unit = 46px
-                const totalH = side + stripH;
-                rect.style.width = side + 'px';
-                rect.style.height = totalH + 'px';
+                // x² body (teal) + striped band above for +5
+                areaRect.style.width  = side + 'px';
+                areaRect.style.height = side + 'px';
+                areaRect.style.bottom = '0';
 
-                // Reference square outline (just the x² part)
-                refSq.style.width = side + 'px';
+                // Dashed red reference outline
+                refSq.style.width  = side + 'px';
                 refSq.style.height = side + 'px';
-                refLabel.textContent = 'x² = ' + x2;
+                refLabel.textContent = `x² = ${x2}`;
                 refLabel.style.opacity = '1';
 
-                // Show +1 strip on top
-                topStrip.style.height = stripH + 'px';
-                topStrip.style.opacity = '1';
-                topStrip.textContent = '+1';
+                // +5 strip floats above the x² rect
+                stripAbove.style.width  = side + 'px';
+                stripAbove.style.height = stripH + 'px';
+                stripAbove.style.bottom = side + 'px';   // sits on top of x²
+                stripAbove.style.left   = '0';
+                stripAbove.textContent  = `+${Math.abs(c)}`;
+                stripAbove.style.opacity = '1';
 
-                document.getElementById('sqCenter').innerHTML = output + ' units²<br><span style="font-size:11px;opacity:0.8;">= ' + x2 + ' + 1</span>';
+                sqCenter.innerHTML = `${output} units²<br><span style="font-size:11px;opacity:0.85;">${x2} + ${Math.abs(c)}</span>`;
 
             } else if (currentFunc === 'minus') {
-                // x² - 1: show the x² reference outline, fill only x²-1
-                // Main rect is the x² size, but bottom strip is hatched to show removed area
-                rect.style.width = side + 'px';
-                rect.style.height = side + 'px';
+                // Full x² orange rect with hatched strip at bottom showing −5 removed
+                areaRect.style.width  = side + 'px';
+                areaRect.style.height = side + 'px';
+                areaRect.style.bottom = '0';
 
-                // Reference square outline (full x²)
-                refSq.style.width = side + 'px';
+                // Dashed red reference outline
+                refSq.style.width  = side + 'px';
                 refSq.style.height = side + 'px';
-                refLabel.textContent = 'x² = ' + x2;
+                refLabel.textContent = `x² = ${x2}`;
                 refLabel.style.opacity = '1';
 
-                // Show -1 hatched strip at bottom (the removed portion)
-                const stripH = C_PX;
-                bottomStrip.style.height = stripH + 'px';
-                bottomStrip.style.opacity = '1';
-                bottomStrip.textContent = '−1';
+                // −5 hatched strip at bottom of the rect
+                stripBelow.style.height = stripH + 'px';
+                stripBelow.textContent  = `−${Math.abs(c)}`;
+                stripBelow.style.opacity = '1';
 
-                document.getElementById('sqCenter').innerHTML = output + ' units²<br><span style="font-size:11px;opacity:0.8;">= ' + x2 + ' − 1</span>';
+                sqCenter.innerHTML = `${output} units²<br><span style="font-size:11px;opacity:0.85;">${x2} − ${Math.abs(c)}</span>`;
             }
 
-            document.getElementById('sqCenter').style.opacity = '1';
-            document.getElementById('sqRight').textContent = inputVal + ' w';
-            document.getElementById('sqRight').style.opacity = '1';
-            document.getElementById('sqBottom').textContent = inputVal + ' w';
-            document.getElementById('sqBottom').style.opacity = '1';
+            sqCenter.style.opacity = '1';
+            sqRight.textContent    = inputVal + ' u';
+            sqRight.style.opacity  = '1';
+            sqBottom.textContent   = inputVal + ' u';
+            sqBottom.style.opacity = '1';
         }
 
         // ===== ANIMATION =====
@@ -1002,59 +1070,58 @@
         }
 
         function setCalcLines(input) {
-            const fc = funcs[currentFunc];
-            const c = fc.c;
-            const x2 = input * input;
-            const output = x2 + c;
-            const cStr = c > 0 ? ' + ' + c : (c < 0 ? ' − ' + Math.abs(c) : '');
-            const cLabel = c > 0 ? '+' + c : (c < 0 ? '−' + Math.abs(c) : '');
+            const fc  = funcs[currentFunc];
+            const c   = fc.c;
+            const x2  = input * input;
+            const out = x2 + c;
+            const cStr = c > 0 ? ` + ${c}` : (c < 0 ? ` − ${Math.abs(c)}` : '');
 
             document.getElementById('line1').textContent = `f(${input}) = ${input}²${cStr}`;
-            document.getElementById('line2').textContent = `f(${input}) = ${input} × ${input}${cStr}`;
+            document.getElementById('line2').textContent = `f(${input}) = ${input}×${input}${cStr}`;
             document.getElementById('line3').textContent = `f(${input}) = ${x2}${cStr}`;
-            document.getElementById('line4').textContent = `f(${input}) = ${output}`;
+            document.getElementById('line4').textContent = `f(${input}) = ${out}`;
         }
 
-        function hideAllLines() { for (let i=1;i<=4;i++) document.getElementById('line'+i).classList.remove('visible'); }
-        function showLine(n) { document.getElementById('line'+n).classList.add('visible'); }
+        function hideAllLines() { for (let i = 1; i <= 4; i++) document.getElementById('line'+i).classList.remove('visible'); }
+        function showLine(n)    { document.getElementById('line'+n).classList.add('visible'); }
 
         function showInputLine(val) {
             document.getElementById('greenLine').style.height = (val * PX_PER_UNIT) + 'px';
-            document.getElementById('lineLabel').textContent = val + ' units';
+            document.getElementById('lineLabel').textContent   = val + ' units';
             document.getElementById('lineLabel').style.opacity = '1';
         }
 
         function hideVisuals() {
-            document.getElementById('greenLine').style.height = '0px';
-            document.getElementById('lineLabel').style.opacity = '0';
-            document.getElementById('areaRect').style.width = '0px';
-            document.getElementById('areaRect').style.height = '0px';
-            document.getElementById('refSquare').style.width = '0px';
-            document.getElementById('refSquare').style.height = '0px';
-            document.getElementById('refLabel').style.opacity = '0';
-            document.getElementById('sqCenter').style.opacity = '0';
-            document.getElementById('sqRight').style.opacity = '0';
-            document.getElementById('sqBottom').style.opacity = '0';
-            document.getElementById('topStrip').style.opacity = '0';
-            document.getElementById('topStrip').style.height = '0px';
-            document.getElementById('bottomStrip').style.opacity = '0';
-            document.getElementById('bottomStrip').style.height = '0px';
+            document.getElementById('greenLine').style.height   = '0px';
+            document.getElementById('lineLabel').style.opacity  = '0';
+            document.getElementById('areaRect').style.height    = '0';
+            document.getElementById('areaRect').style.width     = '0';
+            document.getElementById('refSquare').style.width    = '0';
+            document.getElementById('refSquare').style.height   = '0';
+            document.getElementById('refLabel').style.opacity   = '0';
+            document.getElementById('sqCenter').style.opacity   = '0';
+            document.getElementById('sqRight').style.opacity    = '0';
+            document.getElementById('sqBottom').style.opacity   = '0';
+            document.getElementById('stripAbove').style.opacity = '0';
+            document.getElementById('stripAbove').style.height  = '0';
+            document.getElementById('stripBelow').style.opacity = '0';
+            document.getElementById('stripBelow').style.height  = '0';
         }
 
         function animateStep() {
             if (animationInProgress) return;
             animationInProgress = true;
 
-            const fc = funcs[currentFunc];
+            const fc    = funcs[currentFunc];
             const input = inputs[currentStep];
             const output = input * input + fc.c;
             if (currentStep === 0 && plottedPoints.length > 0) clearPoints();
 
-            const ball = document.getElementById('movingBall');
-            const inputEl = document.getElementById('inputValue');
-            const outputEl = document.getElementById('outputValue');
-            const stepEl = document.getElementById('stepIndicator');
-            const functionBox = document.getElementById('functionBox');
+            const ball       = document.getElementById('movingBall');
+            const inputEl    = document.getElementById('inputValue');
+            const outputEl   = document.getElementById('outputValue');
+            const stepEl     = document.getElementById('stepIndicator');
+            const functionBox= document.getElementById('functionBox');
 
             stepEl.textContent = `Step ${currentStep+1}: ${fc.label} → x = ${input} → y = ?`;
             hideAllLines(); setCalcLines(input);
@@ -1064,47 +1131,55 @@
             requestAnimationFrame(() => { inputEl.style.animation = 'pulse 0.4s ease'; });
 
             showInputLine(input);
-            // Reset area
-            document.getElementById('areaRect').style.width = '0px';
-            document.getElementById('areaRect').style.height = '0px';
-            document.getElementById('refSquare').style.width = '0px';
-            document.getElementById('refSquare').style.height = '0px';
-            document.getElementById('refLabel').style.opacity = '0';
-            document.getElementById('sqCenter').style.opacity = '0';
-            document.getElementById('sqRight').style.opacity = '0';
-            document.getElementById('sqBottom').style.opacity = '0';
-            document.getElementById('topStrip').style.opacity = '0';
-            document.getElementById('topStrip').style.height = '0px';
-            document.getElementById('bottomStrip').style.opacity = '0';
-            document.getElementById('bottomStrip').style.height = '0px';
 
-            const inputPos = getCenter(document.getElementById('inputWrapper'));
-            const boxPos = getCenter(functionBox);
+            // Reset area
+            document.getElementById('areaRect').style.height    = '0';
+            document.getElementById('areaRect').style.width     = '0';
+            document.getElementById('refSquare').style.width    = '0';
+            document.getElementById('refSquare').style.height   = '0';
+            document.getElementById('refLabel').style.opacity   = '0';
+            document.getElementById('sqCenter').style.opacity   = '0';
+            document.getElementById('sqRight').style.opacity    = '0';
+            document.getElementById('sqBottom').style.opacity   = '0';
+            document.getElementById('stripAbove').style.opacity = '0';
+            document.getElementById('stripAbove').style.height  = '0';
+            document.getElementById('stripBelow').style.opacity = '0';
+            document.getElementById('stripBelow').style.height  = '0';
+
+            const inputPos  = getCenter(document.getElementById('inputWrapper'));
+            const boxPos    = getCenter(functionBox);
             const outputPos = getCenter(document.getElementById('outputWrapper'));
 
+            // Ball: input → box
             ball.textContent = input;
-            ball.className = 'moving-ball green';
+            ball.className   = 'moving-ball green';
             ball.style.transition = 'none';
-            ball.style.left = inputPos.x+'px'; ball.style.top = inputPos.y+'px';
-            ball.style.opacity = '1'; ball.style.animation = 'popIn 0.35s ease forwards';
+            ball.style.left   = inputPos.x + 'px';
+            ball.style.top    = inputPos.y + 'px';
+            ball.style.opacity = '1';
+            ball.style.animation = 'popIn 0.35s ease forwards';
 
             addTimeout(() => {
-                ball.style.animation = '';
-                ball.style.transform = 'translate(-50%,-50%) scale(1)';
-                ball.style.transition = 'left 0.7s cubic-bezier(0.4,0,0.2,1), top 0.7s cubic-bezier(0.4,0,0.2,1)';
-                ball.style.left = boxPos.x+'px'; ball.style.top = boxPos.y+'px';
+                ball.style.animation   = '';
+                ball.style.transform   = 'translate(-50%,-50%) scale(1)';
+                ball.style.transition  = 'left 0.7s cubic-bezier(0.4,0,0.2,1), top 0.7s cubic-bezier(0.4,0,0.2,1)';
+                ball.style.left = boxPos.x + 'px';
+                ball.style.top  = boxPos.y + 'px';
             }, 600);
 
+            // Processing pulse
             addTimeout(() => {
                 ball.className = 'moving-ball orange';
                 ball.style.transition = 'transform 0.25s ease, opacity 0.25s ease';
-                ball.style.transform = 'translate(-50%,-50%) scale(0.4)'; ball.style.opacity = '0.3';
+                ball.style.transform  = 'translate(-50%,-50%) scale(0.4)';
+                ball.style.opacity    = '0.3';
                 functionBox.style.transform = 'scale(1.06)';
                 addTimeout(() => { functionBox.style.transform = 'scale(0.96)'; }, 100);
                 addTimeout(() => { functionBox.style.transform = 'scale(1.02)'; }, 200);
-                addTimeout(() => { functionBox.style.transform = 'scale(1)'; }, 300);
+                addTimeout(() => { functionBox.style.transform = 'scale(1)'; },    300);
             }, 1500);
 
+            // Calc lines
             addTimeout(() => { showLine(1); }, 2100);
             addTimeout(() => { showLine(2); }, 2700);
             addTimeout(() => { showLine(3); }, 3300);
@@ -1113,18 +1188,21 @@
                 stepEl.textContent = `Step ${currentStep+1}: ${fc.label} → x = ${input} → y = ${output}`;
             }, 3900);
 
+            // Ball becomes output value, area appears
             addTimeout(() => {
                 ball.textContent = output;
-                ball.className = 'moving-ball blue';
-                ball.style.opacity = '1';
+                ball.className   = 'moving-ball blue';
+                ball.style.opacity    = '1';
                 ball.style.transition = 'transform 0.3s ease-out';
-                ball.style.transform = 'translate(-50%,-50%) scale(1)';
+                ball.style.transform  = 'translate(-50%,-50%) scale(1)';
                 showAreaVisual(input);
             }, 4600);
 
+            // Ball travels to output circle
             addTimeout(() => {
                 ball.style.transition = 'left 0.7s cubic-bezier(0.4,0,0.2,1), top 0.7s cubic-bezier(0.4,0,0.2,1)';
-                ball.style.left = outputPos.x+'px'; ball.style.top = outputPos.y+'px';
+                ball.style.left = outputPos.x + 'px';
+                ball.style.top  = outputPos.y + 'px';
             }, 5000);
 
             addTimeout(() => {
@@ -1134,8 +1212,10 @@
                 ball.style.animation = 'popOut 0.3s ease forwards';
             }, 5900);
 
+            // Plot point on graph
             addTimeout(() => { plotPoint(input, output); }, 6300);
 
+            // Next step
             addTimeout(() => {
                 ball.style.opacity = '0'; ball.style.animation = '';
                 animationInProgress = false;
@@ -1147,9 +1227,9 @@
         function play() {
             if (!isPlaying) {
                 isPlaying = true;
-                document.getElementById('playBtn').disabled = true;
+                document.getElementById('playBtn').disabled  = true;
                 document.getElementById('pauseBtn').disabled = false;
-                document.getElementById('stopBtn').disabled = false;
+                document.getElementById('stopBtn').disabled  = false;
                 document.querySelectorAll('.func-btn').forEach(b => b.style.pointerEvents = 'none');
                 if (!animationInProgress) animateStep();
             }
@@ -1158,29 +1238,29 @@
         function pause() {
             if (isPlaying) {
                 isPlaying = false;
-                document.getElementById('playBtn').disabled = false;
+                document.getElementById('playBtn').disabled  = false;
                 document.getElementById('pauseBtn').disabled = true;
             }
         }
 
         function stop() {
             isPlaying = false; animationInProgress = false; clearAllTimeouts(); currentStep = 0;
-            document.getElementById('movingBall').style.transition = 'none';
-            document.getElementById('movingBall').style.opacity = '0';
-            document.getElementById('movingBall').style.animation = '';
-            document.getElementById('inputValue').textContent = '?';
+            const ball = document.getElementById('movingBall');
+            ball.style.transition = 'none'; ball.style.opacity = '0'; ball.style.animation = '';
+            document.getElementById('inputValue').textContent  = '?';
             document.getElementById('outputValue').textContent = '?';
             document.getElementById('stepIndicator').textContent = `Selected ${funcs[currentFunc].label} — Press Play`;
             document.getElementById('functionBox').style.transform = 'scale(1)';
             hideAllLines(); hideVisuals(); clearPoints();
-            document.getElementById('playBtn').disabled = false;
+            document.getElementById('playBtn').disabled  = false;
             document.getElementById('pauseBtn').disabled = true;
-            document.getElementById('stopBtn').disabled = true;
+            document.getElementById('stopBtn').disabled  = true;
             document.querySelectorAll('.func-btn').forEach(b => b.style.pointerEvents = 'auto');
         }
 
         // Init
-        hideAllLines(); redrawGraph();
+        hideAllLines();
+        redrawGraph();
     </script>
 </body>
 </html>
