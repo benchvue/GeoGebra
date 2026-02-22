@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quadratic Function Explorer</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #f5f2eb;
+    font-family: 'JetBrains Mono', monospace;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    padding: 24px 16px;
+  }
+
+  h1 {
+    font-family: 'Crimson Pro', serif;
+    font-size: 2rem;
+    font-style: italic;
+    color: #1a1a1a;
+    margin-bottom: 4px;
+    letter-spacing: -0.5px;
+  }
+
+  .formula {
+    font-family: 'Crimson Pro', serif;
+    font-size: 1.15rem;
+    color: #555;
+    margin-bottom: 20px;
+    font-style: italic;
+  }
+
+  .container {
+    display: flex;
+    gap: 28px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  canvas {
+    background: #fff;
+    border: 1.5px solid #bbb;
+    border-radius: 2px;
+    box-shadow: 4px 4px 0 #d9d3c8;
+    display: block;
+  }
+
+  .controls {
+    background: #fff;
+    border: 1.5px solid #bbb;
+    border-radius: 2px;
+    box-shadow: 4px 4px 0 #d9d3c8;
+    padding: 24px 20px;
+    min-width: 220px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .ctrl-group label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin-bottom: 8px;
+  }
+
+  .ctrl-group label span.val {
+    font-size: 0.9rem;
+    min-width: 32px;
+    text-align: right;
+    color: #333;
+  }
+
+  input[type=range] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 4px;
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+  }
+
+  input[type=range].m-slider { background: #555; }
+  input[type=range].a-slider { background: #4a7fc1; }
+  input[type=range].b-slider { background: #c94040; }
+
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 1.5px #888;
+  }
+
+  input[type=range].m-slider::-webkit-slider-thumb { background: #444; box-shadow: 0 0 0 1.5px #444; }
+  input[type=range].a-slider::-webkit-slider-thumb { background: #4a7fc1; box-shadow: 0 0 0 1.5px #4a7fc1; }
+  input[type=range].b-slider::-webkit-slider-thumb { background: #c94040; box-shadow: 0 0 0 1.5px #c94040; }
+
+  .legend {
+    border-top: 1px solid #e0dbd2;
+    padding-top: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 0.75rem;
+    color: #444;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .dot {
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+</style>
+</head>
+<body>
+
+<h1>Quadratic Explorer</h1>
+<p class="formula">f(x) = m(x − a)² + b</p>
+
+<div class="container">
+  <canvas id="graph" width="520" height="480"></canvas>
+
+  <div class="controls">
+    <div class="ctrl-group">
+      <label>
+        m <span style="color:#888;font-weight:400;font-size:0.75rem">narrowness</span>
+        <span class="val" id="mVal">2</span>
+      </label>
+      <input type="range" class="m-slider" id="mSlider" min="-5" max="5" step="0.1" value="2">
+    </div>
+
+    <div class="ctrl-group">
+      <label>
+        a <span style="color:#888;font-weight:400;font-size:0.75rem">x-offset</span>
+        <span class="val" id="aVal">1</span>
+      </label>
+      <input type="range" class="a-slider" id="aSlider" min="-4" max="4" step="0.1" value="1">
+    </div>
+
+    <div class="ctrl-group">
+      <label>
+        b <span style="color:#888;font-weight:400;font-size:0.75rem">y-offset</span>
+        <span class="val" id="bVal">1</span>
+      </label>
+      <input type="range" class="b-slider" id="bSlider" min="-4" max="4" step="0.1" value="1">
+    </div>
+
+    <div class="legend">
+      <div class="legend-item">
+        <div class="dot" style="background:#1a7a50;border:2px solid #1a7a50"></div>
+        <span>O (a, b) — vertex / origin</span>
+      </div>
+      <div class="legend-item">
+        <div class="dot" style="background:#4a7fc1;border:2px solid #4a7fc1"></div>
+        <span>A (a, 0) — x-axis offset</span>
+      </div>
+      <div class="legend-item">
+        <div class="dot" style="background:#c94040;border:2px solid #c94040"></div>
+        <span>B (0, b) — y-axis offset</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const canvas = document.getElementById('graph');
+const ctx = canvas.getContext('2d');
+
+let m = 2, a = 1, b = 1;
+
+const W = canvas.width, H = canvas.height;
+const PADDING = 48;
+const PLOT_W = W - PADDING * 2;
+const PLOT_H = H - PADDING * 2;
+
+// World range
+const X_MIN = -3, X_MAX = 6;
+const Y_MIN = -3, Y_MAX = 6;
+
+function toCanvas(wx, wy) {
+  const cx = PADDING + (wx - X_MIN) / (X_MAX - X_MIN) * PLOT_W;
+  const cy = PADDING + (1 - (wy - Y_MIN) / (Y_MAX - Y_MIN)) * PLOT_H;
+  return [cx, cy];
+}
+
+function draw() {
+  ctx.clearRect(0, 0, W, H);
+
+  // White background
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0, 0, W, H);
+
+  // Grid
+  ctx.strokeStyle = '#e0e0e0';
+  ctx.lineWidth = 0.8;
+  for (let x = Math.ceil(X_MIN); x <= X_MAX; x++) {
+    const [cx] = toCanvas(x, 0);
+    ctx.beginPath(); ctx.moveTo(cx, PADDING); ctx.lineTo(cx, PADDING + PLOT_H); ctx.stroke();
+  }
+  for (let y = Math.ceil(Y_MIN); y <= Y_MAX; y++) {
+    const [, cy] = toCanvas(0, y);
+    ctx.beginPath(); ctx.moveTo(PADDING, cy); ctx.lineTo(PADDING + PLOT_W, cy); ctx.stroke();
+  }
+
+  // Axes
+  ctx.strokeStyle = '#111';
+  ctx.lineWidth = 1.5;
+  // x-axis
+  const [, axisY] = toCanvas(0, 0);
+  ctx.beginPath(); ctx.moveTo(PADDING, axisY); ctx.lineTo(PADDING + PLOT_W, axisY); ctx.stroke();
+  // y-axis
+  const [axisX] = toCanvas(0, 0);
+  ctx.beginPath(); ctx.moveTo(axisX, PADDING); ctx.lineTo(axisX, PADDING + PLOT_H); ctx.stroke();
+
+  // Ticks & labels
+  ctx.fillStyle = '#222';
+  ctx.font = '11px JetBrains Mono, monospace';
+  ctx.textAlign = 'center';
+  for (let x = Math.ceil(X_MIN); x <= X_MAX; x++) {
+    if (x === 0) continue;
+    const [cx, cy0] = toCanvas(x, 0);
+    ctx.beginPath(); ctx.moveTo(cx, cy0 - 4); ctx.lineTo(cx, cy0 + 4);
+    ctx.strokeStyle = '#333'; ctx.lineWidth = 1; ctx.stroke();
+    ctx.fillText(x, cx, cy0 + 15);
+  }
+  ctx.textAlign = 'right';
+  for (let y = Math.ceil(Y_MIN); y <= Y_MAX; y++) {
+    if (y === 0) continue;
+    const [cx0, cy] = toCanvas(0, y);
+    ctx.beginPath(); ctx.moveTo(cx0 - 4, cy); ctx.lineTo(cx0 + 4, cy);
+    ctx.strokeStyle = '#333'; ctx.lineWidth = 1; ctx.stroke();
+    ctx.fillText(y, cx0 - 7, cy + 4);
+  }
+  // Origin label
+  ctx.fillText('0', axisX - 7, axisY + 15);
+
+  // Axis arrow tips
+  ctx.strokeStyle = '#111'; ctx.lineWidth = 1.5;
+  // X arrow
+  ctx.beginPath();
+  ctx.moveTo(PADDING + PLOT_W - 8, axisY - 5);
+  ctx.lineTo(PADDING + PLOT_W + 2, axisY);
+  ctx.lineTo(PADDING + PLOT_W - 8, axisY + 5);
+  ctx.stroke();
+  // Y arrow
+  ctx.beginPath();
+  ctx.moveTo(axisX - 5, PADDING + 8);
+  ctx.lineTo(axisX, PADDING - 2);
+  ctx.lineTo(axisX + 5, PADDING + 8);
+  ctx.stroke();
+
+  // Quadratic curve
+  ctx.strokeStyle = '#1a7a50';
+  ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  let first = true;
+  for (let px = 0; px <= PLOT_W; px++) {
+    const wx = X_MIN + px / PLOT_W * (X_MAX - X_MIN);
+    const wy = m * (wx - a) ** 2 + b;
+    const [cx, cy] = toCanvas(wx, wy);
+    if (first) { ctx.moveTo(cx, cy); first = false; }
+    else ctx.lineTo(cx, cy);
+  }
+  ctx.stroke();
+
+  // Dashed helper lines from vertex to axes
+  ctx.setLineDash([4, 4]);
+  ctx.lineWidth = 1;
+  ctx.strokeStyle = '#bbb';
+  // vertical from (a,b) to (a,0)
+  const [ax, ay] = toCanvas(a, b);
+  const [ax2, ay2] = toCanvas(a, 0);
+  ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(ax2, ay2); ctx.stroke();
+  // horizontal from (a,b) to (0,b)
+  const [bx, by] = toCanvas(0, b);
+  ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(bx, by); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Point A (a, 0) — blue
+  drawPoint(a, 0, '#4a7fc1', 'A', 'right', -10, 12);
+  // Point B (0, b) — red
+  drawPoint(0, b, '#c94040', 'B', 'left', 14, 0);
+  // Point O (a, b) — green (vertex)
+  drawPoint(a, b, '#1a7a50', 'O', 'right', -10, -8);
+}
+
+function drawPoint(wx, wy, color, label, align, dx, dy) {
+  const [cx, cy] = toCanvas(wx, wy);
+  ctx.beginPath();
+  ctx.arc(cx, cy, 6, 0, Math.PI * 2);
+  ctx.fillStyle = color;
+  ctx.fill();
+  ctx.strokeStyle = '#fff';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  ctx.fillStyle = color;
+  ctx.font = '600 12px JetBrains Mono, monospace';
+  ctx.textAlign = align === 'right' ? 'right' : 'left';
+  ctx.fillText(label, cx + dx, cy + dy);
+}
+
+// Sliders
+document.getElementById('mSlider').addEventListener('input', e => {
+  m = parseFloat(e.target.value);
+  document.getElementById('mVal').textContent = m;
+  draw();
+});
+document.getElementById('aSlider').addEventListener('input', e => {
+  a = parseFloat(e.target.value);
+  document.getElementById('aVal').textContent = a;
+  draw();
+});
+document.getElementById('bSlider').addEventListener('input', e => {
+  b = parseFloat(e.target.value);
+  document.getElementById('bVal').textContent = b;
+  draw();
+});
+
+draw();
+</script>
+</body>
+</html>

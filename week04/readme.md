@@ -180,6 +180,50 @@ Interactive math function animations designed to help students understand how fu
 
 ---
 
+### 6. Quadratic Explorer — f(x) = m(x − a)² + b (vertex form with sliders)
+
+> Full vertex-form explorer: **three real-time sliders** control the shape and position of the parabola, showing how each parameter independently affects the curve, the vertex, and its projections onto the axes.
+
+[![Open Demo 6](https://img.shields.io/badge/▶%20Open%20Live%20Demo-Quadratic%20Explorer-e67e22?style=for-the-badge&logo=github)](https://benchvue.github.io/GeoGebra/week04/function-quadratic.html)
+
+```
+         ┌──────────────┐   ┌──────────────┐   ┌──────────────┐
+         │    m = 2     │   │    a = 1     │   │    b = 1     │
+         │  narrowness  │   │  x-offset   │   │  y-offset   │
+         └──────────────┘   └──────────────┘   └──────────────┘
+                    ◄────────────── sliders ──────────────►
+
+                              y
+                              │        ╭─╮
+                              │       ╱   ╲
+                  B (0, b) ●──┼──────╱─────╲────
+                    (red)  │  │     ╱   O(a,b)
+                              │    ╱    ● (green)
+                              │   ╱
+                              │  ╱
+                              ──┼──────●──────────── x
+                                │    A(a,0)
+                                │    (blue)
+
+         f(x) = m(x − a)² + b       vertex form
+```
+
+**Features:**
+- **Interactive sliders** for all three vertex-form parameters, updated in real time:
+  - **m** (narrowness) — stretches or compresses the parabola; positive opens upward, negative opens downward
+  - **a** (x-offset) — shifts the vertex left and right along the x-axis
+  - **b** (y-offset) — shifts the vertex up and down along the y-axis
+- **Three labeled key points** that move live with the sliders:
+  - 🟢 **O (a, b)** — the vertex of the parabola (dark green)
+  - 🔵 **A (a, 0)** — projection of the vertex onto the x-axis (blue)
+  - 🔴 **B (0, b)** — projection of the vertex onto the y-axis (red)
+- **Dashed helper lines** connecting the vertex to both axis projections for easy reading
+- **White background coordinate plane** with black grid lines, tick marks, and axis labels
+- **Dark green parabola** redrawn instantly as sliders change
+- No animation loop — fully manual, student-driven exploration
+
+---
+
 ## 🧠 How It Works
 
 Each animation demonstrates the same core concept in increasing detail:
@@ -216,6 +260,14 @@ Input (x)  →  f(x) = x²  →  Output (y = x²)
 | 4    | 4         | 16       | 17           | 15           |
 | 5    | 5         | 25       | 26           | 24           |
 
+### Version 6 — Vertex Form Parameter Effects (m, a, b)
+
+| Parameter | Default | Effect on Parabola                                      |
+|-----------|---------|---------------------------------------------------------|
+| m         | 2       | Larger \|m\| → narrower; smaller \|m\| → wider; m < 0 → flips downward |
+| a         | 1       | Shifts vertex (and curve) left (−) or right (+) along x-axis |
+| b         | 1       | Shifts vertex (and curve) down (−) or up (+) along y-axis   |
+
 ### Visual Progression Across Versions
 
 ```
@@ -234,6 +286,9 @@ Version 4:  [ x² ] [ 2x² ] [ ½x² ]  ← "a" Selector (narrow / wide)
 Version 5:  [ x² ] [ x²+1 ] [ x²−1 ]  ← "c" Selector (shift up / down)
             [ Input ] ──► [ Function Box ] ──► [ Output ]
             │ Green Line │  →  │ Area (with ±c strip) │  →  │ X-Y Graph (3 curves) │
+
+Version 6:  ◄── m slider ──►  ◄── a slider ──►  ◄── b slider ──►
+            │ Live coordinate plane │ → │ O(a,b) vertex │ → │ A(a,0) + B(0,b) projections │
 ```
 
 ---
@@ -264,6 +319,14 @@ Version 5 adds:
 | **x²+1**     | Select shifted-up parabola (c = +1)           |
 | **x²−1**     | Select shifted-down parabola (c = −1)         |
 
+Version 6 adds:
+
+| Control      | Action                                                   |
+|--------------|----------------------------------------------------------|
+| **m slider** | Drag to change narrowness / direction (range: −5 to 5)  |
+| **a slider** | Drag to shift the vertex left or right (range: −4 to 4) |
+| **b slider** | Drag to shift the vertex up or down (range: −4 to 4)    |
+
 ---
 
 ## 📁 File Structure
@@ -275,6 +338,7 @@ week04/
 ├── squre-x-y-drawing.html      # Version 3: + Coordinate plane graphing
 ├── quadratic-a.html            # Version 4: + Coefficient explorer (x², 2x², ½x²)
 ├── quadratic-c.html            # Version 5: + Y-intercept explorer (x², x²+1, x²−1)
+├── function-quadratic.html     # Version 6: + Quadratic explorer f(x) = m(x−a)²+b
 └── readme.md                   # This file
 ```
 
@@ -313,13 +377,14 @@ These visualizations support teaching **function concepts** in algebra and pre-c
 - **Parabola shape** — seeing how y = x² creates the classic U-shaped curve
 - **Effect of coefficients** — how the leading coefficient *a* stretches or compresses the parabola and scales the output area (Version 4)
 - **Vertical shifts** — how the constant *c* moves the parabola up or down, changing the y-intercept without changing the shape (Version 5)
+- **Vertex form** — how m, a, and b in f(x) = m(x − a)² + b each independently control the shape, horizontal position, and vertical position of the parabola (Version 6)
 
 ---
 
 ## 📝 Technical Notes
 
 - All animations are pure **HTML / CSS / JavaScript** with no external dependencies
-- Canvas API is used for the coordinate plane graph (Versions 3, 4 & 5)
+- Canvas API is used for the coordinate plane graph (Versions 3, 4, 5 & 6)
 - CSS transitions and `setTimeout` for animation sequencing
 - Responsive design works on desktop and tablet browsers
 - Each HTML file is fully self-contained (single file, no build step)
