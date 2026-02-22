@@ -66,7 +66,6 @@
             font-weight: 900;
             color: white;
             box-shadow: 0 6px 18px rgba(0,0,0,0.22);
-            transition: transform 0.3s ease;
         }
 
         .circle.green { background: linear-gradient(135deg, #27ae60, #219150); }
@@ -144,17 +143,20 @@
             margin-bottom: 28px;
         }
 
-        /* ── BOTTOM ROW ── */
-        .bottom-row {
+        /* ══════════════════════════════════════════
+           BOTTOM SECTION: visuals row + slider row
+        ══════════════════════════════════════════ */
+
+        /* Row 1: green line | arrow | blue square — all vertically centered */
+        .visuals-row {
             display: flex;
-            gap: 24px;
-            align-items: flex-end;
+            align-items: center;       /* vertical center */
             justify-content: center;
-            margin-bottom: 32px;
+            gap: 32px;
+            margin-bottom: 28px;
         }
 
-        /* INPUT VISUAL */
-        .input-visual {
+        .visual-col {
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -168,11 +170,12 @@
             text-align: center;
         }
 
+        /* ── Green line ── */
         .line-container {
             width: 50px;
             height: 260px;
             display: flex;
-            align-items: flex-end;
+            align-items: center;       /* vertically center the line */
             justify-content: center;
             position: relative;
         }
@@ -197,14 +200,78 @@
             white-space: nowrap;
         }
 
-        /* SLIDER */
-        .slider-section {
+        /* ── Center arrow ── */
+        .center-arrow {
+            font-size: 34px;
+            color: #2c3e50;
+            flex-shrink: 0;
+            /* no extra padding — flexbox handles vertical centering */
+        }
+
+        /* ── Blue square ── */
+        .square-container {
+            width: 260px;
+            height: 260px;
+            display: flex;
+            align-items: center;       /* vertically center the square */
+            justify-content: center;
+            position: relative;
+        }
+
+        /* Question mark placeholder */
+        .question-mark {
+            width: 80px;
+            height: 80px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #3498db22, #3498db11);
+            border: 3px dashed #3498db66;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Nunito', sans-serif;
+            font-size: 40px;
+            font-weight: 900;
+            color: #3498db88;
+        }
+
+        .blue-square {
+            background: linear-gradient(135deg, #3498db, #2074b0);
+            border-radius: 8px;
+            transition: width 0.7s cubic-bezier(0.4,0,0.2,1), height 0.7s cubic-bezier(0.4,0,0.2,1);
+            box-shadow: 4px 4px 18px rgba(52,152,219,0.4);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: visible;
+        }
+
+        .sq-center-label {
+            font-family: 'Nunito', sans-serif;
+            font-size: 16px;
+            font-weight: 900;
+            color: white;
+            text-shadow: 1px 1px 4px rgba(0,0,0,0.4);
+            white-space: nowrap;
+        }
+
+        .sq-dim {
+            position: absolute;
+            font-size: 12px;
+            font-weight: 700;
+            color: #2074b0;
+            white-space: nowrap;
+        }
+        .sq-dim.right  { right: -46px; top: 50%; transform: translateY(-50%); }
+        .sq-dim.bottom { bottom: -24px; left: 50%; transform: translateX(-50%); }
+
+        /* Row 2: slider — centered, on its own row */
+        .slider-row {
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 10px;
-            justify-content: flex-end;
-            padding-bottom: 4px;
+            margin-bottom: 28px;
         }
 
         .slider-label-row {
@@ -262,88 +329,6 @@
             color: #888;
         }
 
-        /* ARROW BETWEEN PANELS */
-        .panel-arrow {
-            font-size: 34px;
-            color: #2c3e50;
-            padding-bottom: 20px;
-        }
-
-        /* OUTPUT VISUAL */
-        .output-visual {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .square-container {
-            width: 260px;
-            height: 260px;
-            display: flex;
-            align-items: flex-end;
-            justify-content: center;
-            position: relative;
-        }
-
-        .square-anchor {
-            position: absolute;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-        }
-
-        .blue-square {
-            background: linear-gradient(135deg, #3498db, #2074b0);
-            border-radius: 8px;
-            transition: width 0.7s cubic-bezier(0.4,0,0.2,1), height 0.7s cubic-bezier(0.4,0,0.2,1);
-            box-shadow: 4px 4px 18px rgba(52,152,219,0.4);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-            overflow: visible;
-        }
-
-        .sq-center-label {
-            font-family: 'Nunito', sans-serif;
-            font-size: 16px;
-            font-weight: 900;
-            color: white;
-            text-shadow: 1px 1px 4px rgba(0,0,0,0.4);
-            transition: opacity 0.4s;
-            white-space: nowrap;
-        }
-
-        .sq-dim {
-            position: absolute;
-            font-size: 12px;
-            font-weight: 700;
-            color: #2074b0;
-            white-space: nowrap;
-            transition: opacity 0.4s;
-        }
-        .sq-dim.right  { right: -46px; top: 50%; transform: translateY(-50%); }
-        .sq-dim.bottom { bottom: -24px; left: 50%; transform: translateX(-50%); }
-
-        /* Question mark placeholder */
-        .question-mark {
-            width: 80px;
-            height: 80px;
-            border-radius: 12px;
-            background: linear-gradient(135deg, #3498db22, #3498db11);
-            border: 3px dashed #3498db66;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-family: 'Nunito', sans-serif;
-            font-size: 40px;
-            font-weight: 900;
-            color: #3498db88;
-            transition: opacity 0.4s;
-            margin-bottom: 0;
-        }
-
         /* ── TOGGLE BUTTON ── */
         .controls {
             display: flex;
@@ -381,7 +366,6 @@
             box-shadow: 0 10px 28px rgba(231,76,60,0.5);
         }
 
-        /* pulse animation for circle */
         @keyframes pulse {
             0%   { transform: scale(0.9); }
             60%  { transform: scale(1.12); }
@@ -418,46 +402,44 @@
 
     <hr class="divider">
 
-    <!-- BOTTOM ROW -->
-    <div class="bottom-row">
+    <!-- ROW 1: Green line | arrow | Blue square — vertically centered -->
+    <div class="visuals-row">
 
-        <!-- INPUT: Green line visual + slider -->
-        <div class="input-visual">
+        <!-- Left: Side Length visual -->
+        <div class="visual-col">
             <div class="visual-label">Side Length (x)</div>
             <div class="line-container">
                 <div class="green-line" id="greenLine" style="height: 48px;">
                     <span class="line-top-label" id="lineLabel">1 in</span>
                 </div>
             </div>
-            <div class="slider-section">
-                <div class="slider-value-display" id="sliderDisplay">1 <span class="slider-unit">inch</span></div>
-                <input type="range" id="sideSlider" min="1" max="5" step="1" value="1" style="--val:1">
-                <div class="slider-label-row">
-                    <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
-                </div>
-            </div>
         </div>
 
-        <div class="panel-arrow">→</div>
+        <!-- Center arrow -->
+        <div class="center-arrow">→</div>
 
-        <!-- OUTPUT: Square visual -->
-        <div class="output-visual">
+        <!-- Right: Area visual -->
+        <div class="visual-col">
             <div class="visual-label">Area = x² (inches²)</div>
             <div class="square-container">
-                <!-- Question mark shown when hidden -->
                 <div id="questionMark" class="question-mark">?</div>
-
-                <!-- Actual square, hidden by default -->
-                <div class="square-anchor" id="squareAnchor" style="display:none;">
-                    <div class="blue-square" id="blueSquare" style="width:48px;height:48px;">
-                        <span class="sq-center-label" id="sqCenter">1 in²</span>
-                        <span class="sq-dim right" id="sqRight">1 in</span>
-                        <span class="sq-dim bottom" id="sqBottom">1 in</span>
-                    </div>
+                <div id="blueSquare" class="blue-square" style="display:none; width:48px; height:48px;">
+                    <span class="sq-center-label" id="sqCenter">1 in²</span>
+                    <span class="sq-dim right" id="sqRight">1 in</span>
+                    <span class="sq-dim bottom" id="sqBottom">1 in</span>
                 </div>
             </div>
         </div>
 
+    </div>
+
+    <!-- ROW 2: Slider — its own centered row -->
+    <div class="slider-row">
+        <div class="slider-value-display" id="sliderDisplay">1 <span class="slider-unit">inch</span></div>
+        <input type="range" id="sideSlider" min="1" max="5" step="1" value="1" style="--val:1">
+        <div class="slider-label-row">
+            <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
+        </div>
     </div>
 
     <!-- TOGGLE BUTTON -->
@@ -470,57 +452,45 @@
     const PX_PER_INCH = 48;
     let showArea = false;
 
-    const slider      = document.getElementById('sideSlider');
-    const inputCircle = document.getElementById('inputCircle');
-    const outputCircle= document.getElementById('outputCircle');
-    const greenLine   = document.getElementById('greenLine');
-    const lineLabel   = document.getElementById('lineLabel');
-    const sliderDisp  = document.getElementById('sliderDisplay');
-    const blueSquare  = document.getElementById('blueSquare');
-    const sqCenter    = document.getElementById('sqCenter');
-    const sqRight     = document.getElementById('sqRight');
-    const sqBottom    = document.getElementById('sqBottom');
-    const toggleBtn   = document.getElementById('toggleBtn');
-    const questionMark= document.getElementById('questionMark');
-    const squareAnchor= document.getElementById('squareAnchor');
+    const slider       = document.getElementById('sideSlider');
+    const inputCircle  = document.getElementById('inputCircle');
+    const outputCircle = document.getElementById('outputCircle');
+    const greenLine    = document.getElementById('greenLine');
+    const lineLabel    = document.getElementById('lineLabel');
+    const sliderDisp   = document.getElementById('sliderDisplay');
+    const blueSquare   = document.getElementById('blueSquare');
+    const sqCenter     = document.getElementById('sqCenter');
+    const sqRight      = document.getElementById('sqRight');
+    const sqBottom     = document.getElementById('sqBottom');
+    const toggleBtn    = document.getElementById('toggleBtn');
+    const questionMark = document.getElementById('questionMark');
 
     function updateAll() {
         const x  = parseInt(slider.value);
         const x2 = x * x;
         const px = x * PX_PER_INCH;
 
-        // Slider gradient
         slider.style.setProperty('--val', x);
-
-        // Slider display
         sliderDisp.innerHTML = `${x} <span class="slider-unit">inch${x > 1 ? 'es' : ''}</span>`;
 
-        // Input circle
         inputCircle.textContent = x;
         triggerPulse(inputCircle);
 
-        // Green line
         greenLine.style.height = px + 'px';
         lineLabel.textContent  = `${x} in`;
 
-        // Output circle
         if (showArea) {
             outputCircle.textContent = x2;
             triggerPulse(outputCircle);
-        } else {
-            outputCircle.textContent = '?';
-        }
 
-        // Square
-        if (showArea) {
             blueSquare.style.width  = px + 'px';
             blueSquare.style.height = px + 'px';
             sqCenter.textContent    = `${x2} in²`;
             sqRight.textContent     = `${x} in`;
             sqBottom.textContent    = `${x} in`;
-
-            // Toggle small label size
             sqCenter.style.fontSize = px < 80 ? '11px' : '16px';
+        } else {
+            outputCircle.textContent = '?';
         }
     }
 
@@ -530,14 +500,14 @@
         if (showArea) {
             toggleBtn.textContent = 'Hide Area';
             toggleBtn.classList.add('hide');
-            questionMark.style.display  = 'none';
-            squareAnchor.style.display  = 'block';
+            questionMark.style.display = 'none';
+            blueSquare.style.display   = 'flex';
         } else {
             toggleBtn.textContent = 'Show Area';
             toggleBtn.classList.remove('hide');
-            questionMark.style.display  = 'flex';
-            squareAnchor.style.display  = 'none';
-            outputCircle.textContent    = '?';
+            questionMark.style.display = 'flex';
+            blueSquare.style.display   = 'none';
+            outputCircle.textContent   = '?';
         }
 
         updateAll();
@@ -551,8 +521,6 @@
     }
 
     slider.addEventListener('input', updateAll);
-
-    // Init
     updateAll();
 </script>
 </body>
