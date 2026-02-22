@@ -37,7 +37,7 @@ Interactive math function animations designed to help students understand how fu
 
 > Enhanced version with geometric visuals: a **green vertical line** shows the input as a side length (in inches), and a **blue square** shows the output as an area (in square inches).
 
-[![Open Demo 2](https://img.shields.io/badge/▶%20Open%20Live%20Demo-Side%20Length%20%26%20Area-3498db?style=for-the-badge&logo=github)](https://benchvue.github.io/GeoGebra/week04/function-stacking.html)
+[![Open Demo 2](https://img.shields.io/badge/▶%20Open%20Live%20Demo-Side%20Length%20%26%20Area-3498db?style=for-the-badge&logo=github)](https://benchvue.github.io/GeoGebra/week04/square-drawing.html)
 
 ```
   ┌───┐       ┌────────────┐       ┌───┐
@@ -334,7 +334,7 @@ Version 6 adds:
 ```
 week04/
 ├── basic-diagram.html          # Version 1: Basic function machine
-├── function-stacking.html      # Version 2: + Side length & area visuals
+├── square-drawing.html      # Version 2: + Side length & area visuals
 ├── squre-x-y-drawing.html      # Version 3: + Coordinate plane graphing
 ├── quadratic-a.html            # Version 4: + Coefficient explorer (x², 2x², ½x²)
 ├── quadratic-c.html            # Version 5: + Y-intercept explorer (x², x²+1, x²−1)
