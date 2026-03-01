@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Equilateral Triangle Angle Quiz</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            min-height: 100vh;
+            background: #f5f5f5;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        #container {
+            background: white;
+            padding: 30px 36px 28px;
+            border-radius: 14px;
+            box-shadow: 0 2px 16px rgba(0,0,0,0.10);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 18px;
+            max-width: 560px;
+            width: 100%;
+        }
+
+        h1 {
+            font-size: 20px;
+            color: #333;
+            text-align: center;
+            font-weight: bold;
+            line-height: 1.5;
+        }
+        h1 span.blue  { color: #2563eb; }
+        h1 span.green { color: #10b981; }
+
+        #subtitle {
+            font-size: 14px;
+            color: #666;
+            text-align: center;
+            line-height: 1.6;
+        }
+
+        canvas {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            display: block;
+        }
+
+        /* ── Sum card ── */
+        #sum-card {
+            width: 100%;
+            background: #f0fdf4;
+            border: 2px solid #10b981;
+            border-radius: 12px;
+            padding: 16px 20px;
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+            opacity: 0;
+            transform: translateY(8px);
+            transition: opacity 0.4s, transform 0.4s;
+        }
+        #sum-card.show { display: flex; opacity: 1; transform: translateY(0); }
+
+        .sum-title {
+            font-size: 13px;
+            color: #065f46;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+
+        .sum-equation {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .angle-chip {
+            background: #2563eb;
+            color: white;
+            font-weight: bold;
+            font-size: 15px;
+            padding: 5px 11px;
+            border-radius: 8px;
+            opacity: 0;
+            transform: scale(0.7);
+            transition: opacity 0.3s, transform 0.3s;
+        }
+        .angle-chip.pop { opacity: 1; transform: scale(1); }
+
+        .plus-sign {
+            color: #6b7280;
+            font-size: 18px;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .plus-sign.show { opacity: 1; }
+
+        .equals-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 4px;
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+        .equals-row.show { opacity: 1; }
+
+        .equals-line { flex: 1; height: 2px; background: #10b981; border-radius: 2px; }
+        .total-value { font-size: 26px; font-weight: bold; color: #10b981; }
+
+        .total-label {
+            font-size: 13px;
+            color: #065f46;
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+        .total-label.show { opacity: 1; }
+
+        /* ── Button ── */
+        #btn-answer {
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 13px 38px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.18s, transform 0.1s;
+            letter-spacing: 0.5px;
+        }
+        #btn-answer:hover  { background: #1d4ed8; transform: translateY(-1px); }
+        #btn-answer:active { transform: translateY(0); }
+        #btn-answer.revealed       { background: #10b981; }
+        #btn-answer.revealed:hover { background: #059669; }
+    </style>
+</head>
+<body>
+<div id="container">
+    <h1>
+        An <span class="blue">equilateral triangle</span> has<br>
+        <span class="green">three equal angles</span> — what are they?
+    </h1>
+    <div id="subtitle">
+        All three sides are equal. Can you figure out each <strong>?</strong> angle?
+    </div>
+
+    <canvas id="canvas" width="480" height="420"></canvas>
+
+    <div id="sum-card">
+        <div class="sum-title">🔢 Internal Angle Sum</div>
+        <div class="sum-equation">
+            <span class="angle-chip" id="c1">60°</span>
+            <span class="plus-sign"  id="p1">+</span>
+            <span class="angle-chip" id="c2">60°</span>
+            <span class="plus-sign"  id="p2">+</span>
+            <span class="angle-chip" id="c3">60°</span>
+        </div>
+        <div class="equals-row" id="equals-row">
+            <div class="equals-line"></div>
+            <div class="total-value">= 180°</div>
+            <div class="equals-line"></div>
+        </div>
+        <div class="total-label" id="total-label">
+            ✅ Every triangle's internal angles always add up to <strong>180°</strong>
+        </div>
+    </div>
+
+    <button id="btn-answer" onclick="revealAnswer()">Show Answer</button>
+</div>
+
+<script>
+    const canvas = document.getElementById('canvas');
+    const ctx    = canvas.getContext('2d');
+    const btn    = document.getElementById('btn-answer');
+    const sumCard = document.getElementById('sum-card');
+
+    let revealed = false;
+
+    const W = canvas.width;
+    const H = canvas.height;
+
+    // ── Triangle geometry ─────────────────────────────────────────────────
+    // Equilateral triangle — vertices chosen to sit nicely with circles above it
+    const cx = W / 2;
+    const cy = H / 2 - 20;
+    const R  = 130; // circumradius
+
+    // Top vertex (T), bottom-left (L), bottom-right (R_)
+    const T  = { x: cx,                        y: cy - R            };
+    const L  = { x: cx - R * Math.sin(toRad(60)), y: cy + R * 0.5   };
+    const Rv = { x: cx + R * Math.sin(toRad(60)), y: cy + R * 0.5   };
+
+    // Side length = R * √3
+    const side = R * Math.sqrt(3);
+
+    // Circle radius = side length (each circle passes through the other's centre)
+    const cr = side;
+
+    function toRad(d) { return d * Math.PI / 180; }
+
+    // ── Main draw ─────────────────────────────────────────────────────────
+    function draw(showAnswer) {
+        ctx.clearRect(0, 0, W, H);
+
+        // ── Two overlapping circles ───────────────────────────────────────
+        ctx.strokeStyle = '#999';
+        ctx.lineWidth   = 1.5;
+        ctx.setLineDash([]);
+
+        // Left circle centred on L, radius = side
+        ctx.beginPath();
+        ctx.arc(L.x, L.y, cr, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // Right circle centred on Rv, radius = side
+        ctx.beginPath();
+        ctx.arc(Rv.x, Rv.y, cr, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // ── Triangle fill ─────────────────────────────────────────────────
+        ctx.beginPath();
+        ctx.moveTo(T.x, T.y);
+        ctx.lineTo(L.x, L.y);
+        ctx.lineTo(Rv.x, Rv.y);
+        ctx.closePath();
+        ctx.fillStyle = 'rgba(37,99,235,0.08)';
+        ctx.fill();
+
+        // ── Triangle border ───────────────────────────────────────────────
+        ctx.beginPath();
+        ctx.moveTo(T.x, T.y);
+        ctx.lineTo(L.x, L.y);
+        ctx.lineTo(Rv.x, Rv.y);
+        ctx.closePath();
+        ctx.strokeStyle = '#2563eb';
+        ctx.lineWidth   = 2.5;
+        ctx.stroke();
+
+        // ── Vertex dots ───────────────────────────────────────────────────
+        [T, L, Rv].forEach(v => {
+            ctx.beginPath();
+            ctx.arc(v.x, v.y, 5, 0, Math.PI * 2);
+            ctx.fillStyle = '#2563eb';
+            ctx.fill();
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+        });
+
+        // ── Angle arcs & labels ───────────────────────────────────────────
+        const arcR = 22;
+        const label = showAnswer ? '60°' : '?';
+        const labelFont = showAnswer ? 'bold 15px Arial' : 'bold 22px Arial';
+
+        // Top vertex T — arc from left-side direction to right-side direction
+        // From T: toward L = atan2(L.y-T.y, L.x-T.x), toward Rv = atan2(Rv.y-T.y, Rv.x-T.x)
+        drawAngleArc(T, L, Rv, arcR);
+        // Label inside triangle, along bisector from T (straight down)
+        ctx.font         = labelFont;
+        ctx.fillStyle    = '#10b981';
+        ctx.textAlign    = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(label, T.x, T.y + (showAnswer ? 44 : 48));
+
+        // Bottom-left vertex L — arc between T and Rv directions
+        drawAngleArc(L, T, Rv, arcR);
+        // Label inside triangle — bisector goes up-right
+        const lLabelX = L.x + 54;
+        const lLabelY = L.y - (showAnswer ? 24 : 20);
+        ctx.font         = labelFont;
+        ctx.fillStyle    = '#10b981';
+        ctx.textAlign    = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(label, lLabelX, lLabelY);
+
+        // Bottom-right vertex Rv — arc between T and L directions
+        drawAngleArc(Rv, T, L, arcR);
+        // Label inside triangle — bisector goes up-left
+        const rLabelX = Rv.x - 54;
+        const rLabelY = Rv.y - (showAnswer ? 24 : 20);
+        ctx.font         = labelFont;
+        ctx.fillStyle    = '#10b981';
+        ctx.textAlign    = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(label, rLabelX, rLabelY);
+
+        // ── Tick marks on all three sides (equilateral = all equal) ───────
+        drawTick((T.x + L.x) / 2,  (T.y + L.y) / 2,  Math.atan2(L.y - T.y,  L.x - T.x));
+        drawTick((T.x + Rv.x) / 2, (T.y + Rv.y) / 2, Math.atan2(Rv.y - T.y, Rv.x - T.x));
+        drawTick((L.x + Rv.x) / 2, (L.y + Rv.y) / 2, Math.atan2(Rv.y - L.y, Rv.x - L.x));
+
+        // ── Inside sum when revealed ──────────────────────────────────────
+        if (showAnswer) {
+            ctx.font      = 'bold 13px Arial';
+            ctx.fillStyle = '#2563eb';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('60° + 60° + 60°', cx, cy + 18);
+
+            ctx.beginPath();
+            ctx.moveTo(cx - 62, cy + 30);
+            ctx.lineTo(cx + 62, cy + 30);
+            ctx.strokeStyle = '#2563eb';
+            ctx.lineWidth   = 1.5;
+            ctx.stroke();
+
+            ctx.font      = 'bold 17px Arial';
+            ctx.fillStyle = '#10b981';
+            ctx.fillText('= 180°', cx, cy + 46);
+        }
+    }
+
+    // Draw the arc at vertex `v` between the two sides toward `a` and `b`
+    function drawAngleArc(v, a, b, r) {
+        const ang1 = Math.atan2(a.y - v.y, a.x - v.x);
+        const ang2 = Math.atan2(b.y - v.y, b.x - v.x);
+
+        // Always draw the smaller arc (interior angle)
+        let start = ang1, end = ang2;
+        let diff  = end - start;
+        // Normalise diff to [-π, π]
+        while (diff >  Math.PI) diff -= 2 * Math.PI;
+        while (diff < -Math.PI) diff += 2 * Math.PI;
+        const ccw = diff < 0;
+
+        ctx.strokeStyle = '#888';
+        ctx.lineWidth   = 1.8;
+        ctx.setLineDash([]);
+        ctx.beginPath();
+        ctx.arc(v.x, v.y, r, start, end, ccw);
+        ctx.stroke();
+    }
+
+    function drawTick(mx, my, angleRad) {
+        const len  = 8;
+        const gap  = 5;
+        const perp = angleRad + Math.PI / 2;
+        const px   = Math.cos(perp) * len;
+        const py   = Math.sin(perp) * len;
+        const ox   = Math.cos(angleRad) * gap;
+        const oy   = Math.sin(angleRad) * gap;
+
+        ctx.save();
+        ctx.strokeStyle = '#2563eb';
+        ctx.lineWidth   = 2;
+        ctx.setLineDash([]);
+        // tick 1
+        ctx.beginPath();
+        ctx.moveTo(mx - px - ox, my - py - oy);
+        ctx.lineTo(mx + px - ox, my + py - oy);
+        ctx.stroke();
+        // tick 2
+        ctx.beginPath();
+        ctx.moveTo(mx - px + ox, my - py + oy);
+        ctx.lineTo(mx + px + ox, my + py + oy);
+        ctx.stroke();
+        ctx.restore();
+    }
+
+    // ── Card animation ────────────────────────────────────────────────────
+    function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+    async function animateCard() {
+        sumCard.style.display = 'flex';
+        await delay(20);
+        sumCard.classList.add('show');
+
+        const chips  = ['c1', 'c2', 'c3'];
+        const pluses = ['p1', 'p2'];
+
+        for (let i = 0; i < chips.length; i++) {
+            await delay(220);
+            document.getElementById(chips[i]).classList.add('pop');
+            if (i < pluses.length) {
+                await delay(100);
+                document.getElementById(pluses[i]).classList.add('show');
+            }
+        }
+        await delay(320);
+        document.getElementById('equals-row').classList.add('show');
+        await delay(300);
+        document.getElementById('total-label').classList.add('show');
+    }
+
+    function resetCard() {
+        sumCard.classList.remove('show');
+        sumCard.style.display = 'none';
+        ['c1','c2','c3'].forEach(id => document.getElementById(id).classList.remove('pop'));
+        ['p1','p2'].forEach(id => document.getElementById(id).classList.remove('show'));
+        document.getElementById('equals-row').classList.remove('show');
+        document.getElementById('total-label').classList.remove('show');
+    }
+
+    function revealAnswer() {
+        if (revealed) {
+            revealed = false;
+            btn.textContent = 'Show Answer';
+            btn.classList.remove('revealed');
+            resetCard();
+            draw(false);
+        } else {
+            revealed = true;
+            btn.textContent = 'Try Again';
+            btn.classList.add('revealed');
+            draw(true);
+            animateCard();
+        }
+    }
+
+    draw(false);
+</script>
+</body>
+</html>

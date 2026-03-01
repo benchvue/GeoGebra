@@ -1,36 +1,73 @@
 # Week 05 - Interactive Circle Angle Visualizations
 
-This repository contains three progressive HTML visualizations demonstrating circle geometry, angles, radians, and arc length calculations. Each file builds upon the previous one with enhanced features.
+This repository contains three progressive HTML visualizations demonstrating circle geometry, angles, radians, and arc length calculations, plus three interactive angle quizzes for learning internal angles of shapes.
 
 ## 🚀 Live Demos
 
-[![Open Demo 1](https://img.shields.io/badge/▶%20Open%20Live%20Demo-Basic%20Angle-3498db?style=for-the-badge&logo=github)](https://benchvue.github.io/GeoGebra/week05/circle_angle_v1.html)
+### 🧩 Angle Quizzes
 
-[![Open Demo 2](https://img.shields.io/badge/▶%20Open%20Live%20Demo-Enhanced%20with%20Buttons-e67e22?style=for-the-badge&logo=github)](https://benchvue.github.io/GeoGebra/week05/circle_angle_v2.html)
+[![Open Demo 1](https://img.shields.io/badge/▶%20Open%20Live%20Demo-Square%20Angle%20Quiz-10b981?style=for-the-badge&logo=github)](https://benchvue.github.io/GeoGebra/week05/square-angle-quiz.html)
 
-[![Open Demo 3](https://img.shields.io/badge/▶%20Open%20Live%20Demo-Complete%20with%20Radians-9b59b6?style=for-the-badge&logo=github)](https://benchvue.github.io/GeoGebra/week05/circle_angle_v3.html)
+[![Open Demo 2](https://img.shields.io/badge/▶%20Open%20Live%20Demo-Triangle%20Angle%20Quiz-10b981?style=for-the-badge&logo=github)](https://benchvue.github.io/GeoGebra/week05/triangle-angle-quiz.html)
+
+[![Open Demo 3](https://img.shields.io/badge/▶%20Open%20Live%20Demo-Equilateral%20Triangle%20Quiz-10b981?style=for-the-badge&logo=github)](https://benchvue.github.io/GeoGebra/week05/equilateral-triangle-quiz.html)
+
+### 🔵 Circle Angle Visualizations
+
+[![Open Demo 4](https://img.shields.io/badge/▶%20Open%20Live%20Demo-Basic%20Angle-3498db?style=for-the-badge&logo=github)](https://benchvue.github.io/GeoGebra/week05/circle_angle_v1.html)
+
+[![Open Demo 5](https://img.shields.io/badge/▶%20Open%20Live%20Demo-Enhanced%20with%20Buttons-e67e22?style=for-the-badge&logo=github)](https://benchvue.github.io/GeoGebra/week05/circle_angle_v2.html)
+
+[![Open Demo 6](https://img.shields.io/badge/▶%20Open%20Live%20Demo-Complete%20with%20Radians-9b59b6?style=for-the-badge&logo=github)](https://benchvue.github.io/GeoGebra/week05/circle_angle_v3.html)
 
 ## 📁 Files
 
-1. **`circle_angle_v1.html`** - Basic Interactive Angle Visualization
-2. **`circle_angle_v2.html`** - Enhanced with Fundamental Angles and Increment Buttons
-3. **`circle_angle_v3.html`** - Complete with Radian Labels and Arc Length Display
+1. **`square-angle-quiz.html`** - Square Internal Angle Quiz
+2. **`triangle-angle-quiz.html`** - Isosceles Right Triangle Angle Quiz
+3. **`equilateral-triangle-quiz.html`** - Equilateral Triangle Angle Quiz
+4. **`circle_angle_v1.html`** - Basic Interactive Angle Visualization
+5. **`circle_angle_v2.html`** - Enhanced with Fundamental Angles and Increment Buttons
+6. **`circle_angle_v3.html`** - Complete with Radian Labels and Arc Length Display
 
-## 🎯 Features Overview
+## 🧩 Angle Quiz Features
 
-### Version 1: Basic Interactive Angle
+### Demo 1: Square Angle Quiz (`square-angle-quiz.html`)
+- 📐 Shows a square with **?** at each of the four corners
+- 🟢 Green right-angle indicators at every corner
+- ✅ **Show Answer** reveals `90°` at all four corners
+- 🔢 Animated angle sum card: `90° + 90° + 90° + 90° = 360°`
+- 💡 Chips pop in one by one to build the equation
+
+### Demo 2: Isosceles Right Triangle Quiz (`triangle-angle-quiz.html`)
+- 📐 Square cut diagonally — shows the resulting isosceles right triangle
+- 🔲 Dashed ghost square (top & right edges) shows the original shape
+- 🟢 Right angle (90°) always shown; two **?** marks at the 45° corners
+- ✅ **Show Answer** reveals both corners as `45°`
+- 💡 Includes equation: `90° + 45° + 45° = 180°`
+
+### Demo 3: Equilateral Triangle Quiz (`equilateral-triangle-quiz.html`)
+- 📐 Equilateral triangle constructed from two overlapping circles
+- 🔵 Blue vertex dots and double tick marks on all three equal sides
+- 🟢 Three **?** marks inside, one at each corner
+- ✅ **Show Answer** reveals all three angles as `60°`
+- 🔢 Animated angle sum card: `60° + 60° + 60° = 180°`
+- 💡 Reinforces: every triangle's angles sum to 180°
+
+## 🎯 Circle Visualization Features Overview
+
+### Demo 4: Basic Interactive Angle (`circle_angle_v1.html`)
 - Interactive draggable endpoint
 - Real-time angle display in degrees
 - Visual angle arc representation
 - Clean, simple interface
 
-### Version 2: Enhanced Visualization
+### Demo 5: Enhanced Visualization (`circle_angle_v2.html`)
 - ✨ Fundamental angle markers (0°, 30°, 45°, 60°, 90°, etc.)
 - 🔵 Four increment buttons: +30°, +45°, +60°, +90°
 - 🎬 Smooth animations when using buttons
 - 🎨 Better visual feedback and styling
 
-### Version 3: Complete Mathematical Visualization
+### Demo 6: Complete Mathematical Visualization (`circle_angle_v3.html`)
 - 🔴 **Radian labels** outside the circle (π/6, π/4, π/3, etc.)
 - 🟠 **Arc length display** on the circle perimeter
 - 📊 **Dual angle system**: Degree and Radian angles
@@ -38,17 +75,28 @@ This repository contains three progressive HTML visualizations demonstrating cir
 - 🎯 **Reset button** to return to 0°
 - 📐 Comprehensive labeling with color-coded elements
 
-## 🎨 Color Coding (Version 3)
+## 🎨 Color Coding
 
-- **Blue** - Degree angles and radius
-- **Red** - Radian angles and labels
-- **Orange** - Arc length
-- **Green** - Base line (starting position)
-- **Gray** - Reference lines for fundamental angles
+### Angle Quizzes (Demos 1–3)
+- **Blue** (`#2563eb`) — Shape borders and tick marks
+- **Green** (`#10b981`) — Angle arcs, labels, and right-angle indicators
+- **Light Blue** — Shape fill
+
+### Circle Visualizations (Demos 4–6)
+- **Blue** — Degree angles and radius
+- **Red** — Radian angles and labels
+- **Orange** — Arc length
+- **Green** — Base line (starting position)
+- **Gray** — Reference lines for fundamental angles
 
 ## 🚀 How to Use
 
-### Basic Interaction
+### Angle Quizzes (Demos 1–3)
+1. **Study the shape** and try to figure out each **?** angle
+2. **Click "Show Answer"** to reveal all angles and the animated sum equation
+3. **Click "Try Again"** to reset and quiz yourself again
+
+### Circle Visualizations (Demos 4–6)
 1. **Drag the endpoint**: Click and drag the blue endpoint around the circle to change the angle
 2. **Use increment buttons**: Click +30°, +45°, +60°, or +90° to automatically rotate
 3. **Reset to zero**: Click the "Reset to 0°" button to return to starting position
@@ -74,12 +122,19 @@ The distance along the circle's perimeter from the start point to the endpoint
 
 ## 📐 Mathematical Concepts
 
+### Internal Angle Sums
+| Shape | Each Angle | Sum of All Angles |
+|-------|-----------|-------------------|
+| Equilateral Triangle | 60° | 180° |
+| Isosceles Right Triangle | 90°, 45°, 45° | 180° |
+| Square | 90° | 360° |
+
 ### Fundamental Angles
 The visualization shows key angles commonly used in mathematics:
 - **0° (0)** - Starting position
-- **30° (π/6)** - 
-- **45° (π/4)** - 
-- **60° (π/3)** - 
+- **30° (π/6)**
+- **45° (π/4)**
+- **60° (π/3)**
 - **90° (π/2)** - Quarter circle
 - **180° (π)** - Half circle
 - **270° (3π/2)** - Three quarters
@@ -137,6 +192,7 @@ These visualizations are ideal for:
 - Visualizing arc length calculations
 - Interactive mathematics education
 - Self-study and exploration
+- **Quizzing students on internal angles of common shapes**
 
 ## 💾 Offline Usage
 
@@ -160,6 +216,7 @@ Feel free to fork this repository and enhance the visualizations! Some ideas:
 - Add animation speed controls
 - Include angle input field for direct entry
 - Add multiple angle comparison mode
+- Add more shape quizzes (pentagon, hexagon, etc.)
 
 ## 📄 License
 

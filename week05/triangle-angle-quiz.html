@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Triangle Angle Quiz</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            min-height: 100vh;
+            background: #f5f5f5;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        #container {
+            background: white;
+            padding: 36px 40px 32px;
+            border-radius: 14px;
+            box-shadow: 0 2px 16px rgba(0,0,0,0.10);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            max-width: 520px;
+            width: 100%;
+        }
+
+        h1 {
+            font-size: 21px;
+            color: #333;
+            text-align: center;
+            font-weight: bold;
+            line-height: 1.5;
+        }
+
+        h1 span.blue  { color: #2563eb; }
+        h1 span.green { color: #10b981; }
+
+        #subtitle {
+            font-size: 14px;
+            color: #666;
+            text-align: center;
+            line-height: 1.6;
+        }
+
+        canvas {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            display: block;
+        }
+
+        #btn-answer {
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 13px 38px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.18s, transform 0.1s;
+            letter-spacing: 0.5px;
+        }
+        #btn-answer:hover  { background: #1d4ed8; transform: translateY(-1px); }
+        #btn-answer:active { transform: translateY(0); }
+        #btn-answer.revealed       { background: #10b981; }
+        #btn-answer.revealed:hover { background: #059669; }
+
+        #result {
+            font-size: 16px;
+            color: #333;
+            text-align: center;
+            min-height: 24px;
+            font-weight: 500;
+            transition: opacity 0.3s;
+            line-height: 1.6;
+        }
+        #result.hidden { opacity: 0; }
+        #result.show   { opacity: 1; }
+    </style>
+</head>
+<body>
+<div id="container">
+    <h1>
+        If a <span class="blue">square</span> is cut in half<br>
+        by a diagonal — what are the<br>
+        <span class="green">two equal corner angles</span> inside?
+    </h1>
+
+    <div id="subtitle">
+        The <strong>right angle (90°)</strong> stays fixed.<br>
+        Can you figure out the two <strong>?</strong> angles?
+    </div>
+
+    <canvas id="canvas" width="400" height="400"></canvas>
+
+    <div id="result" class="hidden"></div>
+
+    <button id="btn-answer" onclick="revealAnswer()">Show Answer</button>
+</div>
+
+<script>
+    const canvas = document.getElementById('canvas');
+    const ctx    = canvas.getContext('2d');
+    const btn    = document.getElementById('btn-answer');
+    const result = document.getElementById('result');
+
+    let revealed = false;
+
+    const W   = canvas.width;
+    const H   = canvas.height;
+    const pad = 60;
+    const sq  = 270;
+
+    // Vertices matching reference image:
+    // C = top-left    (45°)
+    // A = bottom-left (90°)
+    // B = bottom-right(45°)
+    const C  = { x: pad,       y: pad      };  // top-left
+    const A  = { x: pad,       y: pad + sq };  // bottom-left
+    const B  = { x: pad + sq,  y: pad + sq };  // bottom-right
+    const TR = { x: pad + sq,  y: pad      };  // ghost top-right
+
+    const toRad = deg => deg * Math.PI / 180;
+
+    function draw(showAnswer) {
+        ctx.clearRect(0, 0, W, H);
+
+        // ── Ghost square: top edge and right edge only (dashed) ───────────
+        ctx.save();
+        ctx.strokeStyle = '#94a3b8';
+        ctx.lineWidth   = 2.2;
+        ctx.setLineDash([9, 6]);
+        ctx.beginPath();
+        ctx.moveTo(C.x,  C.y);   // top-left → top-right
+        ctx.lineTo(TR.x, TR.y);
+        ctx.moveTo(TR.x, TR.y);  // top-right → bottom-right
+        ctx.lineTo(B.x,  B.y);
+        ctx.stroke();
+        ctx.restore();
+
+        // ── Triangle fill ─────────────────────────────────────────────────
+        ctx.beginPath();
+        ctx.moveTo(C.x, C.y);
+        ctx.lineTo(A.x, A.y);
+        ctx.lineTo(B.x, B.y);
+        ctx.closePath();
+        ctx.fillStyle = 'rgba(37,99,235,0.07)';
+        ctx.fill();
+
+        // ── Triangle border ───────────────────────────────────────────────
+        ctx.beginPath();
+        ctx.moveTo(C.x, C.y);
+        ctx.lineTo(A.x, A.y);
+        ctx.lineTo(B.x, B.y);
+        ctx.closePath();
+        ctx.strokeStyle = '#2563eb';
+        ctx.lineWidth   = 3.5;
+        ctx.setLineDash([]);
+        ctx.stroke();
+
+        // ── Right-angle square at A (bottom-left, inside triangle) ───────
+        const rs = 22;
+        ctx.strokeStyle = '#10b981';
+        ctx.lineWidth   = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(A.x + rs, A.y);       // go right
+        ctx.lineTo(A.x + rs, A.y - rs);  // go up
+        ctx.lineTo(A.x,      A.y - rs);  // go left back to left edge
+        ctx.stroke();
+
+        // 90° label: just inside triangle, right of the square, slightly up
+        ctx.font         = 'bold 15px Arial';
+        ctx.fillStyle    = '#10b981';
+        ctx.textAlign    = 'left';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('90°', A.x + rs + 5, A.y - rs - 2);
+
+        // ── Arc at C (top-left, 45°) ──────────────────────────────────────
+        // From C, the two triangle sides go:
+        //   → downward to A  = canvas angle 90°
+        //   → diagonally to B (SE) = canvas angle 45°
+        // Arc sweeps from 45° to 90° (inside triangle)
+        const arcR = 40;
+        ctx.strokeStyle = '#10b981';
+        ctx.lineWidth   = 2.5;
+        ctx.beginPath();
+        ctx.arc(C.x, C.y, arcR, toRad(45), toRad(90), false);
+        ctx.stroke();
+
+        // C label: along bisector at 67.5°, pushed inward
+        const cLabelR = 60;
+        const cLx = C.x + cLabelR * Math.cos(toRad(67.5));
+        const cLy = C.y + cLabelR * Math.sin(toRad(67.5));
+
+        ctx.textAlign    = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle    = '#10b981';
+        if (showAnswer) {
+            ctx.font = 'bold 17px Arial';
+            ctx.fillText('45°', cLx, cLy);
+        } else {
+            ctx.font = 'bold 28px Arial';
+            ctx.fillText('?', cLx, cLy);
+        }
+
+        // ── Arc at B (bottom-right, 45°) ──────────────────────────────────
+        // From B: leftward to A = 180°, diagonally to C (NW) = 135°
+        ctx.strokeStyle = '#10b981';
+        ctx.lineWidth   = 2.5;
+        ctx.beginPath();
+        ctx.arc(B.x, B.y, arcR, toRad(180), toRad(225), false);
+        ctx.stroke();
+
+        // B label: place explicitly inside triangle — up and to the left of B
+        const bLx = B.x - 52;
+        const bLy = B.y - 26;
+
+        ctx.fillStyle = '#10b981';
+        if (showAnswer) {
+            ctx.font = 'bold 17px Arial';
+            ctx.fillText('45°', bLx, bLy);
+        } else {
+            ctx.font = 'bold 28px Arial';
+            ctx.fillText('?', bLx, bLy);
+        }
+
+        // ── Tick marks on the two equal legs ─────────────────────────────
+        drawTick((A.x + C.x) / 2, (A.y + C.y) / 2, 90);  // left side (vertical)
+        drawTick((A.x + B.x) / 2, (A.y + B.y) / 2, 0);   // bottom (horizontal)
+    }
+
+    function drawTick(mx, my, angleDeg) {
+        const len = 9;
+        const gap = 5;
+        const rad = toRad(angleDeg);
+        const px  = Math.cos(rad + Math.PI / 2) * len;
+        const py  = Math.sin(rad + Math.PI / 2) * len;
+        const ox  = Math.cos(rad) * gap;
+        const oy  = Math.sin(rad) * gap;
+        ctx.save();
+        ctx.strokeStyle = '#2563eb';
+        ctx.lineWidth   = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(mx - px - ox, my - py - oy);
+        ctx.lineTo(mx + px - ox, my + py - oy);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(mx - px + ox, my - py + oy);
+        ctx.lineTo(mx + px + ox, my + py + oy);
+        ctx.stroke();
+        ctx.restore();
+    }
+
+    function revealAnswer() {
+        if (revealed) {
+            revealed = false;
+            btn.textContent = 'Show Answer';
+            btn.classList.remove('revealed');
+            result.textContent = '';
+            result.classList.remove('show');
+            result.classList.add('hidden');
+            draw(false);
+        } else {
+            revealed = true;
+            btn.textContent = 'Try Again';
+            btn.classList.add('revealed');
+            result.innerHTML = '✅ Each equal corner angle = <strong>45°</strong><br>Because 90° + 45° + 45° = 180° ✓';
+            result.classList.remove('hidden');
+            result.classList.add('show');
+            draw(true);
+        }
+    }
+
+    draw(false);
+</script>
+</body>
+</html>
