@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pythagorean Theorem</title>
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root { --ink:#1a1008; --paper:#f5f0e8; --amber:#c8860a; --green:#3a8a3a; --blue:#2a62a8; --red:#c0392b; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--paper); color:var(--ink); font-family:'Crimson Pro',Georgia,serif; min-height:100vh; }
+  body::before {
+    content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+    background-image:repeating-linear-gradient(transparent,transparent 31px,rgba(180,160,120,0.12) 31px,rgba(180,160,120,0.12) 32px);
+  }
+  header { text-align:center; padding:1rem 1rem 0.2rem; position:relative; z-index:1; }
+  header h1 { font-size:clamp(1.3rem,3vw,2rem); font-weight:600; }
+  header h1 span { color:var(--amber); font-style:italic; }
+  header p { font-size:0.83rem; color:#6b5a3a; font-style:italic; margin-top:0.1rem; }
+  .wrap { position:relative; z-index:1; max-width:680px; margin:0.4rem auto; padding:0 0.8rem; display:flex; flex-direction:column; align-items:center; gap:0.6rem; }
+  .cbox { background:rgba(255,255,255,0.55); border:1.5px solid rgba(26,16,8,0.13); border-radius:3px; padding:4px; width:100%; }
+  canvas { display:block; width:100%; height:auto; cursor:crosshair; touch-action:none; }
+  .eq { width:100%; background:rgba(255,255,255,0.6); border:1.5px solid rgba(26,16,8,0.13); border-radius:2px; padding:0.75rem 1.1rem; display:flex; flex-direction:column; gap:0.45rem; }
+  .eqlbl { font-family:'JetBrains Mono',monospace; font-size:0.59rem; letter-spacing:0.15em; text-transform:uppercase; color:var(--amber); display:flex; align-items:center; gap:0.5rem; }
+  .eqlbl::after { content:''; flex:1; height:1px; background:rgba(200,134,10,0.3); }
+  .eqrow { display:flex; align-items:center; justify-content:center; gap:0.38rem; flex-wrap:wrap; font-family:'JetBrains Mono',monospace; font-size:0.91rem; }
+  .box { padding:0.3rem 0.65rem; border:2px solid; font-weight:700; border-radius:2px; min-width:82px; text-align:center; }
+  .ga{border-color:var(--green);color:var(--green);}
+  .gb{border-color:var(--blue);color:var(--blue);}
+  .gs{border-color:var(--ink);color:var(--ink);}
+  .gc1{border-color:var(--red);color:var(--red);}
+  .gc2{border-color:var(--red);color:var(--red);background:rgba(192,57,43,0.08);}
+  .op{color:var(--ink);font-size:1rem;}
+  .match{font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:#2e7d32;text-align:center;font-weight:700;}
+  .hint{font-size:0.74rem;color:#888;text-align:center;font-style:italic;}
+</style>
+</head>
+<body>
+<header>
+  <h1>Pythagorean <span>Theorem</span></h1>
+  <p>Hypotenuse from center (0,0) to C on circle · drag C anywhere · a²+b²=c²</p>
+</header>
+<div class="wrap">
+  <div class="cbox"><canvas id="cv" width="680" height="680"></canvas></div>
+  <div class="eq">
+    <div class="eqlbl">Live Equation</div>
+    <div class="eqrow">
+      <div class="box ga" id="ea">a² = ?</div><span class="op">+</span>
+      <div class="box gb" id="eb">b² = ?</div><span class="op">=</span>
+      <div class="box gs" id="es">?</div><span class="op">│</span>
+      <div class="box gc1" id="ec1">c² = ?</div><span class="op">=</span>
+      <div class="box gc2" id="ec2">?</div>
+    </div>
+    <div class="match" id="ml"></div>
+    <div class="hint">🖱 Drag the <strong style="color:#1a6bb5">blue point C</strong> anywhere around the full circle</div>
+  </div>
+</div>
+
+<script>
+const cv  = document.getElementById('cv');
+const ctx = cv.getContext('2d');
+const W = 680, H = 680;
+
+// ── World bounds: X -8..8, Y -8..8 (squares max ±7.07, padded) ──
+const PAD   = 8.4;
+const SCALE = Math.min(W, H) / (PAD * 2);  // px per unit
+
+// Canvas origin = world (0,0) = circle center = hypotenuse fixed end
+const OX = W / 2;
+const OY = H / 2;
+
+function wx(x) { return OX + x * SCALE; }
+function wy(y) { return OY - y * SCALE; }   // y-up
+
+// ── Grid unit for axis labels ─────────────────────────────────
+const GRID = 1;  // label every 1 unit
+
+// ── State ─────────────────────────────────────────────────────
+const R = 5;
+let angle = Math.PI / 6 * 2.2;   // ~66° start → gives nice values
+
+// ── Geometry ──────────────────────────────────────────────────
+// O = origin (0,0)  — fixed end of hypotenuse = circle center
+// C = (R cosθ, R sinθ) — draggable on circle
+// B = (Cx, 0)          — foot on x-axis, right angle here
+//
+// Triangle: O – B – C
+//   a = |OB| = |Cx|           (base, horizontal)
+//   b = |BC| = |Cy|           (height, vertical)
+//   c = |OC| = R = 5          (hypotenuse, always 5)
+//   a² + b² = c² = 25  always
+
+function geom() {
+  const C = { x: R * Math.cos(angle), y: R * Math.sin(angle) };
+  const O = { x: 0, y: 0 };
+  const B = { x: C.x, y: 0 };
+  const a = Math.abs(C.x);
+  const b = Math.abs(C.y);
+  const c = R;   // always 5
+  return { O, C, B, a, b, c };
+}
+
+// ── Square outward from world edge p1→p2 ─────────────────────
+function squareCornersW(p1, p2) {
+  const { O, B, C } = geom();
+  const dx = p2.x - p1.x, dy = p2.y - p1.y;
+  let nx = -dy, ny = dx;
+  const tcx = (O.x + B.x + C.x) / 3;
+  const tcy = (O.y + B.y + C.y) / 3;
+  const mx  = (p1.x + p2.x) / 2, my = (p1.y + p2.y) / 2;
+  if (nx*(tcx-mx) + ny*(tcy-my) > 0) { nx=-nx; ny=-ny; }
+  return [
+    {x:p1.x,    y:p1.y   },
+    {x:p2.x,    y:p2.y   },
+    {x:p2.x+nx, y:p2.y+ny},
+    {x:p1.x+nx, y:p1.y+ny},
+  ];
+}
+
+function drawSquare(p1, p2, fill, stroke) {
+  const corners = squareCornersW(p1, p2);
+  ctx.beginPath();
+  ctx.moveTo(wx(corners[0].x), wy(corners[0].y));
+  corners.slice(1).forEach(c => ctx.lineTo(wx(c.x), wy(c.y)));
+  ctx.closePath();
+  ctx.fillStyle = fill;   ctx.fill();
+  ctx.strokeStyle = stroke; ctx.lineWidth = 2; ctx.stroke();
+  return {
+    px: corners.reduce((s,c)=>s+wx(c.x),0)/4,
+    py: corners.reduce((s,c)=>s+wy(c.y),0)/4,
+  };
+}
+
+// ── Helpers ───────────────────────────────────────────────────
+function dot(worldX, worldY, r, fill, sc) {
+  ctx.beginPath(); ctx.arc(wx(worldX), wy(worldY), r, 0, Math.PI*2);
+  ctx.fillStyle=fill; ctx.fill();
+  if(sc){ ctx.strokeStyle=sc; ctx.lineWidth=2.2; ctx.stroke(); }
+}
+
+function lbl(text, px, py, col, sz=13, mono=false) {
+  ctx.save();
+  ctx.font = mono ? `700 ${sz}px 'JetBrains Mono',monospace`
+                  : `italic 600 ${sz}px 'Crimson Pro',Georgia,serif`;
+  ctx.fillStyle=col; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(text, px, py);
+  ctx.restore();
+}
+
+// Side label offset outward from triangle centroid
+function sideLbl(p1, p2, text, col) {
+  const { O, B, C } = geom();
+  const mx=(wx(p1.x)+wx(p2.x))/2, my=(wy(p1.y)+wy(p2.y))/2;
+  const dx=wx(p2.x)-wx(p1.x), dy=wy(p2.y)-wy(p1.y);
+  const len=Math.hypot(dx,dy)||1;
+  let nx=-dy/len, ny=dx/len;
+  const tcxP=(wx(O.x)+wx(B.x)+wx(C.x))/3;
+  const tcyP=(wy(O.y)+wy(B.y)+wy(C.y))/3;
+  if(nx*(tcxP-mx)+ny*(tcyP-my)>0){nx=-nx;ny=-ny;}
+  lbl(text, mx+nx*20, my+ny*20, col, 12);
+}
+
+// ── Draw ──────────────────────────────────────────────────────
+function draw() {
+  ctx.clearRect(0, 0, W, H);
+  const { O, C, B, a, b, c } = geom();
+
+  // ── grid lines ──
+  ctx.save();
+  ctx.strokeStyle='rgba(180,160,120,0.18)'; ctx.lineWidth=0.8;
+  for(let v=-8; v<=8; v++) {
+    ctx.beginPath(); ctx.moveTo(wx(v),wy(-8.4)); ctx.lineTo(wx(v),wy(8.4)); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(wx(-8.4),wy(v)); ctx.lineTo(wx(8.4),wy(v)); ctx.stroke();
+  }
+  ctx.restore();
+
+  // ── axes ──
+  ctx.save();
+  ctx.strokeStyle='rgba(26,16,8,0.35)'; ctx.lineWidth=1.4;
+  ctx.beginPath(); ctx.moveTo(wx(-8.2),wy(0)); ctx.lineTo(wx(8.2),wy(0)); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(wx(0),wy(-8.2)); ctx.lineTo(wx(0),wy(8.2)); ctx.stroke();
+  ctx.restore();
+
+  // ── axis tick labels ──
+  ctx.save();
+  ctx.font=`600 10px 'JetBrains Mono',monospace`;
+  ctx.fillStyle='rgba(26,16,8,0.40)'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  for(let v=-7; v<=7; v++) {
+    if(v===0) continue;
+    lbl(String(v), wx(v),    wy(0)+14,  'rgba(26,16,8,0.38)', 10, true);
+    lbl(String(v), wx(0)-14, wy(v),     'rgba(26,16,8,0.38)', 10, true);
+  }
+  ctx.restore();
+
+  // axis arrows + labels
+  ctx.save(); ctx.fillStyle='rgba(26,16,8,0.35)';
+  ctx.beginPath(); ctx.moveTo(wx(8.2),wy(0)); ctx.lineTo(wx(8.2)-8,wy(0)-4); ctx.lineTo(wx(8.2)-8,wy(0)+4); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(wx(0),wy(8.2)); ctx.lineTo(wx(0)-4,wy(8.2)+8); ctx.lineTo(wx(0)+4,wy(8.2)+8); ctx.fill();
+  ctx.restore();
+  lbl('x', wx(8.2)+12, wy(0),     'rgba(26,16,8,0.45)', 11, true);
+  lbl('y', wx(0),      wy(8.2)-12,'rgba(26,16,8,0.45)', 11, true);
+
+  // ── full circle ──
+  ctx.save();
+  ctx.beginPath(); ctx.arc(wx(0), wy(0), R*SCALE, 0, Math.PI*2);
+  ctx.strokeStyle='#444'; ctx.lineWidth=1.8; ctx.stroke();
+  ctx.restore();
+
+  // ── dashed drop line C → B ──
+  ctx.save();
+  ctx.setLineDash([4,4]);
+  ctx.strokeStyle='rgba(42,98,168,0.4)'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(wx(C.x),wy(C.y)); ctx.lineTo(wx(B.x),wy(B.y)); ctx.stroke();
+  ctx.restore();
+
+  // ── squares (behind triangle) ──
+  const gCen = drawSquare(O, B, 'rgba(100,200,100,0.22)', '#3a8a3a');   // green: base O→B
+  const bCen = drawSquare(B, C, 'rgba(100,150,230,0.20)', '#2a62a8');   // blue:  height B→C
+  const rCen = drawSquare(O, C, 'rgba(220,80,80,0.16)',   '#c0392b');   // red:   hyp O→C
+
+  // ── triangle O–B–C ──
+  ctx.beginPath();
+  ctx.moveTo(wx(O.x),wy(O.y));
+  ctx.lineTo(wx(B.x),wy(B.y));
+  ctx.lineTo(wx(C.x),wy(C.y));
+  ctx.closePath();
+  ctx.fillStyle='rgba(200,134,10,0.08)'; ctx.fill();
+  [[O,B,'#3a8a3a'],[B,C,'#2a62a8'],[O,C,'#c0392b']].forEach(([p,q,col])=>{
+    ctx.beginPath(); ctx.moveTo(wx(p.x),wy(p.y)); ctx.lineTo(wx(q.x),wy(q.y));
+    ctx.strokeStyle=col; ctx.lineWidth=2.5; ctx.stroke();
+  });
+
+  // ── right-angle box at B ──
+  const s = 0.22;
+  const signX = O.x < B.x ? -1 : 1;
+  const signY = C.y >= 0  ?  1 : -1;
+  ctx.beginPath();
+  ctx.moveTo(wx(B.x + signX*s), wy(0));
+  ctx.lineTo(wx(B.x + signX*s), wy(signY*s));
+  ctx.lineTo(wx(B.x),           wy(signY*s));
+  ctx.strokeStyle='#555'; ctx.lineWidth=1.5; ctx.stroke();
+  lbl('90°', wx(B.x)+signX*28, wy(0)+(C.y>=0?-16:16), '#555', 10, true);
+
+  // ── area labels inside squares ──
+  lbl(`${(a*a).toFixed(2)}`, gCen.px, gCen.py, '#3a8a3a', 14);
+  lbl(`${(b*b).toFixed(2)}`, bCen.px, bCen.py, '#2a62a8', 14);
+  lbl(`${(c*c).toFixed(2)}`, rCen.px, rCen.py, '#c0392b', 14);
+
+  // ── side value labels ──
+  sideLbl(O, B, `a=${a.toFixed(2)}`, '#3a8a3a');
+  sideLbl(B, C, `b=${b.toFixed(2)}`, '#2a62a8');
+  sideLbl(O, C, `c=5.00`,           '#c0392b');
+
+  // ── square corner labels ──
+  const gC = squareCornersW(O, B);
+  const bC = squareCornersW(B, C);
+  const rC = squareCornersW(O, C);
+
+  // Green corners: D, E (far corners of green square)
+  const gOff = C.y >= 0 ? 14 : -14;
+  lbl('D', wx(gC[3].x), wy(gC[3].y)+gOff, '#555', 11, true);
+  lbl('E', wx(gC[2].x), wy(gC[2].y)+gOff, '#555', 11, true);
+
+  // Blue corners: F, G (far corners of blue square)
+  const bOff = C.x >= 0 ? 16 : -16;
+  lbl('F', wx(bC[2].x)+bOff, wy(bC[2].y)+4, '#555', 11, true);
+  lbl('G', wx(bC[3].x)+bOff, wy(bC[3].y)-4, '#555', 11, true);
+
+  // Red corners: H, I (far corners of red square)
+  lbl('H', wx(rC[3].x)-4, wy(rC[3].y)-14, '#555', 11, true);
+  lbl('I', wx(rC[2].x)+14, wy(rC[2].y),   '#555', 11, true);
+
+  // ── dots ──
+  dot(0,   0,   6, '#444', '#fff');          // O = origin (fixed hyp end)
+  dot(B.x, 0,   5, '#555');                  // B = foot
+  dot(C.x, C.y, 9, '#1a6bb5', '#fff');       // C = draggable
+
+  // ── vertex labels ──
+  lbl('O', wx(0)-14,            wy(0)+14,            '#444',    13, true);
+  lbl('B', wx(B.x)+(B.x>=0?0:0),wy(0)+(C.y>=0?18:-18), '#444', 12, true);
+  lbl('C', wx(C.x)+(C.x>=0?16:-16), wy(C.y)+(C.y>=0?-14:14), '#1a5fa8', 13, true);
+
+  // ── equation panel ──
+  const a2=a*a, b2=b*b, c2=c*c, sum=a2+b2;
+  document.getElementById('ea').textContent  = `a² = ${a2.toFixed(2)}`;
+  document.getElementById('eb').textContent  = `b² = ${b2.toFixed(2)}`;
+  document.getElementById('es').textContent  = sum.toFixed(2);
+  document.getElementById('ec1').textContent = `c² = ${c2.toFixed(2)}`;
+  document.getElementById('ec2').textContent = c2.toFixed(2);
+  document.getElementById('ml').textContent  =
+    `✓  ${a2.toFixed(2)} + ${b2.toFixed(2)} = ${sum.toFixed(2)} = c² (${c2.toFixed(2)}) — always 25!`;
+}
+
+// ── Drag ──────────────────────────────────────────────────────
+let drag = false;
+function gp(e) {
+  const r=cv.getBoundingClientRect(), sx=W/r.width, sy=H/r.height;
+  const s=e.touches?e.touches[0]:e;
+  return { x:(s.clientX-r.left)*sx, y:(s.clientY-r.top)*sy };
+}
+function nearC(p) {
+  const {C}=geom();
+  return Math.hypot(p.x-wx(C.x), p.y-wy(C.y)) < 24;
+}
+function updateAngle(p) {
+  const worldX = (p.x - OX) / SCALE;
+  const worldY = (OY - p.y) / SCALE;
+  let a = Math.atan2(worldY, worldX);
+  // avoid degenerate: C exactly on axes
+  const eps = 0.04;
+  if (Math.abs(a) < eps)                a = a<0 ? -eps : eps;
+  if (Math.abs(Math.abs(a) - Math.PI/2) < eps) a = a>0 ? Math.PI/2-eps : -Math.PI/2+eps;
+  if (Math.abs(a - Math.PI) < eps)      a = Math.PI - eps;
+  if (Math.abs(a + Math.PI) < eps)      a = -Math.PI + eps;
+  angle = a;
+  draw();
+}
+
+cv.addEventListener('mousedown',  e=>{ if(nearC(gp(e))) drag=true; });
+cv.addEventListener('mousemove',  e=>{ if(drag) updateAngle(gp(e)); });
+cv.addEventListener('mouseup',    ()=>drag=false);
+cv.addEventListener('mouseleave', ()=>drag=false);
+cv.addEventListener('touchstart', e=>{ e.preventDefault(); if(nearC(gp(e))) drag=true; },{passive:false});
+cv.addEventListener('touchmove',  e=>{ e.preventDefault(); if(drag) updateAngle(gp(e)); },{passive:false});
+cv.addEventListener('touchend',   ()=>drag=false);
+
+draw();
+</script>
+</body>
+</html>

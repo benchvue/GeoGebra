@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pythagorean Theorem</title>
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1008;
+    --paper: #f5f0e8;
+    --amber: #c8860a;
+    --gold: #e8c84a;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Crimson Pro', Georgia, serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: repeating-linear-gradient(
+      transparent, transparent 31px,
+      rgba(180,160,120,0.15) 31px, rgba(180,160,120,0.15) 32px
+    );
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  header {
+    text-align: center;
+    padding: 2.5rem 1rem 0.5rem;
+    position: relative;
+    z-index: 1;
+  }
+  header h1 {
+    font-size: clamp(1.8rem, 4vw, 3rem);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+  header h1 span { color: var(--amber); font-style: italic; }
+  header p { font-size: 1rem; color: #6b5a3a; margin-top: 0.3rem; font-style: italic; }
+
+  .steps-nav {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1.2rem 1rem 0;
+    position: relative;
+    z-index: 1;
+    flex-wrap: wrap;
+  }
+  .step-btn {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    padding: 0.35rem 0.9rem;
+    border: 1.5px solid var(--ink);
+    background: transparent;
+    color: var(--ink);
+    cursor: pointer;
+    letter-spacing: 0.05em;
+    transition: all 0.2s;
+  }
+  .step-btn.active { background: var(--ink); color: var(--paper); }
+  .step-btn:hover:not(.active) { background: rgba(26,16,8,0.08); }
+
+  .stage {
+    position: relative;
+    z-index: 1;
+    max-width: 960px;
+    margin: 1.5rem auto;
+    padding: 0 1rem;
+  }
+
+  .step-panel { display: none; animation: fadeSlide 0.4s ease; }
+  .step-panel.active { display: block; }
+
+  @keyframes fadeSlide {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .panel-inner {
+    background: rgba(255,255,255,0.6);
+    border: 1.5px solid rgba(26,16,8,0.13);
+    border-radius: 2px;
+    padding: 1.8rem;
+    backdrop-filter: blur(4px);
+  }
+
+  .panel-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--amber);
+    margin-bottom: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .panel-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(200,134,10,0.3);
+  }
+
+  .viz-area {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .explain {
+    max-width: 240px;
+    flex: 1;
+    min-width: 180px;
+  }
+  .explain h3 { font-size: 1.3rem; font-weight: 600; margin-bottom: 0.5rem; }
+  .explain p { font-size: 1rem; line-height: 1.6; color: #3a2e1a; }
+
+  .dim-tag {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    padding: 2px 7px;
+    border-radius: 2px;
+    margin: 2px;
+    color: white;
+    font-weight: 700;
+  }
+  .dim-a { background: #3a8a3a; }
+  .dim-b { background: #2a62a8; }
+  .dim-c { background: #c0392b; }
+
+  .formula-block {
+    font-family: 'Crimson Pro', Georgia, serif;
+    font-size: 2.5rem;
+    font-style: italic;
+    text-align: center;
+    padding: 1.5rem 2rem;
+    background: var(--ink);
+    color: var(--gold);
+    letter-spacing: 0.02em;
+    margin: 1.2rem 0 0;
+    display: inline-block;
+    width: 100%;
+  }
+  .formula-block sup { font-size: 0.6em; vertical-align: super; }
+
+  .equation-steps {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    margin-top: 1.2rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.1rem;
+  }
+  .eq-box {
+    padding: 0.5rem 1rem;
+    border: 2px solid;
+    font-weight: 700;
+    animation: popIn 0.5s ease both;
+  }
+  .eq-a { border-color: #3a8a3a; color: #3a8a3a; }
+  .eq-b { border-color: #2a62a8; color: #2a62a8; }
+  .eq-c { border-color: #c0392b; color: #c0392b; }
+  .eq-op { color: var(--ink); font-size: 1.3rem; }
+
+  @keyframes popIn {
+    from { transform: scale(0.7); opacity: 0; }
+    to   { transform: scale(1); opacity: 1; }
+  }
+
+  .area-cards {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 1.2rem;
+    flex-wrap: wrap;
+  }
+  .area-card {
+    padding: 0.8rem 1.2rem;
+    text-align: center;
+    border: 2px solid;
+    min-width: 100px;
+    animation: fadeSlide 0.5s ease both;
+  }
+  .area-card:nth-child(2) { animation-delay: 0.1s; }
+  .area-card:nth-child(3) { animation-delay: 0.2s; }
+  .area-card .card-label { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.2rem; }
+  .area-card .card-formula { font-size: 1rem; font-style: italic; margin-bottom: 0.2rem; }
+  .area-card .card-value { font-size: 1.9rem; font-weight: 600; }
+  .card-a { border-color: #3a8a3a; color: #3a8a3a; }
+  .card-b { border-color: #2a62a8; color: #2a62a8; }
+  .card-c { border-color: #c0392b; color: #c0392b; }
+
+  .circled-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    border: 2px solid;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    font-weight: 700;
+    margin-right: 4px;
+    vertical-align: middle;
+  }
+
+  .progress-bar {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 1.5rem;
+  }
+  .prog-dot { width: 7px; height: 7px; border-radius: 50%; background: rgba(26,16,8,0.2); transition: background 0.3s; }
+  .prog-dot.active { background: var(--amber); }
+
+  .nav-row {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 1.3rem;
+    gap: 1rem;
+  }
+  .nav-btn {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    padding: 0.45rem 1.2rem;
+    border: 1.5px solid var(--ink);
+    background: transparent;
+    color: var(--ink);
+    cursor: pointer;
+    transition: all 0.2s;
+    flex: 1;
+    text-align: center;
+  }
+  .nav-btn:hover { background: var(--ink); color: var(--paper); }
+  .nav-btn:disabled { opacity: 0.3; pointer-events: none; }
+  .nav-btn.primary { background: var(--ink); color: var(--paper); }
+  .nav-btn.primary:hover { background: var(--amber); border-color: var(--amber); }
+
+  svg { overflow: visible; }
+  svg text { font-family: 'Crimson Pro', Georgia, serif; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Pythagorean <span>Theorem</span></h1>
+  <p>A visual proof, step by step</p>
+</header>
+
+<div class="steps-nav">
+  <button class="step-btn active" onclick="goTo(0)">Step 1</button>
+  <button class="step-btn" onclick="goTo(1)">Step 2</button>
+  <button class="step-btn" onclick="goTo(2)">Step 3</button>
+  <button class="step-btn" onclick="goTo(3)">Step 4</button>
+  <button class="step-btn" onclick="goTo(4)">Step 5</button>
+</div>
+
+<div class="stage">
+
+<!-- ===================== STEP 1: Triangle only ===================== -->
+<div class="step-panel active" id="panel-0">
+  <div class="panel-inner">
+    <div class="panel-title">Step 1 — The Right Triangle</div>
+    <div class="viz-area">
+      <svg width="300" height="300" viewBox="0 0 300 300">
+        <!--
+          Triangle vertices (matching the image layout):
+          B = right angle = (200, 180)  ← bottom-right corner
+          A = (200, 60)                 ← top-right (height goes up)
+          C = (80, 180)                 ← bottom-left (base goes left)
+
+          a = BC = base = 3 units  → 120px  (C to B horizontal)
+          b = AB = height = 4 units → 120px  (A to B vertical)
+          c = AC = hypotenuse = 5 units
+        -->
+
+        <!-- Triangle fill -->
+        <polygon points="200,60 200,180 80,180" fill="rgba(200,134,10,0.12)" stroke="#c8860a" stroke-width="2.5"/>
+
+        <!-- Right angle square -->
+        <polyline points="200,168 188,168 188,180" fill="none" stroke="#555" stroke-width="1.8"/>
+
+        <!-- 90° label -->
+        <text x="163" y="173" font-size="12" fill="#444">90°</text>
+
+        <!-- Side labels -->
+        <!-- a = 3 (bottom, C to B) -->
+        <text x="136" y="200" text-anchor="middle" font-size="16" fill="#3a8a3a" font-style="italic" font-weight="600">a = 3</text>
+        <!-- b = 4 (right side, A to B) -->
+        <text x="218" y="122" text-anchor="start" font-size="16" fill="#2a62a8" font-style="italic" font-weight="600">b = 4</text>
+        <!-- c = 5 (hypotenuse) -->
+        <text x="118" y="108" text-anchor="middle" font-size="16" fill="#c0392b" font-style="italic" font-weight="600" transform="rotate(-53.13 118 108)">c = 5</text>
+
+        <!-- Vertex labels -->
+        <text x="204" y="57" font-size="13" fill="#555" font-weight="600">A</text>
+        <text x="73" y="193" font-size="13" fill="#555" font-weight="600">C</text>
+        <text x="204" y="193" font-size="13" fill="#555" font-weight="600">B</text>
+      </svg>
+
+      <div class="explain">
+        <h3>Right Triangle</h3>
+        <p>A right triangle with a 90° corner at <strong>B</strong>.</p>
+        <br>
+        <p>
+          <span class="dim-tag dim-a">a = 3</span> base (C→B)<br>
+          <span class="dim-tag dim-b">b = 4</span> height (A→B)<br>
+          <span class="dim-tag dim-c">c = 5</span> hypotenuse (A→C)
+        </p>
+        <br>
+        <p style="font-style:italic;font-size:0.9rem;color:#6b5a3a;">The hypotenuse is always opposite the right angle.</p>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" disabled>← Previous</button>
+      <button class="nav-btn primary" onclick="goTo(1)">Next →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== STEP 2: Squares on each side ===================== -->
+<div class="step-panel" id="panel-1">
+  <div class="panel-inner">
+    <div class="panel-title">Step 2 — Draw Squares on Each Side</div>
+    <div class="viz-area">
+      <svg width="420" height="400" viewBox="-10 -10 430 410">
+        <!--
+          Triangle:
+            B = right angle = (220, 230)
+            A = (220, 110)   ← top (b=4, 120px up)
+            C = (100, 230)   ← left (a=3, 120px left)
+
+          Green square on 'a' (base CB): goes DOWN from C and B
+            C=(100,230), B=(220,230) → down by 120px
+            D=(100,350), E=(220,350)
+
+          Blue square on 'b' (right side AB): goes RIGHT from A and B
+            A=(220,110), B=(220,230) → right by 120px
+            G=(340,110), F=(340,230)
+
+          Red square on 'c' (hypotenuse AC): rotated
+            A=(220,110), C=(100,230)
+            direction AC = (-120, 120), length = 120√2
+            perp (outward, upper-left) = (-120, -120) normalized × 120√2 = (-120,-120)
+            H = A + perp_unit×len = (220-120, 110-120) = (100, -10)
+            I = C + perp_unit×len = (100-120, 230-120) = (-20, 110)
+        -->
+
+        <!-- GREEN square on a (base) -->
+        <polygon points="100,230 220,230 220,350 100,350"
+          fill="rgba(100,200,100,0.25)" stroke="#3a8a3a" stroke-width="2"/>
+        <!-- label D, E -->
+        <text x="95" y="368" font-size="13" fill="#555" font-weight="600">D</text>
+        <text x="218" y="368" font-size="13" fill="#555" font-weight="600">E</text>
+        <!-- area label -->
+        <text x="160" y="297" text-anchor="middle" font-size="22" fill="#3a8a3a" font-style="italic" font-weight="600">9</text>
+        <!-- side label -->
+        <text x="160" y="225" text-anchor="middle" font-size="15" fill="#3a8a3a" font-style="italic">3</text>
+
+        <!-- BLUE square on b (right side) -->
+        <polygon points="220,110 340,110 340,230 220,230"
+          fill="rgba(100,150,230,0.22)" stroke="#2a62a8" stroke-width="2"/>
+        <!-- label G, F -->
+        <text x="343" y="115" font-size="13" fill="#555" font-weight="600">G</text>
+        <text x="343" y="238" font-size="13" fill="#555" font-weight="600">F</text>
+        <!-- area label -->
+        <text x="280" y="175" text-anchor="middle" font-size="22" fill="#2a62a8" font-style="italic" font-weight="600">16</text>
+        <!-- side label -->
+        <text x="215" y="175" text-anchor="end" font-size="15" fill="#2a62a8" font-style="italic">4</text>
+
+        <!-- RED square on c (hypotenuse) — rotated -->
+        <polygon points="220,110 100,230 -20,110 100,-10"
+          fill="rgba(220,80,80,0.18)" stroke="#c0392b" stroke-width="2"/>
+        <!-- label H, I -->
+        <text x="96" y="-15" font-size="13" fill="#555" font-weight="600">H</text>
+        <text x="-32" y="118" font-size="13" fill="#555" font-weight="600">I</text>
+        <!-- area label -->
+        <text x="90" y="110" text-anchor="middle" font-size="22" fill="#c0392b" font-style="italic" font-weight="600">25</text>
+        <!-- side label along hyp -->
+        <text x="175" y="193" text-anchor="middle" font-size="15" fill="#c0392b" font-style="italic" transform="rotate(-45 175 193)">5</text>
+
+        <!-- Triangle (drawn on top) -->
+        <polygon points="220,110 220,230 100,230"
+          fill="rgba(200,134,10,0.13)" stroke="#c8860a" stroke-width="2.5"/>
+
+        <!-- Right angle mark -->
+        <polyline points="220,218 208,218 208,230" fill="none" stroke="#555" stroke-width="1.8"/>
+        <text x="180" y="225" font-size="11" fill="#444">90°</text>
+
+        <!-- Vertex dots -->
+        <circle cx="220" cy="110" r="4" fill="#555"/>
+        <circle cx="220" cy="230" r="4" fill="#555"/>
+        <circle cx="100" cy="230" r="4" fill="#555"/>
+        <circle cx="100" cy="350" r="4" fill="#555"/>
+        <circle cx="220" cy="350" r="4" fill="#555"/>
+        <circle cx="340" cy="110" r="4" fill="#555"/>
+        <circle cx="340" cy="230" r="4" fill="#555"/>
+        <circle cx="100" cy="-10" r="4" fill="#555"/>
+        <circle cx="-20" cy="110" r="4" fill="#555"/>
+      </svg>
+
+      <div class="explain">
+        <h3>Three Squares</h3>
+        <p>A square is drawn on <em>each</em> side of the triangle.</p>
+        <br>
+        <p>
+          <span class="dim-tag dim-a">Green</span> on base a (→ down)<br>
+          <span class="dim-tag dim-b">Blue</span> on height b (→ right)<br>
+          <span class="dim-tag dim-c">Red</span> on hypotenuse c (rotated)
+        </p>
+        <br>
+        <p style="font-style:italic;font-size:0.9rem;color:#6b5a3a;">Points D, E, F, G, H, I mark the square corners.</p>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="goTo(0)">← Previous</button>
+      <button class="nav-btn primary" onclick="goTo(2)">Next →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== STEP 3: Areas ===================== -->
+<div class="step-panel" id="panel-2">
+  <div class="panel-inner">
+    <div class="panel-title">Step 3 — Each Square's Area</div>
+    <div class="viz-area" style="flex-direction:column;">
+      <svg width="420" height="400" viewBox="-10 -10 430 410">
+        <!-- GREEN square with grid -->
+        <polygon points="100,230 220,230 220,350 100,350" fill="rgba(100,200,100,0.25)" stroke="#3a8a3a" stroke-width="2"/>
+        <!-- 3×3 grid -->
+        <line x1="140" y1="230" x2="140" y2="350" stroke="#3a8a3a" stroke-width="0.7" opacity="0.5"/>
+        <line x1="180" y1="230" x2="180" y2="350" stroke="#3a8a3a" stroke-width="0.7" opacity="0.5"/>
+        <line x1="100" y1="270" x2="220" y2="270" stroke="#3a8a3a" stroke-width="0.7" opacity="0.5"/>
+        <line x1="100" y1="310" x2="220" y2="310" stroke="#3a8a3a" stroke-width="0.7" opacity="0.5"/>
+        <text x="160" y="290" text-anchor="middle" font-size="20" fill="#3a8a3a" font-weight="600">3² = 9</text>
+        <text x="95" y="368" font-size="13" fill="#555" font-weight="600">D</text>
+        <text x="218" y="368" font-size="13" fill="#555" font-weight="600">E</text>
+
+        <!-- BLUE square with grid -->
+        <polygon points="220,110 340,110 340,230 220,230" fill="rgba(100,150,230,0.22)" stroke="#2a62a8" stroke-width="2"/>
+        <!-- 4×4 grid -->
+        <line x1="250" y1="110" x2="250" y2="230" stroke="#2a62a8" stroke-width="0.7" opacity="0.5"/>
+        <line x1="280" y1="110" x2="280" y2="230" stroke="#2a62a8" stroke-width="0.7" opacity="0.5"/>
+        <line x1="310" y1="110" x2="310" y2="230" stroke="#2a62a8" stroke-width="0.7" opacity="0.5"/>
+        <line x1="220" y1="140" x2="340" y2="140" stroke="#2a62a8" stroke-width="0.7" opacity="0.5"/>
+        <line x1="220" y1="170" x2="340" y2="170" stroke="#2a62a8" stroke-width="0.7" opacity="0.5"/>
+        <line x1="220" y1="200" x2="340" y2="200" stroke="#2a62a8" stroke-width="0.7" opacity="0.5"/>
+        <text x="280" y="175" text-anchor="middle" font-size="20" fill="#2a62a8" font-weight="600">4² = 16</text>
+        <text x="343" y="115" font-size="13" fill="#555" font-weight="600">G</text>
+        <text x="343" y="238" font-size="13" fill="#555" font-weight="600">F</text>
+
+        <!-- RED square -->
+        <polygon points="220,110 100,230 -20,110 100,-10" fill="rgba(220,80,80,0.18)" stroke="#c0392b" stroke-width="2"/>
+        <text x="90" y="113" text-anchor="middle" font-size="20" fill="#c0392b" font-weight="600">5² = 25</text>
+        <text x="96" y="-15" font-size="13" fill="#555" font-weight="600">H</text>
+        <text x="-32" y="118" font-size="13" fill="#555" font-weight="600">I</text>
+
+        <!-- Triangle -->
+        <polygon points="220,110 220,230 100,230" fill="rgba(200,134,10,0.13)" stroke="#c8860a" stroke-width="2.5"/>
+        <polyline points="220,218 208,218 208,230" fill="none" stroke="#555" stroke-width="1.8"/>
+        <text x="180" y="225" font-size="11" fill="#444">90°</text>
+
+        <!-- Dots -->
+        <circle cx="220" cy="110" r="4" fill="#555"/>
+        <circle cx="220" cy="230" r="4" fill="#555"/>
+        <circle cx="100" cy="230" r="4" fill="#555"/>
+        <circle cx="100" cy="350" r="4" fill="#555"/>
+        <circle cx="220" cy="350" r="4" fill="#555"/>
+        <circle cx="340" cy="110" r="4" fill="#555"/>
+        <circle cx="340" cy="230" r="4" fill="#555"/>
+        <circle cx="100" cy="-10" r="4" fill="#555"/>
+        <circle cx="-20" cy="110" r="4" fill="#555"/>
+      </svg>
+
+      <div class="area-cards">
+        <div class="area-card card-a">
+          <div class="card-label">Side a</div>
+          <div class="card-formula">a² = 3²</div>
+          <div class="card-value">9</div>
+        </div>
+        <div class="area-card card-b">
+          <div class="card-label">Side b</div>
+          <div class="card-formula">b² = 4²</div>
+          <div class="card-value">16</div>
+        </div>
+        <div class="area-card card-c">
+          <div class="card-label">Hypotenuse c</div>
+          <div class="card-formula">c² = 5²</div>
+          <div class="card-value">25</div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="goTo(1)">← Previous</button>
+      <button class="nav-btn primary" onclick="goTo(3)">Next →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== STEP 4: Circled numbers + addition ===================== -->
+<div class="step-panel" id="panel-3">
+  <div class="panel-inner">
+    <div class="panel-title">Step 4 — Label & Add</div>
+    <div class="viz-area" style="flex-direction:column; align-items:center; gap:1rem;">
+
+      <svg width="420" height="400" viewBox="-10 -10 430 410">
+        <!-- GREEN square -->
+        <polygon points="100,230 220,230 220,350 100,350" fill="rgba(100,200,100,0.25)" stroke="#3a8a3a" stroke-width="2"/>
+        <circle cx="160" cy="290" r="22" fill="#3a8a3a"/>
+        <text x="160" y="295" text-anchor="middle" font-size="17" fill="white" font-weight="700">①</text>
+        <text x="160" y="225" text-anchor="middle" font-size="14" fill="#3a8a3a">3</text>
+        <text x="95" y="368" font-size="13" fill="#555" font-weight="600">D</text>
+        <text x="218" y="368" font-size="13" fill="#555" font-weight="600">E</text>
+
+        <!-- BLUE square -->
+        <polygon points="220,110 340,110 340,230 220,230" fill="rgba(100,150,230,0.22)" stroke="#2a62a8" stroke-width="2"/>
+        <circle cx="280" cy="170" r="22" fill="#2a62a8"/>
+        <text x="280" y="175" text-anchor="middle" font-size="17" fill="white" font-weight="700">②</text>
+        <text x="215" y="175" text-anchor="end" font-size="14" fill="#2a62a8">4</text>
+        <text x="343" y="115" font-size="13" fill="#555" font-weight="600">G</text>
+        <text x="343" y="238" font-size="13" fill="#555" font-weight="600">F</text>
+
+        <!-- RED square -->
+        <polygon points="220,110 100,230 -20,110 100,-10" fill="rgba(220,80,80,0.18)" stroke="#c0392b" stroke-width="2"/>
+        <circle cx="80" cy="105" r="22" fill="#c0392b"/>
+        <text x="80" y="110" text-anchor="middle" font-size="17" fill="white" font-weight="700">③</text>
+        <text x="165" y="190" text-anchor="middle" font-size="14" fill="#c0392b" transform="rotate(-45 165 190)">5</text>
+        <text x="96" y="-15" font-size="13" fill="#555" font-weight="600">H</text>
+        <text x="-32" y="118" font-size="13" fill="#555" font-weight="600">I</text>
+
+        <!-- Triangle -->
+        <polygon points="220,110 220,230 100,230" fill="rgba(200,134,10,0.13)" stroke="#c8860a" stroke-width="2.5"/>
+        <polyline points="220,218 208,218 208,230" fill="none" stroke="#555" stroke-width="1.8"/>
+        <text x="180" y="225" font-size="11" fill="#444">90°</text>
+
+        <!-- Dots -->
+        <circle cx="220" cy="110" r="4" fill="#555"/>
+        <circle cx="220" cy="230" r="4" fill="#555"/>
+        <circle cx="100" cy="230" r="4" fill="#555"/>
+        <circle cx="100" cy="350" r="4" fill="#555"/>
+        <circle cx="220" cy="350" r="4" fill="#555"/>
+        <circle cx="340" cy="110" r="4" fill="#555"/>
+        <circle cx="340" cy="230" r="4" fill="#555"/>
+        <circle cx="100" cy="-10" r="4" fill="#555"/>
+        <circle cx="-20" cy="110" r="4" fill="#555"/>
+      </svg>
+
+      <div style="display:flex; gap:1.5rem; flex-wrap:wrap; justify-content:center; font-size:1rem;">
+        <span><span class="circled-num" style="border-color:#3a8a3a;color:#3a8a3a">①</span> a² = <strong>9</strong></span>
+        <span><span class="circled-num" style="border-color:#2a62a8;color:#2a62a8">②</span> b² = <strong>16</strong></span>
+        <span><span class="circled-num" style="border-color:#c0392b;color:#c0392b">③</span> c² = <strong>25</strong></span>
+      </div>
+
+      <div class="equation-steps">
+        <div class="eq-box eq-a" style="animation-delay:0s">① 9</div>
+        <span class="eq-op">+</span>
+        <div class="eq-box eq-b" style="animation-delay:0.15s">② 16</div>
+        <span class="eq-op">=</span>
+        <div class="eq-box eq-c" style="animation-delay:0.3s">③ 25</div>
+      </div>
+
+      <p style="font-style:italic;font-size:1rem;color:#6b5a3a;text-align:center;">9 + 16 = 25 ✓</p>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="goTo(2)">← Previous</button>
+      <button class="nav-btn primary" onclick="goTo(4)">Next →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== STEP 5: Formula ===================== -->
+<div class="step-panel" id="panel-4">
+  <div class="panel-inner">
+    <div class="panel-title">Step 5 — The Pythagorean Theorem</div>
+    <div class="viz-area" style="flex-direction:column; align-items:center; gap:1.2rem;">
+
+      <div class="formula-block">
+        a<sup>2</sup> + b<sup>2</sup> = c<sup>2</sup>
+      </div>
+
+      <div style="text-align:center; max-width:420px;">
+        <p style="font-size:1.1rem; line-height:1.7;">
+          For <em>any</em> right triangle, the sum of the squares of the two shorter sides always equals the square of the hypotenuse.
+        </p>
+      </div>
+
+      <div style="background:rgba(26,16,8,0.05); border:1.5px solid rgba(26,16,8,0.12); padding:1.2rem 2rem; text-align:center; max-width:380px; width:100%;">
+        <div style="font-family:'JetBrains Mono',monospace; font-size:0.68rem; letter-spacing:0.12em; color:var(--amber); margin-bottom:0.8rem; text-transform:uppercase;">Numeric Proof</div>
+        <div style="font-family:'JetBrains Mono',monospace; font-size:1.1rem; line-height:2.2;">
+          <span style="color:#3a8a3a">3²</span> + <span style="color:#2a62a8">4²</span> = <span style="color:#c0392b">5²</span><br>
+          <span style="color:#3a8a3a">9</span> + <span style="color:#2a62a8">16</span> = <span style="color:#c0392b">25</span><br>
+          <span style="font-size:1.3rem; font-weight:700;">✓ 25 = 25</span>
+        </div>
+      </div>
+
+      <button class="nav-btn" onclick="goTo(0)" style="max-width:180px;">↺ Start Over</button>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="goTo(3)">← Previous</button>
+      <button class="nav-btn primary" disabled>Done ✓</button>
+    </div>
+  </div>
+</div>
+
+<!-- Progress dots -->
+<div class="progress-bar">
+  <div class="prog-dot active" id="dot-0"></div>
+  <div class="prog-dot" id="dot-1"></div>
+  <div class="prog-dot" id="dot-2"></div>
+  <div class="prog-dot" id="dot-3"></div>
+  <div class="prog-dot" id="dot-4"></div>
+</div>
+
+</div>
+
+<script>
+  let current = 0;
+  function goTo(step) {
+    document.getElementById('panel-' + current).classList.remove('active');
+    document.getElementById('dot-' + current).classList.remove('active');
+    document.querySelectorAll('.step-btn')[current].classList.remove('active');
+    current = step;
+    document.getElementById('panel-' + current).classList.add('active');
+    document.getElementById('dot-' + current).classList.add('active');
+    document.querySelectorAll('.step-btn')[current].classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+</script>
+</body>
+</html>

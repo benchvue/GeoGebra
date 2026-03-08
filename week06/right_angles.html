@@ -1,439 +1,313 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive Circle Angle</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        body {
-            font-family: 'DM Sans', sans-serif;
-            background: #ffffff;
-            color: #333;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        h1 {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 4px;
-            color: #222;
-        }
-
-        .subtitle {
-            font-size: 0.85rem;
-            color: #888;
-            margin-bottom: 16px;
-        }
-
-        .canvas-wrapper {
-            position: relative;
-        }
-
-        canvas {
-            display: block;
-            cursor: default;
-        }
-
-        .info-panel {
-            display: flex;
-            gap: 10px;
-            margin-top: 16px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        .angle-card {
-            background: #f8f9fb;
-            border: 1.5px solid #e0e3ea;
-            border-radius: 10px;
-            padding: 10px 18px;
-            min-width: 120px;
-            text-align: center;
-        }
-
-        .angle-card .label {
-            font-size: 0.7rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.06em;
-            margin-bottom: 3px;
-        }
-
-        .angle-card .value {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 1.25rem;
-            font-weight: 500;
-        }
-
-        .angle-card.alpha .label { color: #555; }
-        .angle-card.alpha .value { color: #333; }
-
-        .angle-card.beta .label { color: #1a73e8; }
-        .angle-card.beta .value { color: #1a73e8; }
-
-        .angle-card.gamma .label { color: #555; }
-        .angle-card.gamma .value { color: #333; }
-
-        .sum-card {
-            background: #eef3ff;
-            border: 1.5px solid #c5d5f5;
-            border-radius: 10px;
-            padding: 10px 18px;
-            min-width: 200px;
-            text-align: center;
-        }
-
-        .sum-card .label {
-            font-size: 0.7rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.06em;
-            color: #1a73e8;
-            margin-bottom: 3px;
-        }
-
-        .sum-card .value {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 1.25rem;
-            font-weight: 500;
-            color: #1a56c4;
-        }
-
-        .hint {
-            font-size: 0.78rem;
-            color: #999;
-            margin-top: 12px;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Interactive Circle Angle</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'DM Sans',sans-serif; background:#fff; color:#333; display:flex; flex-direction:column; align-items:center; min-height:100vh; padding:20px; }
+  h1 { font-size:1.5rem; font-weight:700; margin-bottom:4px; color:#222; }
+  .subtitle { font-size:0.85rem; color:#888; margin-bottom:16px; }
+  canvas { display:block; cursor:default; }
+  .info-panel { display:flex; gap:10px; margin-top:16px; flex-wrap:wrap; justify-content:center; }
+  .angle-card { background:#f8f9fb; border:1.5px solid #e0e3ea; border-radius:10px; padding:10px 18px; min-width:120px; text-align:center; }
+  .angle-card .label { font-size:0.7rem; font-weight:600; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:3px; color:#555; }
+  .angle-card .value { font-family:'JetBrains Mono',monospace; font-size:1.25rem; font-weight:500; color:#333; }
+  .angle-card.beta .label { color:#1a73e8; }
+  .angle-card.beta .value { color:#1a73e8; }
+  .sum-card { background:#eef3ff; border:1.5px solid #c5d5f5; border-radius:10px; padding:10px 18px; min-width:200px; text-align:center; }
+  .sum-card .label { font-size:0.7rem; font-weight:600; text-transform:uppercase; letter-spacing:0.06em; color:#1a73e8; margin-bottom:3px; }
+  .sum-card .value { font-family:'JetBrains Mono',monospace; font-size:1.25rem; font-weight:500; color:#1a56c4; }
+  .hint { font-size:0.78rem; color:#999; margin-top:12px; }
+</style>
 </head>
 <body>
-    <h1>Interactive Circle Angle</h1>
-    <p class="subtitle">Drag the endpoint to change the angle</p>
-    <div class="canvas-wrapper">
-        <canvas id="canvas" width="700" height="700"></canvas>
-    </div>
-    <div class="info-panel">
-        <div class="angle-card alpha">
-            <div class="label">α (Alpha)</div>
-            <div class="value" id="alphaVal">0°</div>
-        </div>
-        <div class="angle-card beta">
-            <div class="label">β (Beta)</div>
-            <div class="value" id="betaVal">90°</div>
-        </div>
-        <div class="angle-card gamma">
-            <div class="label">γ (Gamma)</div>
-            <div class="value" id="gammaVal">0°</div>
-        </div>
-        <div class="sum-card">
-            <div class="label">α + β + γ (Interior Sum)</div>
-            <div class="value" id="sumVal">180°</div>
-        </div>
-    </div>
-    <p class="hint">The sum of interior angles of any triangle is always 180°</p>
+<h1>Interactive Circle Angle</h1>
+<p class="subtitle">Drag the endpoint to change the angle</p>
+<canvas id="canvas" width="700" height="700"></canvas>
+<div class="info-panel">
+  <div class="angle-card">
+    <div class="label">α (Alpha)</div>
+    <div class="value" id="alphaVal">0°</div>
+  </div>
+  <div class="angle-card beta">
+    <div class="label">β (Beta)</div>
+    <div class="value" id="betaVal">90°</div>
+  </div>
+  <div class="angle-card">
+    <div class="label">γ (Gamma)</div>
+    <div class="value" id="gammaVal">0°</div>
+  </div>
+  <div class="sum-card">
+    <div class="label">α + β + γ (Interior Sum)</div>
+    <div class="value" id="sumVal">180°</div>
+  </div>
+</div>
+<p class="hint">The sum of interior angles of any triangle is always 180°</p>
 
-    <script>
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
 
-        const CX = 280, CY = 380;
-        const RADIUS = 250;
-        const startX = CX + RADIUS, startY = CY;
-        const cPointX = CX - RADIUS, cPointY = CY;
-        const POINT_RADIUS = 8;
+const CX = 350, CY = 350;   // circle center = origin of our coord system
+const RADIUS = 270;
+const PR = 8;  // point radius
 
-        let endAngle = -55 * Math.PI / 180;
-        let dragging = false, hovered = false;
+// Fixed points
+const startX = CX + RADIUS, startY = CY;  // right end of base
+const cPointX = CX - RADIUS, cPointY = CY; // left end (C label)
 
-        function getEnd() {
-            return { x: CX + RADIUS * Math.cos(endAngle), y: CY + RADIUS * Math.sin(endAngle) };
-        }
-        function getA() {
-            return { x: getEnd().x, y: CY };
-        }
-        function dist(x1, y1, x2, y2) {
-            return Math.sqrt((x1-x2)**2 + (y1-y2)**2);
-        }
-        function toDeg(r) { return Math.abs(r) * 180 / Math.PI; }
+let endAngle = -55 * Math.PI / 180;  // angle of draggable End point on circle
+let dragging = false, hovered = false;
 
-        function drawRightAngle() { /* replaced by inline code in draw() */ }
+// End point on circle
+function getEnd() {
+  return { x: CX + RADIUS * Math.cos(endAngle), y: CY + RADIUS * Math.sin(endAngle) };
+}
 
-        function drawAngleArc(cx, cy, a1, a2, r, fill, stroke) {
-            let s = a1, diff = a2 - a1;
-            while (diff < 0) diff += 2 * Math.PI;
-            if (diff > Math.PI) { s = a2; diff = 2 * Math.PI - diff; }
-            ctx.beginPath();
-            ctx.moveTo(cx, cy);
-            ctx.arc(cx, cy, r, s, s + diff);
-            ctx.closePath();
-            ctx.fillStyle = fill;
-            ctx.fill();
-            ctx.beginPath();
-            ctx.arc(cx, cy, r, s, s + diff);
-            ctx.strokeStyle = stroke;
-            ctx.lineWidth = 1.5;
-            ctx.stroke();
-        }
+// A = foot of perpendicular from End to x-axis (horizontal through Center)
+function getA() {
+  return { x: getEnd().x, y: CY };
+}
 
-        function draw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            const end = getEnd(), A = getA();
+function dist(x1,y1,x2,y2) { return Math.sqrt((x1-x2)**2+(y1-y2)**2); }
 
-            // Compute the central angle α measured as the positive angle from the base (positive x-axis) to the end direction
-            // endAngle is in range (-PI, PI] from atan2
-            // We want the positive sweep angle from 0 going toward endAngle
-            let alphaDeg;
-            if (endAngle < 0) {
-                // Upper half: angle is simply |endAngle| in radians
-                alphaDeg = Math.abs(endAngle) * 180 / Math.PI;
-            } else {
-                // Lower half: angle measured going clockwise = endAngle
-                alphaDeg = endAngle * 180 / Math.PI;
-            }
-            const gammaDeg = 90 - alphaDeg;
-            // When alpha > 90, gamma becomes negative — but it's the interior angle at End
-            // For display we show absolute value
-            const gammaDisplay = Math.abs(gammaDeg);
+// ── Interior angle at a vertex, given three points ─────────────
+// Returns angle in DEGREES at vertex V, with rays to P1 and P2
+function interiorAngle(Vx,Vy, P1x,P1y, P2x,P2y) {
+  const ax = P1x-Vx, ay = P1y-Vy;
+  const bx = P2x-Vx, by = P2y-Vy;
+  const dot = ax*bx + ay*by;
+  const magA = Math.sqrt(ax*ax+ay*ay);
+  const magB = Math.sqrt(bx*bx+by*by);
+  if (magA < 1e-9 || magB < 1e-9) return 0;
+  const cosA = Math.max(-1, Math.min(1, dot/(magA*magB)));
+  return Math.acos(cosA) * 180 / Math.PI;
+}
 
-            // Determine if end is above or below horizontal
-            const above = end.y < CY;
-            const rightOfCenter = end.x > CX;
+function drawAngleArc(cx,cy, fromPx,fromPy, toPx,toPy, r, fill, stroke) {
+  const a1 = Math.atan2(fromPy-cy, fromPx-cx);
+  const a2 = Math.atan2(toPy-cy,  toPx-cx);
+  // Always draw the SMALLER arc (interior angle < 180)
+  let diff = a2 - a1;
+  while (diff >  Math.PI) diff -= 2*Math.PI;
+  while (diff < -Math.PI) diff += 2*Math.PI;
+  ctx.beginPath();
+  ctx.moveTo(cx, cy);
+  ctx.arc(cx, cy, r, a1, a1+diff, diff < 0);
+  ctx.closePath();
+  ctx.fillStyle = fill; ctx.fill();
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, a1, a1+diff, diff < 0);
+  ctx.strokeStyle = stroke; ctx.lineWidth=1.5; ctx.stroke();
+}
 
-            // Circle
-            ctx.beginPath();
-            ctx.arc(CX, CY, RADIUS, 0, Math.PI * 2);
-            ctx.strokeStyle = '#444';
-            ctx.lineWidth = 2;
-            ctx.stroke();
+function draw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const End = getEnd();
+  const A   = getA();
 
-            // Green base line: Center → start
-            ctx.beginPath();
-            ctx.moveTo(CX, CY);
-            ctx.lineTo(startX, startY);
-            ctx.strokeStyle = '#2e8b57';
-            ctx.lineWidth = 3;
-            ctx.stroke();
+  // Triangle vertices:
+  //   Center = (CX, CY)
+  //   A      = foot on x-axis
+  //   End    = point on circle
+  // Right angle is ALWAYS at A (vertical leg A→End, horizontal leg Center→A)
 
-            // Triangle fill
-            ctx.beginPath();
-            ctx.moveTo(CX, CY);
-            ctx.lineTo(A.x, A.y);
-            ctx.lineTo(end.x, end.y);
-            ctx.closePath();
-            ctx.fillStyle = 'rgba(100, 149, 237, 0.10)';
-            ctx.fill();
+  // ── Compute TRUE interior angles using dot-product formula ──
+  // α = angle at Center (between Center→A and Center→End)
+  const alphaDeg = interiorAngle(CX,CY,  A.x,A.y,  End.x,End.y);
+  // β = angle at A (always 90°)
+  const betaDeg  = 90;
+  // γ = angle at End (between End→A and End→Center)
+  const gammaDeg = interiorAngle(End.x,End.y,  A.x,A.y,  CX,CY);
+  // Sum should always be 180°
 
-            // Edge: A → End (vertical)
-            ctx.beginPath();
-            ctx.moveTo(A.x, A.y);
-            ctx.lineTo(end.x, end.y);
-            ctx.strokeStyle = '#5b8def';
-            ctx.lineWidth = 2;
-            ctx.stroke();
+  const above = End.y < CY;   // is End above the x-axis?
 
-            // Edge: Center → End (hypotenuse)
-            ctx.beginPath();
-            ctx.moveTo(CX, CY);
-            ctx.lineTo(end.x, end.y);
-            ctx.strokeStyle = '#1a3a8a';
-            ctx.lineWidth = 2.5;
-            ctx.stroke();
+  // ── Circle ──
+  ctx.beginPath(); ctx.arc(CX,CY,RADIUS,0,Math.PI*2);
+  ctx.strokeStyle='#444'; ctx.lineWidth=2; ctx.stroke();
 
-            // ── α arc at Center ──
-            const arcR = 40;
-            drawAngleArc(CX, CY, endAngle, 0, arcR, 'rgba(180,180,180,0.25)', '#999');
-            const aMid = endAngle / 2;
-            // For angles > PI, adjust midpoint
-            let aMidAdj = aMid;
-            if (endAngle > 0 && endAngle > Math.PI) {
-                aMidAdj = (endAngle + 2 * Math.PI) / 2;
-            }
-            ctx.font = '500 13px "DM Sans"';
-            ctx.fillStyle = '#444';
-            ctx.textAlign = 'left';
-            ctx.textBaseline = 'middle';
-            const aLabelX = CX + (arcR + 8) * Math.cos(aMid);
-            const aLabelY = CY + (arcR + 8) * Math.sin(aMid);
-            ctx.fillText(`α = ${alphaDeg.toFixed(1)}°`, aLabelX - 50, aLabelY - 14);
+  // ── Green base line: Center → startX (rightward) ──
+  ctx.beginPath(); ctx.moveTo(CX,CY); ctx.lineTo(startX,startY);
+  ctx.strokeStyle='#2e8b57'; ctx.lineWidth=3; ctx.stroke();
 
-            // "angle = XX°"
-            ctx.fillText(`angle = ${alphaDeg.toFixed(1)}°`, CX + arcR + 12, CY + (above ? -18 : 18));
+  // ── Triangle fill ──
+  ctx.beginPath();
+  ctx.moveTo(CX,CY); ctx.lineTo(A.x,A.y); ctx.lineTo(End.x,End.y);
+  ctx.closePath();
+  ctx.fillStyle='rgba(100,149,237,0.10)'; ctx.fill();
 
-            // ── Right angle square at A ──
-            const sqSize = 14;
-            const sqDirY = above ? -1 : 1; // square goes toward the end point
-            const sqDirX = end.x < CX ? 1 : -1; // square goes toward center
-            ctx.beginPath();
-            ctx.moveTo(A.x + sqDirX * sqSize, A.y);
-            ctx.lineTo(A.x + sqDirX * sqSize, A.y + sqDirY * sqSize);
-            ctx.lineTo(A.x, A.y + sqDirY * sqSize);
-            ctx.strokeStyle = '#555';
-            ctx.lineWidth = 1.5;
-            ctx.stroke();
+  // ── Vertical leg: A → End (blue) ──
+  ctx.beginPath(); ctx.moveTo(A.x,A.y); ctx.lineTo(End.x,End.y);
+  ctx.strokeStyle='#5b8def'; ctx.lineWidth=2; ctx.stroke();
 
-            ctx.font = '500 13px "DM Sans"';
-            ctx.fillStyle = '#1a73e8';
-            ctx.textAlign = 'left';
-            ctx.textBaseline = 'middle';
-            ctx.fillText('β = 90°', A.x + 10, A.y + (above ? -40 : 40));
+  // ── Hypotenuse: Center → End (dark blue) ──
+  ctx.beginPath(); ctx.moveTo(CX,CY); ctx.lineTo(End.x,End.y);
+  ctx.strokeStyle='#1a3a8a'; ctx.lineWidth=2.5; ctx.stroke();
 
-            // ── γ arc at End ──
-            const toADir = above ? Math.PI / 2 : -Math.PI / 2; // toward A (down if above, up if below)
-            const toCenter = Math.atan2(CY - end.y, CX - end.x);
-            drawAngleArc(end.x, end.y, toCenter, toADir, 24, 'rgba(100,149,237,0.15)', '#5b8def');
-            const gammaDegDisplay = gammaDisplay;
-            ctx.font = '500 13px "DM Sans"';
-            ctx.fillStyle = '#444';
-            ctx.textAlign = 'left';
-            ctx.fillText(`γ = ${gammaDegDisplay.toFixed(1)}°`, end.x + 10, end.y + (above ? 36 : -36));
+  // ── Horizontal leg: Center → A (blue) ──
+  ctx.beginPath(); ctx.moveTo(CX,CY); ctx.lineTo(A.x,A.y);
+  ctx.strokeStyle='#1a73e8'; ctx.lineWidth=2.5; ctx.stroke();
 
-            // ── Labels ──
-            // "radius = 1"
-            const rmx = (CX + end.x) / 2, rmy = (CY + end.y) / 2;
-            const ha = Math.atan2(end.y - CY, end.x - CX);
-            ctx.font = '600 14px "DM Sans"';
-            ctx.fillStyle = '#1a73e8';
-            ctx.textAlign = 'center';
-            ctx.fillText('radius = 1', rmx + Math.sin(ha) * 18 - 12, rmy - Math.cos(ha) * 18 - 5);
+  // ── α arc at Center ──
+  drawAngleArc(CX,CY, A.x,A.y, End.x,End.y, 44,
+    'rgba(180,180,180,0.25)', '#999');
+  // α label — place at midpoint angle between the two rays
+  const aA = Math.atan2(A.y-CY,   A.x-CX);
+  const aE = Math.atan2(End.y-CY, End.x-CX);
+  let aMid = (aA+aE)/2;
+  // ensure we pick the interior bisector
+  if (Math.abs(aE-aA) > Math.PI) aMid += Math.PI;
+  ctx.font='500 13px "DM Sans"'; ctx.fillStyle='#444';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(`α = ${alphaDeg.toFixed(1)}°`,
+    CX + 70*Math.cos(aMid), CY + 70*Math.sin(aMid));
 
-            // "center" on vertical
-            ctx.font = '600 13px "DM Sans"';
-            ctx.fillStyle = '#1a73e8';
-            ctx.textAlign = 'left';
-            ctx.fillText('center', end.x + 12, (end.y + A.y) / 2);
+  // ── Right-angle box at A ──
+  const sq = 14;
+  const dirY = above ? -1 : 1;   // toward End
+  const dirX = End.x <= CX ? 1 : -1; // toward Center
+  ctx.beginPath();
+  ctx.moveTo(A.x + dirX*sq, A.y);
+  ctx.lineTo(A.x + dirX*sq, A.y + dirY*sq);
+  ctx.lineTo(A.x,            A.y + dirY*sq);
+  ctx.strokeStyle='#555'; ctx.lineWidth=1.5; ctx.stroke();
 
-            // "h" segment (Center → A) in blue
-            ctx.beginPath();
-            ctx.moveTo(CX, CY);
-            ctx.lineTo(A.x, A.y);
-            ctx.strokeStyle = '#1a73e8';
-            ctx.lineWidth = 2.5;
-            ctx.stroke();
+  // β label
+  ctx.font='500 13px "DM Sans"'; ctx.fillStyle='#1a73e8';
+  ctx.textAlign='left'; ctx.textBaseline='middle';
+  const bLabelX = A.x + dirX*18;
+  const bLabelY = A.y + dirY*40;
+  ctx.fillText(`β = 90°`, bLabelX - (dirX<0?80:0), bLabelY);
 
-            // "h" label
-            ctx.font = '600 14px "DM Sans"';
-            ctx.fillStyle = '#1a73e8';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'top';
-            ctx.fillText('h', (CX + A.x) / 2, CY + (above ? 8 : -20));
+  // ── γ arc at End ──
+  drawAngleArc(End.x,End.y, A.x,A.y, CX,CY, 26,
+    'rgba(100,149,237,0.15)', '#5b8def');
+  // γ label
+  const gA = Math.atan2(A.y-End.y,   A.x-End.x);
+  const gC = Math.atan2(CY-End.y,    CX-End.x);
+  let gMid = (gA+gC)/2;
+  if (Math.abs(gC-gA) > Math.PI) gMid += Math.PI;
+  ctx.font='500 13px "DM Sans"'; ctx.fillStyle='#444';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(`γ = ${gammaDeg.toFixed(1)}°`,
+    End.x + 55*Math.cos(gMid), End.y + 55*Math.sin(gMid));
 
-            // "base"
-            ctx.fillStyle = '#2e8b57';
-            ctx.fillText('base', A.x + 2, CY + (above ? 8 : -20));
+  // ── Labels ──
+  // "radius = 1" along hypotenuse
+  const hAng = Math.atan2(End.y-CY, End.x-CX);
+  const rmx = (CX+End.x)/2, rmy = (CY+End.y)/2;
+  ctx.font='600 13px "DM Sans"'; ctx.fillStyle='#1a3a8a';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('radius = 1',
+    rmx + Math.sin(hAng)*20, rmy - Math.cos(hAng)*20);
 
-            // ── Points ──
-            // Center
-            ctx.beginPath(); ctx.arc(CX, CY, POINT_RADIUS, 0, Math.PI*2);
-            ctx.fillStyle = '#1a3a8a'; ctx.fill();
-            ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke();
-            ctx.font = '600 14px "DM Sans"'; ctx.fillStyle = '#1a73e8';
-            ctx.textAlign = 'center'; ctx.textBaseline = 'top';
-            ctx.fillText('Center', CX, CY + 14);
+  // "h" label on horizontal base
+  ctx.font='600 14px "DM Sans"'; ctx.fillStyle='#1a73e8';
+  ctx.textAlign='center'; ctx.textBaseline = above ? 'top' : 'bottom';
+  ctx.fillText('h', (CX+A.x)/2, CY + (above ? 6 : -6));
 
-            // A
-            ctx.beginPath(); ctx.arc(A.x, A.y, 6, 0, Math.PI*2);
-            ctx.fillStyle = '#888'; ctx.fill();
-            ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5; ctx.stroke();
-            ctx.font = '600 14px "DM Sans"'; ctx.fillStyle = '#555';
-            ctx.textAlign = 'right'; ctx.textBaseline = 'top';
-            ctx.fillText('A', A.x - 8, A.y + 2);
+  // "base" label to the right of A
+  ctx.fillStyle='#2e8b57';
+  ctx.textAlign='left';
+  ctx.fillText('base', A.x+4, CY + (above ? 6 : -6));
 
-            // Start
-            ctx.beginPath(); ctx.arc(startX, startY, POINT_RADIUS, 0, Math.PI*2);
-            ctx.fillStyle = '#1a3a8a'; ctx.fill();
-            ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke();
-            ctx.font = '600 13px "DM Sans"'; ctx.fillStyle = '#555';
-            ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
-            ctx.fillText('start', startX + 10, startY);
+  // "center" label on vertical leg
+  ctx.font='600 13px "DM Sans"'; ctx.fillStyle='#1a73e8';
+  ctx.textAlign = End.x > CX ? 'left' : 'right';
+  ctx.textBaseline='middle';
+  ctx.fillText('center', End.x + (End.x>CX?12:-12), (End.y+A.y)/2);
 
-            // C
-            ctx.beginPath(); ctx.arc(cPointX, cPointY, POINT_RADIUS, 0, Math.PI*2);
-            ctx.fillStyle = '#1a73e8'; ctx.fill();
-            ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke();
-            ctx.font = '600 14px "DM Sans"'; ctx.fillStyle = '#555';
-            ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
-            ctx.fillText('C', cPointX - 12, cPointY);
+  // ── Points ──
+  function drawDot(x,y,r,fill,stroke,label,lx,ly,la,lb) {
+    ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2);
+    ctx.fillStyle=fill; ctx.fill();
+    if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=2;ctx.stroke();}
+    if(label){
+      ctx.font='600 13px "DM Sans"'; ctx.fillStyle=la||'#555';
+      ctx.textAlign=lb||'center'; ctx.textBaseline='middle';
+      ctx.fillText(label,lx,ly);
+    }
+  }
 
-            // End (draggable)
-            const er = dragging ? POINT_RADIUS + 3 : hovered ? POINT_RADIUS + 2 : POINT_RADIUS;
-            if (hovered || dragging) {
-                ctx.beginPath(); ctx.arc(end.x, end.y, er + 10, 0, Math.PI*2);
-                ctx.fillStyle = 'rgba(26,115,232,0.12)'; ctx.fill();
-            }
-            ctx.beginPath(); ctx.arc(end.x, end.y, er + 3, 0, Math.PI*2);
-            ctx.fillStyle = '#1a73e8'; ctx.fill();
-            ctx.beginPath(); ctx.arc(end.x, end.y, er - 1, 0, Math.PI*2);
-            ctx.fillStyle = '#fff'; ctx.fill();
-            ctx.beginPath(); ctx.arc(end.x, end.y, er - 4, 0, Math.PI*2);
-            ctx.fillStyle = '#1a73e8'; ctx.fill();
-            ctx.font = '600 14px "DM Sans"'; ctx.fillStyle = '#1a73e8';
-            ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
-            ctx.fillText('end', end.x - 2, end.y - 16);
+  // Center
+  drawDot(CX,CY,PR,'#1a3a8a','#fff','Center',CX,CY+18,'#1a73e8','center');
+  // A
+  drawDot(A.x,A.y,6,'#888','#fff','A',A.x-10,A.y+(above?14:-14),'#555','center');
+  // start
+  drawDot(startX,startY,PR,'#1a3a8a','#fff','start',startX+10,startY,'#555','left');
+  // C
+  drawDot(cPointX,cPointY,PR,'#1a73e8','#fff','C',cPointX-14,cPointY,'#555','right');
 
-            // Update panel
-            document.getElementById('alphaVal').textContent = alphaDeg.toFixed(1) + '°';
-            document.getElementById('betaVal').textContent = '90.0°';
-            document.getElementById('gammaVal').textContent = gammaDisplay.toFixed(1) + '°';
-            document.getElementById('sumVal').textContent = (alphaDeg + 90 + gammaDisplay).toFixed(1) + '°';
-        }
+  // End (draggable) — fancy ring style
+  const er = dragging ? PR+3 : hovered ? PR+2 : PR;
+  if(hovered||dragging){
+    ctx.beginPath(); ctx.arc(End.x,End.y,er+10,0,Math.PI*2);
+    ctx.fillStyle='rgba(26,115,232,0.12)'; ctx.fill();
+  }
+  ctx.beginPath(); ctx.arc(End.x,End.y,er+3,0,Math.PI*2);
+  ctx.fillStyle='#1a73e8'; ctx.fill();
+  ctx.beginPath(); ctx.arc(End.x,End.y,er-1,0,Math.PI*2);
+  ctx.fillStyle='#fff'; ctx.fill();
+  ctx.beginPath(); ctx.arc(End.x,End.y,er-4,0,Math.PI*2);
+  ctx.fillStyle='#1a73e8'; ctx.fill();
+  ctx.font='600 13px "DM Sans"'; ctx.fillStyle='#1a73e8';
+  ctx.textAlign='center'; ctx.textBaseline='bottom';
+  ctx.fillText('end', End.x, End.y-14);
 
-        // ── Interaction (only endpoint draggable) ──
-        function getMousePos(e) {
-            const r = canvas.getBoundingClientRect();
-            return { x: (e.clientX - r.left) * canvas.width / r.width, y: (e.clientY - r.top) * canvas.height / r.height };
-        }
-        function getTouchPos(e) {
-            const r = canvas.getBoundingClientRect();
-            const t = e.touches[0];
-            return { x: (t.clientX - r.left) * canvas.width / r.width, y: (t.clientY - r.top) * canvas.height / r.height };
-        }
-        function nearEnd(mx, my) {
-            const e = getEnd();
-            return dist(mx, my, e.x, e.y) < POINT_RADIUS + 14;
-        }
-        function updateFromPos(mx, my) {
-            let a = Math.atan2(my - CY, mx - CX);
-            // Convert to 0..2PI measured clockwise from positive x-axis going upward
-            // Disallow exactly 0 (overlaps with base line)
-            // Block a tiny zone around 0 radians (the base line direction)
-            const minRad = 0.1 * Math.PI / 180;   // 0.1°
-            const maxRad = -minRad;                 // -0.1° i.e. 359.9°
-            // If angle is very close to 0 (horizontal right), nudge it
-            if (a > maxRad && a <= 0) a = maxRad;
-            if (a < minRad && a >= 0) a = minRad;
-            endAngle = a;
-            draw();
-        }
+  // ── Update panel ──
+  document.getElementById('alphaVal').textContent = alphaDeg.toFixed(1)+'°';
+  document.getElementById('betaVal').textContent  = '90.0°';
+  document.getElementById('gammaVal').textContent = gammaDeg.toFixed(1)+'°';
+  const total = alphaDeg + betaDeg + gammaDeg;
+  document.getElementById('sumVal').textContent   = total.toFixed(1)+'°';
+}
 
-        canvas.addEventListener('mousedown', e => { if (nearEnd(...Object.values(getMousePos(e)))) dragging = true; });
-        canvas.addEventListener('mousemove', e => {
-            const p = getMousePos(e);
-            if (dragging) updateFromPos(p.x, p.y);
-            const n = nearEnd(p.x, p.y);
-            if (n !== hovered) { hovered = n; canvas.style.cursor = hovered ? 'grab' : 'default'; draw(); }
-        });
-        canvas.addEventListener('mouseup', () => dragging = false);
-        canvas.addEventListener('mouseleave', () => { dragging = false; hovered = false; draw(); });
-        canvas.addEventListener('touchstart', e => { e.preventDefault(); if (nearEnd(...Object.values(getTouchPos(e)))) dragging = true; }, { passive: false });
-        canvas.addEventListener('touchmove', e => { e.preventDefault(); if (dragging) updateFromPos(...Object.values(getTouchPos(e))); }, { passive: false });
-        canvas.addEventListener('touchend', () => dragging = false);
+// ── Interaction ───────────────────────────────────────────────
+function getPos(e) {
+  const r=canvas.getBoundingClientRect();
+  const src=e.touches?e.touches[0]:e;
+  return { x:(src.clientX-r.left)*canvas.width/r.width,
+           y:(src.clientY-r.top)*canvas.height/r.height };
+}
+function nearEnd(p) {
+  const E=getEnd();
+  return dist(p.x,p.y,E.x,E.y) < PR+16;
+}
+function updateAngle(p) {
+  let a = Math.atan2(p.y-CY, p.x-CX);
+  // avoid degenerate: End landing exactly on x-axis (angle=0 or ±π)
+  const eps = 0.015;
+  if (Math.abs(a)       < eps) a = a<0 ? -eps : eps;
+  if (Math.abs(a-Math.PI) < eps) a =  Math.PI-eps;
+  if (Math.abs(a+Math.PI) < eps) a = -Math.PI+eps;
+  endAngle = a;
+  draw();
+}
 
-        function resize() {
-            const w = Math.min(window.innerWidth - 32, 700);
-            canvas.style.width = w + 'px';
-            canvas.style.height = w + 'px';
-        }
-        window.addEventListener('resize', resize);
-        resize();
-        draw();
-    </script>
+canvas.addEventListener('mousedown',  e=>{ if(nearEnd(getPos(e))) dragging=true; });
+canvas.addEventListener('mousemove',  e=>{
+  const p=getPos(e);
+  if(dragging) updateAngle(p);
+  const n=nearEnd(p);
+  if(n!==hovered){ hovered=n; canvas.style.cursor=hovered?'grab':'default'; if(!dragging)draw(); }
+});
+canvas.addEventListener('mouseup',    ()=>dragging=false);
+canvas.addEventListener('mouseleave', ()=>{ dragging=false; hovered=false; draw(); });
+canvas.addEventListener('touchstart', e=>{ e.preventDefault(); if(nearEnd(getPos(e))) dragging=true; },{passive:false});
+canvas.addEventListener('touchmove',  e=>{ e.preventDefault(); if(dragging) updateAngle(getPos(e)); },{passive:false});
+canvas.addEventListener('touchend',   ()=>dragging=false);
+
+function resize() {
+  const w=Math.min(window.innerWidth-32,700);
+  canvas.style.width=w+'px'; canvas.style.height=w+'px';
+}
+window.addEventListener('resize', resize);
+resize();
+draw();
+</script>
 </body>
 </html>
