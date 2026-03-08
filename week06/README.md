@@ -12,15 +12,13 @@
 
 [![Open Demo 3](https://img.shields.io/badge/▶%20Open%20Live%20Demo-Right%20Triangle%20on%20Circle-e67e22?style=for-the-badge&logo=github)](https://benchvue.github.io/GeoGebra/week06/right_angles.html)
 
-[![Open Demo 4](https://img.shields.io/badge/▶%20Open%20Live%20Demo-Angle%20Control%20with%20Buttons-9b59b6?style=for-the-badge&logo=github)](https://benchvue.github.io/GeoGebra/week06/change_angle.html)
+[![Open Demo 4](https://img.shields.io/badge/▶%20Open%20Live%20Demo-Pythagorean%20Theorem%20Step%20by%20Step-27ae60?style=for-the-badge&logo=github)](https://benchvue.github.io/GeoGebra/week06/Pythagorean.html)
 
-[![Open Demo 5](https://img.shields.io/badge/▶%20Open%20Live%20Demo-Pythagorean%20Theorem%20Step%20by%20Step-27ae60?style=for-the-badge&logo=github)](https://benchvue.github.io/GeoGebra/week06/Pythagorean.html)
+[![Open Demo 5](https://img.shields.io/badge/▶%20Open%20Live%20Demo-Pythagorean%20Dynamic%20Triangle-f39c12?style=for-the-badge&logo=github)](https://benchvue.github.io/GeoGebra/week06/angle_Pythagorean-1.html)
 
-[![Open Demo 6](https://img.shields.io/badge/▶%20Open%20Live%20Demo-Pythagorean%20Dynamic%20Triangle-f39c12?style=for-the-badge&logo=github)](https://benchvue.github.io/GeoGebra/week06/angle_Pythagorean-1.html)
+[![Open Demo 6](https://img.shields.io/badge/▶%20Open%20Live%20Demo-Pythagorean%20Circle%20Radius%205%20(Fixed%20End)-16a085?style=for-the-badge&logo=github)](https://benchvue.github.io/GeoGebra/week06/angle_Pythagorean-2.html)
 
-[![Open Demo 7](https://img.shields.io/badge/▶%20Open%20Live%20Demo-Pythagorean%20Circle%20Radius%205%20(Fixed%20End)-16a085?style=for-the-badge&logo=github)](https://benchvue.github.io/GeoGebra/week06/angle_Pythagorean-2.html)
-
-[![Open Demo 8](https://img.shields.io/badge/▶%20Open%20Live%20Demo-Pythagorean%20Circle%20Center%20Origin-8e44ad?style=for-the-badge&logo=github)](https://benchvue.github.io/GeoGebra/week06/angle_Pythagorean-3.html)
+[![Open Demo 7](https://img.shields.io/badge/▶%20Open%20Live%20Demo-Pythagorean%20Circle%20Center%20Origin-8e44ad?style=for-the-badge&logo=github)](https://benchvue.github.io/GeoGebra/week06/angle_Pythagorean-3.html)
 
 ---
 
@@ -31,11 +29,10 @@
 | 1 | **`rectangle_angles.html`** | Interactive rectangle with 4 draggable vertices, all angles fixed at 90° |
 | 2 | **`triangle_interior_angles.html`** | Interactive triangle with 3 draggable vertices |
 | 3 | **`right_angles.html`** | Right triangle inscribed in a circle with draggable endpoint |
-| 4 | **`change_angle.html`** | Circle angle with increase/decrease buttons and reset |
-| 5 | **`Pythagorean.html`** | Step-by-step visual proof of the Pythagorean theorem (3-4-5 example) |
-| 6 | **`angle_Pythagorean-1.html`** | Dynamic Pythagorean triangle — drag point along diameter, base & height update live |
-| 7 | **`angle_Pythagorean-2.html`** | Pythagorean theorem on a circle (radius = 5, fixed left end) — drag C around full circle |
-| 8 | **`angle_Pythagorean-3.html`** | Pythagorean theorem on a circle — hypotenuse from center (0,0) to C, drag full 360° |
+| 4 | **`Pythagorean.html`** | Step-by-step visual proof of the Pythagorean theorem (3-4-5 example) |
+| 5 | **`angle_Pythagorean-1.html`** | Dynamic Pythagorean triangle — drag point along diameter, base & height update live |
+| 6 | **`angle_Pythagorean-2.html`** | Pythagorean theorem on a circle (radius = 5, fixed left end) — drag C around full circle |
+| 7 | **`angle_Pythagorean-3.html`** | Pythagorean theorem on a circle — hypotenuse from center (0,0) to C, drag full 360° |
 
 ---
 
@@ -85,20 +82,7 @@ A right triangle is inscribed in a circle. The **endpoint** moves along the circ
 
 ---
 
-### 4. `change_angle.html` — Angle Control with Buttons
-
-Same right-triangle-on-circle concept as Demo 3, enhanced with **button controls** for precise angle adjustments.
-
-**Features:**
-- All features from `right_angles.html`, plus:
-- **Increase buttons:** +1°, +5°, +10°, +45°
-- **Decrease buttons:** −1°, −5°, −10°, −45°
-- **Reset button:** instantly returns endpoint to 0°
-- Combines drag interaction with button-based control
-
----
-
-### 5. `Pythagorean.html` — Pythagorean Theorem Step by Step
+### 4. `Pythagorean.html` — Pythagorean Theorem Step by Step
 
 A guided 5-step visual proof of the Pythagorean theorem using the classic **3-4-5** right triangle.
 
@@ -114,7 +98,7 @@ A guided 5-step visual proof of the Pythagorean theorem using the classic **3-4-
 
 ---
 
-### 6. `angle_Pythagorean-1.html` — Dynamic Pythagorean Triangle
+### 5. `angle_Pythagorean-1.html` — Dynamic Pythagorean Triangle
 
 An interactive Pythagorean diagram where the **right-angle vertex B slides left/right** along the base (x-axis), and the height always remains vertical using Thales' theorem.
 
@@ -128,7 +112,7 @@ An interactive Pythagorean diagram where the **right-angle vertex B slides left/
 
 ---
 
-### 7. `angle_Pythagorean-2.html` — Pythagorean on Circle, Radius 5, Fixed Left End
+### 6. `angle_Pythagorean-2.html` — Pythagorean on Circle, Radius 5, Fixed Left End
 
 A Pythagorean theorem visualization on a **circle of radius 5** where point **I is fixed** at the left end of the diameter (−5, 0) and point **C moves freely around the full circle**.
 
@@ -143,7 +127,7 @@ A Pythagorean theorem visualization on a **circle of radius 5** where point **I 
 
 ---
 
-### 8. `angle_Pythagorean-3.html` — Pythagorean on Circle, Hypotenuse from Center
+### 7. `angle_Pythagorean-3.html` — Pythagorean on Circle, Hypotenuse from Center
 
 The most general form: the hypotenuse always runs from the **circle center O = (0,0)** to the draggable point **C on the circle** (radius = 5). The foot B is always directly below/above C on the x-axis.
 
@@ -189,11 +173,9 @@ The most general form: the hypotenuse always runs from the **circle center O = (
 1. **Click and drag** the highlighted points to change angles interactively
 2. Watch the **angle values** and **interior sum** update in real time
 3. In Demo 1, drag any corner to resize the rectangle — all angles stay at 90°
-4. In Demo 4, use the **+/− buttons** for precise angle increments
-5. In Demo 5, use **Step 1–5 buttons** to walk through the Pythagorean proof
-6. In Demo 6, drag point **B left/right** along the baseline to change the triangle
-7. In Demo 7 & 8, drag point **C anywhere around the full circle** to explore all quadrants
-8. Hit **Reset 0°** (Demo 4) to return to the starting position
+4. In Demo 4, use **Step 1–5 buttons** to walk through the Pythagorean proof
+5. In Demo 5, drag point **B left/right** along the baseline to change the triangle
+6. In Demo 6 & 7, drag point **C anywhere around the full circle** to explore all quadrants
 
 ---
 
@@ -205,11 +187,10 @@ week06/
 ├── rectangle_angles.html           ← Demo 1: Rectangle with 4 right angles
 ├── triangle_interior_angles.html   ← Demo 2: Draggable triangle
 ├── right_angles.html               ← Demo 3: Right triangle on circle
-├── change_angle.html               ← Demo 4: Button-controlled angle
-├── Pythagorean.html                ← Demo 5: Step-by-step Pythagorean proof
-├── angle_Pythagorean-1.html        ← Demo 6: Dynamic triangle, drag along baseline
-├── angle_Pythagorean-2.html        ← Demo 7: Circle radius 5, fixed left end I
-└── angle_Pythagorean-3.html        ← Demo 8: Circle radius 5, hypotenuse from center
+├── Pythagorean.html                ← Demo 4: Step-by-step Pythagorean proof
+├── angle_Pythagorean-1.html        ← Demo 5: Dynamic triangle, drag along baseline
+├── angle_Pythagorean-2.html        ← Demo 6: Circle radius 5, fixed left end I
+└── angle_Pythagorean-3.html        ← Demo 7: Circle radius 5, hypotenuse from center
 ```
 
 ---
