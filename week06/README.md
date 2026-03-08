@@ -6,19 +6,19 @@
 
 ## 🚀 Live Demos
 
-[![Open Demo 1](https://img.shields.io/badge/▶%20Open%20Live%20Demo-Rectangle%20Interior%20Angles-e74c3c?style=for-the-badge&logo=github)](https://benchvue.github.io/GeoGebra/week06/rectangle_angles.html)
+[![Open Demo 1](https://img.shields.io/badge/▶%20Open%20Live%20Demo%201-Rectangle%20Interior%20Angles-e74c3c?style=for-the-badge&logo=github)](https://benchvue.github.io/GeoGebra/week06/rectangle_angles.html)
 
-[![Open Demo 2](https://img.shields.io/badge/▶%20Open%20Live%20Demo-Triangle%20Interior%20Angles-3498db?style=for-the-badge&logo=github)](https://benchvue.github.io/GeoGebra/week06/triangle_interior_angles.html)
+[![Open Demo 2](https://img.shields.io/badge/▶%20Open%20Live%20Demo%202-Triangle%20Interior%20Angles-3498db?style=for-the-badge&logo=github)](https://benchvue.github.io/GeoGebra/week06/triangle_interior_angles.html)
 
-[![Open Demo 3](https://img.shields.io/badge/▶%20Open%20Live%20Demo-Right%20Triangle%20on%20Circle-e67e22?style=for-the-badge&logo=github)](https://benchvue.github.io/GeoGebra/week06/right_angles.html)
+[![Open Demo 3](https://img.shields.io/badge/▶%20Open%20Live%20Demo%203-Right%20Triangle%20on%20Circle-e67e22?style=for-the-badge&logo=github)](https://benchvue.github.io/GeoGebra/week06/right_angles.html)
 
-[![Open Demo 4](https://img.shields.io/badge/▶%20Open%20Live%20Demo-Pythagorean%20Theorem%20Step%20by%20Step-27ae60?style=for-the-badge&logo=github)](https://benchvue.github.io/GeoGebra/week06/Pythagorean.html)
+[![Open Demo 4](https://img.shields.io/badge/▶%20Open%20Live%20Demo%204-Pythagorean%20Theorem%20Step%20by%20Step-27ae60?style=for-the-badge&logo=github)](https://benchvue.github.io/GeoGebra/week06/Pythagorean.html)
 
-[![Open Demo 5](https://img.shields.io/badge/▶%20Open%20Live%20Demo-Pythagorean%20Dynamic%20Triangle-f39c12?style=for-the-badge&logo=github)](https://benchvue.github.io/GeoGebra/week06/angle_Pythagorean-1.html)
+[![Open Demo 5](https://img.shields.io/badge/▶%20Open%20Live%20Demo%205-Pythagorean%20Dynamic%20Triangle-f39c12?style=for-the-badge&logo=github)](https://benchvue.github.io/GeoGebra/week06/angle_Pythagorean-1.html)
 
-[![Open Demo 6](https://img.shields.io/badge/▶%20Open%20Live%20Demo-Pythagorean%20Circle%20Radius%205%20(Fixed%20End)-16a085?style=for-the-badge&logo=github)](https://benchvue.github.io/GeoGebra/week06/angle_Pythagorean-2.html)
+[![Open Demo 6](https://img.shields.io/badge/▶%20Open%20Live%20Demo%206-Pythagorean%20Circle%20Radius%205%20(Fixed%20End)-16a085?style=for-the-badge&logo=github)](https://benchvue.github.io/GeoGebra/week06/angle_Pythagorean-2.html)
 
-[![Open Demo 7](https://img.shields.io/badge/▶%20Open%20Live%20Demo-Pythagorean%20Circle%20Center%20Origin-8e44ad?style=for-the-badge&logo=github)](https://benchvue.github.io/GeoGebra/week06/angle_Pythagorean-3.html)
+[![Open Demo 7](https://img.shields.io/badge/▶%20Open%20Live%20Demo%207-Pythagorean%20Circle%20Center%20Origin-8e44ad?style=for-the-badge&logo=github)](https://benchvue.github.io/GeoGebra/week06/angle_Pythagorean-3.html)
 
 ---
 
