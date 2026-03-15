@@ -19,28 +19,58 @@ body {
     flex-direction: column;
 }
 
-/* ── Header ── */
-header {
+/* ── Top nav bar (moved up) ── */
+.nav {
+    flex-shrink: 0;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    padding: 10px 28px;
+    justify-content: center;
+    gap: 36px;
+    padding: 16px 28px;
     border-bottom: 1px solid #1e2535;
     background: #0d0f14;
-    flex-shrink: 0;
 }
-header h1 {
-    font-size: 0.95rem;
-    font-weight: 400;
-    font-style: italic;
-    color: #6b7a99;
+
+.nav-btn {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.1rem;
+    letter-spacing: 0.07em;
+    background: #151a24;
+    color: #8899bb;
+    border: 1px solid #252f45;
+    border-radius: 8px;
+    padding: 14px 48px;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    user-select: none;
+    min-width: 160px;
 }
+.nav-btn:hover:not(:disabled) { background: #1e2840; color: #c5d0e8; border-color: #4a5a7a; }
+.nav-btn:active:not(:disabled) { transform: scale(0.97); }
+.nav-btn:disabled { opacity: 0.2; cursor: default; }
+
+.nav-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
 .step-badge {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 0.72rem;
+    font-size: 0.85rem;
     color: #3d4a66;
     letter-spacing: 0.1em;
 }
+
+.dots { display: flex; align-items: center; gap: 14px; }
+.dot-group { display: flex; gap: 5px; }
+.dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: #1e2535;
+    transition: background 0.2s, transform 0.2s;
+}
+.dot.active { transform: scale(1.7); }
 
 /* ── Main: two equal halves ── */
 .main {
@@ -69,11 +99,12 @@ canvas { display: block; }
     align-items: center;
     justify-content: center;
     padding: 20px 28px;
+    gap: 0;
 }
 
 .pt-label {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 0.75rem;
+    font-size: 0.85rem;
     letter-spacing: 0.14em;
     margin-bottom: 24px;
     text-transform: uppercase;
@@ -90,7 +121,7 @@ canvas { display: block; }
 
 .fline {
     display: flex;
-    align-items: baseline;
+    align-items: center;
     justify-content: center;
     font-family: 'Lora', serif;
     font-weight: 400;
@@ -99,10 +130,12 @@ canvas { display: block; }
     padding: 10px 0;
 }
 
-.fline sup {
+/* Superscript — fixed with relative positioning */
+.fline .sup {
     font-size: 0.52em;
-    vertical-align: super;
     line-height: 0;
+    position: relative;
+    top: -0.62em;
 }
 
 .fdiv {
@@ -125,66 +158,27 @@ canvas { display: block; }
     padding: 16px 0;
 }
 .skip-card b { color: #4a5a7a; font-style: normal; }
-
-/* ── Nav ── */
-.nav {
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 28px;
-    padding: 12px 28px;
-    border-top: 1px solid #1e2535;
-    background: #0d0f14;
-}
-
-.nav-btn {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.8rem;
-    letter-spacing: 0.07em;
-    background: #151a24;
-    color: #8899bb;
-    border: 1px solid #252f45;
-    border-radius: 6px;
-    padding: 9px 30px;
-    cursor: pointer;
-    transition: background 0.15s, color 0.15s;
-    user-select: none;
-    min-width: 110px;
-}
-.nav-btn:hover:not(:disabled) { background: #1e2840; color: #c5d0e8; border-color: #4a5a7a; }
-.nav-btn:active:not(:disabled) { transform: scale(0.97); }
-.nav-btn:disabled { opacity: 0.2; cursor: default; }
-
-.dots { display: flex; align-items: center; gap: 12px; }
-.dot-group { display: flex; gap: 4px; }
-.dot {
-    width: 6px; height: 6px; border-radius: 50%;
-    background: #1e2535;
-    transition: background 0.2s, transform 0.2s;
-}
-.dot.active { transform: scale(1.7); }
 </style>
 </head>
 <body>
 
-<header>
-    <h1>Pythagorean Theorem → Circle &nbsp;·&nbsp; x² + y² = r²</h1>
-    <span class="step-badge" id="stepBadge">1 / 16</span>
-</header>
+<!-- ── Nav at TOP ── -->
+<div class="nav">
+    <button class="nav-btn" id="prevBtn" onclick="go(-1)" disabled>← Prev</button>
+    <div class="nav-center">
+        <span class="step-badge" id="stepBadge">1 / 16</span>
+        <div class="dots" id="dots"></div>
+    </div>
+    <button class="nav-btn" id="nextBtn" onclick="go(1)">Next →</button>
+</div>
 
+<!-- ── Main split ── -->
 <div class="main">
     <div class="left"><canvas id="canvas"></canvas></div>
     <div class="right">
         <div class="pt-label" id="ptLabel"></div>
         <div class="formula-wrap" id="fwrap"></div>
     </div>
-</div>
-
-<div class="nav">
-    <button class="nav-btn" id="prevBtn" onclick="go(-1)" disabled>← Prev</button>
-    <div class="dots" id="dots"></div>
-    <button class="nav-btn" id="nextBtn" onclick="go(1)">Next →</button>
 </div>
 
 <script>
@@ -245,10 +239,11 @@ function draw() {
     ctx.clearRect(0, 0, W, W);
 
     // bg
-    ctx.fillStyle = '#0d0f14'; ctx.fillRect(0,0,W,W);
+    ctx.fillStyle = '#0d0f14';
+    ctx.fillRect(0, 0, W, W);
 
-    // grid
-    ctx.strokeStyle = '#151a24'; ctx.lineWidth = 1;
+    // grid — subtle
+    ctx.strokeStyle = '#141820'; ctx.lineWidth = 1;
     for (let i = -6; i <= 6; i++) {
         let a = toC(i,-6), b = toC(i,6);
         ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
@@ -256,74 +251,134 @@ function draw() {
         ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
     }
 
-    // axes
-    ctx.strokeStyle = '#252f45'; ctx.lineWidth = 1.5;
-    ctx.beginPath(); ctx.moveTo(toC(-6,0).x,oy); ctx.lineTo(toC(6,0).x,oy); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(ox,toC(0,6).y); ctx.lineTo(ox,toC(0,-6).y); ctx.stroke();
+    // ── Outstanding axes with arrowheads ──
+    const AX = 6.2;
+    ctx.strokeStyle = '#3a5070'; ctx.lineWidth = 2.5;
+    ctx.beginPath(); ctx.moveTo(toC(-AX,0).x,oy); ctx.lineTo(toC(AX,0).x,oy); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(ox,toC(0,AX).y);  ctx.lineTo(ox,toC(0,-AX).y); ctx.stroke();
+
+    // arrowheads
+    const aw = 6, ah = 11; ctx.fillStyle = '#3a5070';
+    ctx.beginPath(); ctx.moveTo(toC(AX,0).x,oy);  ctx.lineTo(toC(AX,0).x-ah,oy-aw);  ctx.lineTo(toC(AX,0).x-ah,oy+aw);  ctx.closePath(); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(toC(-AX,0).x,oy); ctx.lineTo(toC(-AX,0).x+ah,oy-aw); ctx.lineTo(toC(-AX,0).x+ah,oy+aw); ctx.closePath(); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(ox,toC(0,AX).y);  ctx.lineTo(ox-aw,toC(0,AX).y+ah);  ctx.lineTo(ox+aw,toC(0,AX).y+ah);  ctx.closePath(); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(ox,toC(0,-AX).y); ctx.lineTo(ox-aw,toC(0,-AX).y-ah); ctx.lineTo(ox+aw,toC(0,-AX).y-ah); ctx.closePath(); ctx.fill();
+
+    // axis letters
+    ctx.font = `500 ${Math.max(11,s*0.42)}px 'JetBrains Mono',monospace`;
+    ctx.fillStyle = '#5a7aaa'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('x', toC(AX,0).x+18, oy);
+    ctx.fillText('y', ox, toC(0,AX).y-18);
 
     // tick numbers
-    ctx.font = `${Math.max(8,s*0.36)}px 'JetBrains Mono',monospace`;
-    ctx.fillStyle = '#252f45'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.font = `${Math.max(8,s*0.32)}px 'JetBrains Mono',monospace`;
+    ctx.fillStyle = '#2a3a55';
     for (let i=-5;i<=5;i++) {
-        if(!i) continue;
+        if (!i) continue;
+        ctx.textAlign='center'; ctx.textBaseline='middle';
         ctx.fillText(i, toC(i,0).x, oy+s*0.55);
-        ctx.fillText(i, ox-s*0.6, toC(0,i).y);
+        ctx.textAlign='right';
+        ctx.fillText(i, ox-s*0.55, toC(0,i).y);
     }
 
-    // circle
-    ctx.beginPath(); ctx.arc(ox,oy,5*s,0,Math.PI*2);
-    ctx.strokeStyle='rgba(91,156,246,0.28)'; ctx.lineWidth=1.5;
-    ctx.setLineDash([6,5]); ctx.stroke(); ctx.setLineDash([]);
-    ctx.fillStyle='rgba(91,156,246,0.04)'; ctx.fill();
+    // ── Circle — doubled stroke, brighter ──
+    ctx.beginPath(); ctx.arc(ox, oy, 5*s, 0, Math.PI*2);
+    ctx.strokeStyle = 'rgba(91,156,246,0.65)';
+    ctx.lineWidth = 3;
+    ctx.setLineDash([8, 6]); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle = 'rgba(91,156,246,0.05)'; ctx.fill();
 
     // r=5 label
-    const rp = toC(3.6,3.4);
-    ctx.font=`italic ${Math.max(9,s*0.36)}px 'Lora',serif`;
-    ctx.fillStyle='rgba(91,156,246,0.4)';
+    const rp = toC(3.6, 3.4);
+    ctx.font = `italic ${Math.max(9,s*0.36)}px 'Lora',serif`;
+    ctx.fillStyle = 'rgba(91,156,246,0.6)';
     ctx.textAlign='center'; ctx.textBaseline='middle';
     ctx.fillText('r = 5', rp.x, rp.y);
 
-    // legs for current step
+    // ── Legs for current step — doubled, brighter ──
     const st = steps[cur];
     if (!st.skip) {
-        const cp=toC(st.x,st.y), fx=toC(st.x,0);
-        ctx.setLineDash([4,4]);
-        ctx.strokeStyle='#e06b6b33'; ctx.lineWidth=1.5;
+        const cp = toC(st.x, st.y), fx = toC(st.x, 0);
+        ctx.setLineDash([5, 5]);
+        ctx.lineWidth = 3;
+        // x leg
+        ctx.strokeStyle = '#e06b6b88';
         ctx.beginPath(); ctx.moveTo(ox,oy); ctx.lineTo(fx.x,oy); ctx.stroke();
-        ctx.strokeStyle='#5b9cf633';
+        // y leg
+        ctx.strokeStyle = '#5b9cf688';
         ctx.beginPath(); ctx.moveTo(fx.x,oy); ctx.lineTo(fx.x,cp.y); ctx.stroke();
-        ctx.strokeStyle=COLORS[st.base]+'44';
+        // hypotenuse / radius
+        ctx.strokeStyle = COLORS[st.base] + '99';
         ctx.beginPath(); ctx.moveTo(ox,oy); ctx.lineTo(cp.x,cp.y); ctx.stroke();
         ctx.setLineDash([]);
     }
 
-    // points
-    pts.forEach((p,i) => {
-        const cp=toC(p.x,p.y), col=COLORS[p.base], last=i===pts.length-1;
-        const r = last ? 8 : 5;
+    // ── Reflection connection lines — doubled, brighter ──
+    // Group already-drawn points by base, connect same-base pairs
+    const byBase = {};
+    pts.forEach(p => {
+        if (!byBase[p.base]) byBase[p.base] = [];
+        byBase[p.base].push(p);
+    });
+    Object.entries(byBase).forEach(([base, bpts]) => {
+        if (bpts.length < 2) return;
+        const col = COLORS[base];
+        ctx.setLineDash([4, 6]);
+        ctx.strokeStyle = col + '55';
+        ctx.lineWidth = 2;
+        for (let a = 0; a < bpts.length; a++) {
+            for (let b = a+1; b < bpts.length; b++) {
+                const pa = toC(bpts[a].x, bpts[a].y);
+                const pb = toC(bpts[b].x, bpts[b].y);
+                ctx.beginPath(); ctx.moveTo(pa.x,pa.y); ctx.lineTo(pb.x,pb.y); ctx.stroke();
+            }
+        }
+        ctx.setLineDash([]);
+    });
+
+    // ── Points ──
+    pts.forEach((p, i) => {
+        const cp = toC(p.x, p.y), col = COLORS[p.base], last = i === pts.length - 1;
+        const r = last ? 9 : 6;
         if (last) {
-            const g=ctx.createRadialGradient(cp.x,cp.y,0,cp.x,cp.y,22);
-            g.addColorStop(0,col+'44'); g.addColorStop(1,col+'00');
-            ctx.fillStyle=g; ctx.beginPath(); ctx.arc(cp.x,cp.y,22,0,Math.PI*2); ctx.fill();
+            const g = ctx.createRadialGradient(cp.x,cp.y,0,cp.x,cp.y,26);
+            g.addColorStop(0, col+'50'); g.addColorStop(1, col+'00');
+            ctx.fillStyle=g; ctx.beginPath(); ctx.arc(cp.x,cp.y,26,0,Math.PI*2); ctx.fill();
         }
         ctx.beginPath(); ctx.arc(cp.x,cp.y,r,0,Math.PI*2);
-        ctx.fillStyle = last ? col : col+'88';
-        ctx.fill(); ctx.strokeStyle='#0d0f14'; ctx.lineWidth=2; ctx.stroke();
-        const fs=Math.max(9,s*0.36);
-        ctx.font=`${last?600:400} ${fs}px 'JetBrains Mono',monospace`;
-        const lx=cp.x+(p.x>=0?r+5:-(r+5)), ly=cp.y+(p.y>=0?-(r+5):r+5);
-        ctx.textAlign=p.x>=0?'left':'right'; ctx.textBaseline='middle';
-        ctx.fillStyle=last?col:col+'77';
-        ctx.fillText(p.label,lx,ly);
+        ctx.fillStyle = last ? col : col+'99';
+        ctx.fill();
+        ctx.strokeStyle = '#0d0f14'; ctx.lineWidth = 2.5; ctx.stroke();
+
+        const fs = Math.max(9, s*0.36);
+        ctx.font = `${last?600:400} ${fs}px 'JetBrains Mono',monospace`;
+        const lx = cp.x + (p.x >= 0 ? r+6 : -(r+6));
+        const ly = cp.y + (p.y >= 0 ? -(r+6) : r+6);
+        ctx.textAlign = p.x >= 0 ? 'left' : 'right';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = last ? col : col + '88';
+        ctx.fillText(p.label, lx, ly);
     });
+
+    // Origin O — always
+    ctx.beginPath(); ctx.arc(ox, oy, 5, 0, Math.PI*2);
+    ctx.fillStyle = '#3a5070'; ctx.fill();
+    ctx.strokeStyle = '#0d0f14'; ctx.lineWidth = 2; ctx.stroke();
+    ctx.font = `400 ${Math.max(9,s*0.32)}px 'JetBrains Mono',monospace`;
+    ctx.fillStyle = '#5a7aaa'; ctx.textAlign='right'; ctx.textBaseline='top';
+    ctx.fillText('O', ox-8, oy+6);
 }
 
 // ── Formula ──
+// Builds superscripts properly using span.sup (relative top)
+function sup(colorClass) {
+    return `<span class="sup ${colorClass}">2</span>`;
+}
+
 function renderFormula() {
     const st = steps[cur];
     const col = COLORS[st.base];
 
-    // label
     const lbl = document.getElementById('ptLabel');
     lbl.textContent = st.type;
     lbl.style.color = col + 'bb';
@@ -331,7 +386,6 @@ function renderFormula() {
     const fw = document.getElementById('fwrap');
     fw.innerHTML = '';
 
-    // font size responsive
     const fs = 'clamp(1.8rem, 4vw, 3.4rem)';
 
     if (st.skip) {
@@ -347,10 +401,9 @@ function renderFormula() {
         return;
     }
 
-    const x2 = st.x*st.x, y2 = st.y*st.y;
+    const x2 = st.x * st.x, y2 = st.y * st.y;
 
-    // Row 1: point = (x, y)
-    fw.innerHTML += `
+    fw.innerHTML = `
       <div class="fline" style="font-size:${fs}">
         <span style="color:${col};font-weight:600">${st.label}</span>
         <span class="cop">&nbsp;=&nbsp;</span>
@@ -359,20 +412,20 @@ function renderFormula() {
       <div class="fdiv"></div>
 
       <div class="fline" style="font-size:${fs}">
-        <span class="cx">x</span><sup class="cx">2</sup>
+        <span class="cx">x</span>${sup('cx')}
         <span class="cop"> + </span>
-        <span class="cy">y</span><sup class="cy">2</sup>
+        <span class="cy">y</span>${sup('cy')}
         <span class="cop"> = </span>
-        <span class="cr">r</span><sup class="cr">2</sup>
+        <span class="cr">r</span>${sup('cr')}
       </div>
       <div class="fdiv"></div>
 
       <div class="fline" style="font-size:${fs}">
-        <span class="cx">${st.x}</span><sup class="cx">2</sup>
+        <span class="cx">${st.x}</span>${sup('cx')}
         <span class="cop"> + </span>
-        <span class="cy">${st.y}</span><sup class="cy">2</sup>
+        <span class="cy">${st.y}</span>${sup('cy')}
         <span class="cop"> = </span>
-        <span class="cr">5</span><sup class="cr">2</sup>
+        <span class="cr">5</span>${sup('cr')}
       </div>
       <div class="fdiv"></div>
 
@@ -395,10 +448,10 @@ function renderDots() {
     ['A','B','C','D'].forEach(b => {
         const grp = document.createElement('div');
         grp.className = 'dot-group';
-        steps.forEach((s,i) => {
-            if (s.base!==b) return;
+        steps.forEach((s, i) => {
+            if (s.base !== b) return;
             const d = document.createElement('div');
-            d.className = 'dot' + (i===cur?' active':'');
+            d.className = 'dot' + (i === cur ? ' active' : '');
             d.style.background = i <= cur ? COLORS[b]+(i<cur?'55':'') : '#1e2535';
             grp.appendChild(d);
         });
@@ -415,19 +468,19 @@ function go(dir) {
         addPt(steps[cur]);
     } else {
         drawn.clear(); pts.length = 0;
-        for (let i=0;i<=cur;i++) addPt(steps[i]);
+        for (let i = 0; i <= cur; i++) addPt(steps[i]);
     }
     draw(); renderFormula(); renderDots();
     document.getElementById('stepBadge').textContent = `${cur+1} / ${steps.length}`;
-    document.getElementById('prevBtn').disabled = cur===0;
+    document.getElementById('prevBtn').disabled = cur === 0;
     const nb = document.getElementById('nextBtn');
-    nb.disabled = cur===steps.length-1;
-    nb.textContent = cur===steps.length-1 ? 'Done ✓' : 'Next →';
+    nb.disabled = cur === steps.length - 1;
+    nb.textContent = cur === steps.length - 1 ? 'Done ✓' : 'Next →';
 }
 
 document.addEventListener('keydown', e => {
     if (e.key==='ArrowRight'||e.key==='ArrowDown') go(1);
-    if (e.key==='ArrowLeft'||e.key==='ArrowUp')   go(-1);
+    if (e.key==='ArrowLeft' ||e.key==='ArrowUp')   go(-1);
 });
 
 // Init

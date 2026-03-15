@@ -26,9 +26,9 @@ header {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 14px 20px 12px;
+    padding: 10px 20px 10px;
     border-bottom: 1px solid #181f2e;
-    gap: 5px;
+    gap: 8px;
 }
 .title {
     font-size: 1.15rem;
@@ -38,12 +38,101 @@ header {
     text-align: center;
 }
 .title span { color: #a0bce0; font-weight: 600; }
-.subtitle {
-    font-size: 0.72rem;
-    font-weight: 300;
-    color: #2e3d55;
-    letter-spacing: 0.08em;
-    text-align: center;
+
+/* ── Controls row (was bottom bar) ── */
+.controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+}
+
+/* Divider */
+.sep {
+    width: 1px;
+    height: 28px;
+    background: #1e2a3e;
+    margin: 0 16px;
+    flex-shrink: 0;
+}
+
+/* ── Step buttons ── */
+.steps {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.sbtn {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    letter-spacing: 0.04em;
+    background: transparent;
+    color: #3d4f6a;
+    border: 1px solid #1e2a3e;
+    border-radius: 6px;
+    padding: 6px 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+}
+.sbtn:hover { color: #8899bb; border-color: #2a3a55; }
+.sbtn.active { color: #c8d4e8; border-color: #3a5080; background: #111826; }
+
+.all-btn {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    background: transparent;
+    color: #3d4f6a;
+    border: 1px solid #1e2a3e;
+    border-radius: 6px;
+    padding: 6px 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+}
+.all-btn:hover { color: #8899bb; border-color: #2a3a55; }
+.all-btn.active { color: #e8c97a; border-color: #5a4a20; background: #1a160a; }
+
+/* ── Point toggles ── */
+.toggles {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.tog {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 6px;
+    border: 1px solid transparent;
+    transition: all 0.15s;
+    user-select: none;
+}
+.tog:hover { border-color: #1e2a3e; background: #0f1420; }
+.tog.off { opacity: 0.28; }
+
+.tog-check {
+    width: 15px; height: 15px;
+    border-radius: 3px;
+    border: 1.5px solid currentColor;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.15s;
+}
+.tog:not(.off) .tog-check { background: currentColor; }
+.tog:not(.off) .tog-check::after { content: '✓'; color: #0b0d13; font-weight: 700; font-size: 9px; }
+.tog.off .tog-check::after { content: ''; }
+
+.tog-label {
+    font-size: 0.82rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
 }
 
 /* ── Canvas ── */
@@ -75,113 +164,40 @@ canvas {
 #tip.show { opacity: 1; }
 #tip .tn { color: #8899bb; }
 #tip .tc { color: #4ade80; }
-
-/* ── Bottom bar ── */
-.bar {
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0;
-    padding: 0 24px;
-    border-top: 1px solid #181f2e;
-    height: 64px;
-}
-
-/* Divider */
-.sep {
-    width: 1px;
-    height: 32px;
-    background: #1e2a3e;
-    margin: 0 18px;
-    flex-shrink: 0;
-}
-
-/* ── Step buttons ── */
-.steps {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-shrink: 0;
-}
-
-.sbtn {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.8rem;
-    letter-spacing: 0.04em;
-    background: transparent;
-    color: #3d4f6a;
-    border: 1px solid #1e2a3e;
-    border-radius: 6px;
-    padding: 8px 14px;
-    cursor: pointer;
-    transition: all 0.15s;
-    white-space: nowrap;
-}
-.sbtn:hover { color: #8899bb; border-color: #2a3a55; }
-.sbtn.active { color: #c8d4e8; border-color: #3a5080; background: #111826; }
-
-.all-btn {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.8rem;
-    background: transparent;
-    color: #3d4f6a;
-    border: 1px solid #1e2a3e;
-    border-radius: 6px;
-    padding: 8px 14px;
-    cursor: pointer;
-    transition: all 0.15s;
-    white-space: nowrap;
-}
-.all-btn:hover { color: #8899bb; border-color: #2a3a55; }
-.all-btn.active { color: #e8c97a; border-color: #5a4a20; background: #1a160a; }
-
-/* ── Point toggles ── */
-.toggles {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    flex-shrink: 0;
-}
-
-.tog {
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    cursor: pointer;
-    padding: 7px 13px;
-    border-radius: 6px;
-    border: 1px solid transparent;
-    transition: all 0.15s;
-    user-select: none;
-}
-.tog:hover { border-color: #1e2a3e; background: #0f1420; }
-.tog.off { opacity: 0.28; }
-
-.tog-check {
-    width: 17px; height: 17px;
-    border-radius: 4px;
-    border: 1.5px solid currentColor;
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
-    transition: background 0.15s;
-}
-.tog:not(.off) .tog-check { background: currentColor; }
-.tog:not(.off) .tog-check::after { content: '✓'; color: #0b0d13; font-weight: 700; font-size: 10px; }
-.tog.off .tog-check::after { content: ''; }
-
-.tog-label {
-    font-size: 0.85rem;
-    font-weight: 500;
-    letter-spacing: 0.05em;
-}
 </style>
 </head>
 <body>
 
 <header>
     <div class="title"><span>x² + y² = r²</span>&nbsp; → &nbsp;Circle</div>
-    <div class="subtitle">Every Pythagorean integer solution lies on a circle &nbsp;·&nbsp; r = 5</div>
+    <div class="controls">
+        <div class="steps">
+            <button class="sbtn active" data-step="1" onclick="setStep(1)">① Original</button>
+            <button class="sbtn" data-step="2" onclick="setStep(2)">② y-axis</button>
+            <button class="sbtn" data-step="3" onclick="setStep(3)">③ x-axis</button>
+            <button class="sbtn" data-step="4" onclick="setStep(4)">④ Origin</button>
+            <button class="all-btn" id="allBtn" onclick="toggleAll()">All</button>
+        </div>
+        <div class="sep"></div>
+        <div class="toggles">
+            <div class="tog" id="tog-A" onclick="togglePoint('A')" style="color:#f87171">
+                <div class="tog-check"></div>
+                <span class="tog-label">A</span>
+            </div>
+            <div class="tog" id="tog-B" onclick="togglePoint('B')" style="color:#4ade80">
+                <div class="tog-check"></div>
+                <span class="tog-label">B</span>
+            </div>
+            <div class="tog" id="tog-C" onclick="togglePoint('C')" style="color:#5b9cf6">
+                <div class="tog-check"></div>
+                <span class="tog-label">C</span>
+            </div>
+            <div class="tog" id="tog-D" onclick="togglePoint('D')" style="color:#f0c060">
+                <div class="tog-check"></div>
+                <span class="tog-label">D</span>
+            </div>
+        </div>
+    </div>
 </header>
 
 <div class="canvas-wrap">
@@ -190,37 +206,6 @@ canvas {
         <div class="tn" id="tipName"></div>
         <div id="tipCoord"></div>
         <div class="tc" id="tipCheck"></div>
-    </div>
-</div>
-
-<div class="bar">
-    <div class="steps">
-        <button class="sbtn active" data-step="1" onclick="setStep(1)">① Original</button>
-        <button class="sbtn" data-step="2" onclick="setStep(2)">② y-axis</button>
-        <button class="sbtn" data-step="3" onclick="setStep(3)">③ x-axis</button>
-        <button class="sbtn" data-step="4" onclick="setStep(4)">④ Origin</button>
-        <button class="all-btn" id="allBtn" onclick="toggleAll()">All</button>
-    </div>
-
-    <div class="sep"></div>
-
-    <div class="toggles">
-        <div class="tog" id="tog-A" onclick="togglePoint('A')" style="color:#f87171">
-            <div class="tog-check"></div>
-            <span class="tog-label">A</span>
-        </div>
-        <div class="tog" id="tog-B" onclick="togglePoint('B')" style="color:#4ade80">
-            <div class="tog-check"></div>
-            <span class="tog-label">B</span>
-        </div>
-        <div class="tog" id="tog-C" onclick="togglePoint('C')" style="color:#5b9cf6">
-            <div class="tog-check"></div>
-            <span class="tog-label">C</span>
-        </div>
-        <div class="tog" id="tog-D" onclick="togglePoint('D')" style="color:#f0c060">
-            <div class="tog-check"></div>
-            <span class="tog-label">D</span>
-        </div>
     </div>
 </div>
 
