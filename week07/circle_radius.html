@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>x² + y² = r²</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&display=swap');
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+    font-family: 'JetBrains Mono', monospace;
+    background: #0b0d13;
+    color: #c8d4e8;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ── Header ── */
+header {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 16px 20px 13px;
+    border-bottom: 1px solid #181f2e;
+    gap: 5px;
+}
+.title {
+    font-size: 1.2rem;
+    font-weight: 500;
+    color: #8899bb;
+    letter-spacing: 0.03em;
+    text-align: center;
+}
+.title .fx { color: #e06b6b; font-weight: 600; }
+.title .fy { color: #5b9cf6; font-weight: 600; }
+.title .fr { color: #f0c060; font-weight: 600; }
+.title .op { color: #3d4f6a; }
+.subtitle {
+    font-size: 0.7rem;
+    font-weight: 300;
+    color: #2a3a55;
+    letter-spacing: 0.1em;
+    text-align: center;
+}
+
+/* ── Canvas ── */
+.canvas-wrap {
+    flex: 1;
+    position: relative;
+    min-height: 0;
+}
+canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+/* ── Bottom bar ── */
+.bar {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 16px 40px 18px;
+    border-top: 1px solid #181f2e;
+}
+
+/* Live formula readout */
+.formula-live {
+    display: flex;
+    align-items: baseline;
+    gap: 0;
+    font-size: 1.5rem;
+    font-weight: 300;
+    letter-spacing: 0.02em;
+    color: #4a5a7a;
+    line-height: 1;
+}
+.formula-live .sup {
+    font-size: 0.52em;
+    line-height: 0;
+    position: relative;
+    top: -0.6em;
+}
+.formula-live .fx  { color: #e06b6b; font-weight: 500; }
+.formula-live .fy  { color: #5b9cf6; font-weight: 500; }
+.formula-live .fr  { color: #f0c060; font-weight: 600; }
+.formula-live .fv  { color: #f0c060; font-weight: 600; }
+.formula-live .op  { color: #2a3a55; margin: 0 0.1em; }
+.formula-live .eq  { color: #3d5070; margin: 0 0.15em; }
+
+/* Slider row */
+.slider-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    width: 100%;
+    max-width: 540px;
+}
+
+.slider-label {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #f0c060;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+    min-width: 18px;
+    text-align: right;
+}
+
+.slider-val {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #f0c060;
+    min-width: 36px;
+    text-align: left;
+    letter-spacing: 0.02em;
+}
+
+/* Custom range slider */
+input[type=range] {
+    -webkit-appearance: none;
+    appearance: none;
+    flex: 1;
+    height: 4px;
+    border-radius: 2px;
+    background: #1a2435;
+    outline: none;
+    cursor: pointer;
+}
+input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: #f0c060;
+    border: 3px solid #0b0d13;
+    box-shadow: 0 0 10px rgba(240,192,96,0.5);
+    cursor: pointer;
+    transition: box-shadow 0.15s;
+}
+input[type=range]::-webkit-slider-thumb:hover {
+    box-shadow: 0 0 18px rgba(240,192,96,0.7);
+}
+input[type=range]::-moz-range-thumb {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: #f0c060;
+    border: 3px solid #0b0d13;
+    box-shadow: 0 0 10px rgba(240,192,96,0.5);
+    cursor: pointer;
+}
+
+.range-ends {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 540px;
+    padding: 0 50px;
+}
+.range-end {
+    font-size: 0.65rem;
+    color: #2a3a55;
+    letter-spacing: 0.06em;
+}
+</style>
+</head>
+<body>
+
+<header>
+    <div class="title">
+        <span class="fx">x</span><span style="color:#e06b6b;font-size:0.58em;line-height:0;position:relative;top:-0.6em">2</span>
+        <span class="op"> + </span>
+        <span class="fy">y</span><span style="color:#5b9cf6;font-size:0.58em;line-height:0;position:relative;top:-0.6em">2</span>
+        <span class="op"> = </span>
+        <span class="fr">r</span><span style="color:#f0c060;font-size:0.58em;line-height:0;position:relative;top:-0.6em">2</span>
+    </div>
+    <div class="subtitle">Drag the slider to change radius — watch the circle grow</div>
+</header>
+
+<div class="canvas-wrap">
+    <canvas id="canvas"></canvas>
+</div>
+
+<div class="bar">
+    <!-- Live formula -->
+    <div class="formula-live" id="formulaLive"></div>
+
+    <!-- Slider -->
+    <div class="slider-row">
+        <span class="slider-label">r =</span>
+        <input type="range" id="rSlider" min="0" max="5" step="0.05" value="3">
+        <span class="slider-val" id="rVal">3.00</span>
+    </div>
+    <div class="range-ends">
+        <span class="range-end">0</span>
+        <span class="range-end">5</span>
+    </div>
+</div>
+
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+const slider = document.getElementById('rSlider');
+
+let r = parseFloat(slider.value);
+
+// ── Resize ──
+function resize() {
+    const wrap = document.querySelector('.canvas-wrap');
+    canvas.width  = wrap.clientWidth;
+    canvas.height = wrap.clientHeight;
+    draw();
+}
+window.addEventListener('resize', resize);
+
+function sc() { return Math.min(canvas.width, canvas.height) / 14; }
+function toC(x, y) {
+    const s = sc();
+    return { x: canvas.width/2 + x*s, y: canvas.height/2 - y*s };
+}
+
+// ── Update formula display ──
+function updateFormula() {
+    const r2 = (r * r).toFixed(2);
+    const rDisp = r.toFixed(2);
+    document.getElementById('rVal').textContent = rDisp;
+    document.getElementById('formulaLive').innerHTML = `
+        <span class="fx">x</span><span class="sup fx">2</span>
+        <span class="op">&nbsp;+&nbsp;</span>
+        <span class="fy">y</span><span class="sup fy">2</span>
+        <span class="eq">&nbsp;=&nbsp;</span>
+        <span class="fr">${rDisp}</span><span class="sup fr">2</span>
+        <span class="eq">&nbsp;=&nbsp;</span>
+        <span class="fv">${r2}</span>
+    `;
+
+    // Tint the slider track fill
+    const pct = (r / 5) * 100;
+    slider.style.background = `linear-gradient(to right, #f0c060 ${pct}%, #1a2435 ${pct}%)`;
+}
+
+// ── Draw ──
+function draw() {
+    const W = canvas.width, H = canvas.height;
+    const s = sc(), ox = W/2, oy = H/2;
+    ctx.clearRect(0,0,W,H);
+
+    // Background
+    const grad = ctx.createRadialGradient(ox,oy,0,ox,oy,W*0.6);
+    grad.addColorStop(0,'#0f1320'); grad.addColorStop(1,'#0b0d13');
+    ctx.fillStyle = grad; ctx.fillRect(0,0,W,H);
+
+    // Grid
+    ctx.strokeStyle = '#111826'; ctx.lineWidth = 1;
+    for (let i=-7;i<=7;i++) {
+        const a=toC(i,-7),b=toC(i,7); ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
+        const c=toC(-7,i),d=toC(7,i); ctx.beginPath(); ctx.moveTo(c.x,c.y); ctx.lineTo(d.x,d.y); ctx.stroke();
+    }
+
+    // ── Axes ──
+    const AX = 6.6;
+    ctx.strokeStyle = '#3a5070'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(toC(-AX,0).x, oy); ctx.lineTo(toC(AX,0).x, oy); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(ox, toC(0,AX).y);  ctx.lineTo(ox, toC(0,-AX).y); ctx.stroke();
+
+    // Arrowheads
+    const aw=6, ah=11;
+    ctx.fillStyle='#3a5070';
+    ctx.beginPath(); ctx.moveTo(toC(AX,0).x,oy);     ctx.lineTo(toC(AX,0).x-ah,oy-aw);    ctx.lineTo(toC(AX,0).x-ah,oy+aw);    ctx.closePath(); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(toC(-AX,0).x,oy);    ctx.lineTo(toC(-AX,0).x+ah,oy-aw);   ctx.lineTo(toC(-AX,0).x+ah,oy+aw);   ctx.closePath(); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(ox,toC(0,AX).y);     ctx.lineTo(ox-aw,toC(0,AX).y+ah);    ctx.lineTo(ox+aw,toC(0,AX).y+ah);    ctx.closePath(); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(ox,toC(0,-AX).y);    ctx.lineTo(ox-aw,toC(0,-AX).y-ah);   ctx.lineTo(ox+aw,toC(0,-AX).y-ah);   ctx.closePath(); ctx.fill();
+
+    // Axis letters
+    ctx.font=`500 ${Math.max(11,s*0.42)}px 'JetBrains Mono',monospace`;
+    ctx.fillStyle='#5a7aaa'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('x', toC(AX,0).x+20, oy);
+    ctx.fillText('y', ox, toC(0,AX).y-20);
+
+    // Tick labels
+    ctx.font=`${Math.max(8,s*0.3)}px 'JetBrains Mono',monospace`;
+    ctx.fillStyle='#2a3a55';
+    for (let i=-6;i<=6;i++) {
+        if (!i) continue;
+        ctx.textAlign='center'; ctx.textBaseline='middle';
+        ctx.fillText(i, toC(i,0).x, oy+s*0.52);
+        ctx.textAlign='right';
+        ctx.fillText(i, ox-s*0.45, toC(0,i).y);
+    }
+
+    // ── Radius line (from origin to circle at angle 35°) ──
+    if (r > 0.01) {
+        const ang = Math.PI / 5; // ~36°
+        const rx = r * Math.cos(ang), ry = r * Math.sin(ang);
+        const rEnd = toC(rx, ry);
+
+        // Dashed line from O to circle edge
+        ctx.setLineDash([5,4]);
+        ctx.strokeStyle = 'rgba(240,192,96,0.5)'; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.moveTo(ox,oy); ctx.lineTo(rEnd.x,rEnd.y); ctx.stroke();
+        ctx.setLineDash([]);
+
+        // r label midpoint
+        const mx = ox + (rEnd.x-ox)*0.5 + 10;
+        const my = oy + (rEnd.y-oy)*0.5 - 12;
+        ctx.font=`500 ${Math.max(10,s*0.36)}px 'JetBrains Mono',monospace`;
+        ctx.fillStyle='rgba(240,192,96,0.75)';
+        ctx.textAlign='center'; ctx.textBaseline='middle';
+        ctx.fillText(`r = ${r.toFixed(2)}`, mx, my);
+    }
+
+    // ── Circle glow ──
+    if (r > 0.01) {
+        // Outer glow
+        const glowR = r * s;
+        const glow = ctx.createRadialGradient(ox,oy,Math.max(0,glowR-8),ox,oy,glowR+14);
+        glow.addColorStop(0,'rgba(240,192,96,0.12)');
+        glow.addColorStop(1,'rgba(240,192,96,0)');
+        ctx.fillStyle=glow; ctx.beginPath(); ctx.arc(ox,oy,glowR+14,0,Math.PI*2); ctx.fill();
+
+        // Circle fill
+        ctx.beginPath(); ctx.arc(ox,oy,glowR,0,Math.PI*2);
+        ctx.fillStyle=`rgba(240,192,96,0.04)`; ctx.fill();
+
+        // Circle stroke — bright gold
+        ctx.beginPath(); ctx.arc(ox,oy,glowR,0,Math.PI*2);
+        ctx.strokeStyle='rgba(240,192,96,0.85)'; ctx.lineWidth=2.5;
+        ctx.stroke();
+    }
+
+    // ── r² squares (visual Pythagorean) ── only when r > 0.5
+    if (r > 0.5) {
+        const sqS = r * s * 0.26; // small reference squares
+        // x² square on x-axis
+        ctx.fillStyle='rgba(224,107,107,0.08)';
+        ctx.strokeStyle='rgba(224,107,107,0.25)'; ctx.lineWidth=1;
+        ctx.beginPath(); ctx.rect(ox, oy-sqS, r*s*Math.cos(0)*0.26, sqS); // approximate visual
+        // skip complex squares — keep clean
+
+        // Just show the unit ticks at r on axes
+        const rPx = r * s;
+        ctx.strokeStyle='rgba(240,192,96,0.4)'; ctx.lineWidth=1.5;
+        // tick on x axis at r
+        ctx.beginPath(); ctx.moveTo(ox+rPx, oy-7); ctx.lineTo(ox+rPx, oy+7); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(ox-rPx, oy-7); ctx.lineTo(ox-rPx, oy+7); ctx.stroke();
+        // tick on y axis at r
+        ctx.beginPath(); ctx.moveTo(ox-7, oy-rPx); ctx.lineTo(ox+7, oy-rPx); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(ox-7, oy+rPx); ctx.lineTo(ox+7, oy+rPx); ctx.stroke();
+    }
+
+    // ── Center point O — always ──
+    ctx.beginPath(); ctx.arc(ox, oy, 5, 0, Math.PI*2);
+    ctx.fillStyle='#3a5070'; ctx.fill();
+    ctx.strokeStyle='#0b0d13'; ctx.lineWidth=2; ctx.stroke();
+    ctx.font=`400 ${Math.max(9,s*0.32)}px 'JetBrains Mono',monospace`;
+    ctx.fillStyle='#5a7aaa'; ctx.textAlign='right'; ctx.textBaseline='top';
+    ctx.fillText('O', ox-8, oy+6);
+
+    // ── Point on circle at angle ──
+    if (r > 0.01) {
+        const ang = Math.PI / 5;
+        const px = r*Math.cos(ang), py = r*Math.sin(ang);
+        const cp = toC(px, py);
+
+        // foot lines (x and y legs)
+        const fx = toC(px, 0);
+        ctx.setLineDash([4,4]);
+        ctx.strokeStyle='rgba(224,107,107,0.4)'; ctx.lineWidth=1.2;
+        ctx.beginPath(); ctx.moveTo(ox,oy); ctx.lineTo(fx.x,oy); ctx.stroke();
+        ctx.strokeStyle='rgba(91,156,246,0.4)';
+        ctx.beginPath(); ctx.moveTo(fx.x,oy); ctx.lineTo(fx.x,cp.y); ctx.stroke();
+        ctx.setLineDash([]);
+
+        // small leg labels
+        const lfs = Math.max(8,s*0.28);
+        ctx.font=`300 ${lfs}px 'JetBrains Mono',monospace`;
+        ctx.fillStyle='rgba(224,107,107,0.55)';
+        ctx.textAlign='center'; ctx.textBaseline='top';
+        ctx.fillText(`x=${px.toFixed(2)}`, (ox+fx.x)/2, oy+4);
+        ctx.fillStyle='rgba(91,156,246,0.55)';
+        ctx.textAlign='left'; ctx.textBaseline='middle';
+        ctx.fillText(`y=${py.toFixed(2)}`, fx.x+5, (oy+cp.y)/2);
+
+        // Point dot
+        const pg = ctx.createRadialGradient(cp.x,cp.y,0,cp.x,cp.y,18);
+        pg.addColorStop(0,'rgba(240,192,96,0.4)'); pg.addColorStop(1,'rgba(240,192,96,0)');
+        ctx.fillStyle=pg; ctx.beginPath(); ctx.arc(cp.x,cp.y,18,0,Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(cp.x,cp.y,7,0,Math.PI*2);
+        ctx.fillStyle='#f0c060'; ctx.fill();
+        ctx.strokeStyle='#0b0d13'; ctx.lineWidth=2; ctx.stroke();
+
+        // (x,y) label
+        ctx.font=`400 ${Math.max(9,s*0.32)}px 'JetBrains Mono',monospace`;
+        ctx.fillStyle='rgba(240,192,96,0.8)';
+        ctx.textAlign='left'; ctx.textBaseline='bottom';
+        ctx.fillText(`(${px.toFixed(2)}, ${py.toFixed(2)})`, cp.x+10, cp.y-4);
+
+        // verify: x²+y²=r²
+        ctx.font=`300 ${Math.max(8,s*0.28)}px 'JetBrains Mono',monospace`;
+        ctx.fillStyle='rgba(74,222,128,0.55)';
+        const check = (px*px + py*py).toFixed(2);
+        ctx.fillText(`x²+y² = ${check} ✓`, cp.x+10, cp.y+14);
+    }
+}
+
+// ── Slider interaction ──
+slider.addEventListener('input', () => {
+    r = parseFloat(slider.value);
+    updateFormula();
+    draw();
+});
+
+// Init
+updateFormula();
+resize();
+</script>
+</body>
+</html>

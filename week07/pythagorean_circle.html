@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>x² + y² = r²</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500&display=swap');
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+    font-family: 'JetBrains Mono', monospace;
+    background: #0b0d13;
+    color: #c8d4e8;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ── Header ── */
+header {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 14px 20px 12px;
+    border-bottom: 1px solid #181f2e;
+    gap: 5px;
+}
+.title {
+    font-size: 1.15rem;
+    font-weight: 500;
+    color: #8899bb;
+    letter-spacing: 0.04em;
+    text-align: center;
+}
+.title span { color: #a0bce0; font-weight: 600; }
+.subtitle {
+    font-size: 0.72rem;
+    font-weight: 300;
+    color: #2e3d55;
+    letter-spacing: 0.08em;
+    text-align: center;
+}
+
+/* ── Canvas ── */
+.canvas-wrap {
+    flex: 1;
+    position: relative;
+    min-height: 0;
+}
+canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+/* hover tooltip */
+#tip {
+    position: absolute;
+    bottom: 14px; left: 14px;
+    background: #0f1420;
+    border: 1px solid #1e2a3e;
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 0.72rem;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s;
+    line-height: 1.7;
+}
+#tip.show { opacity: 1; }
+#tip .tn { color: #8899bb; }
+#tip .tc { color: #4ade80; }
+
+/* ── Bottom bar ── */
+.bar {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    padding: 0 24px;
+    border-top: 1px solid #181f2e;
+    height: 64px;
+}
+
+/* Divider */
+.sep {
+    width: 1px;
+    height: 32px;
+    background: #1e2a3e;
+    margin: 0 18px;
+    flex-shrink: 0;
+}
+
+/* ── Step buttons ── */
+.steps {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.sbtn {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    letter-spacing: 0.04em;
+    background: transparent;
+    color: #3d4f6a;
+    border: 1px solid #1e2a3e;
+    border-radius: 6px;
+    padding: 8px 14px;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+}
+.sbtn:hover { color: #8899bb; border-color: #2a3a55; }
+.sbtn.active { color: #c8d4e8; border-color: #3a5080; background: #111826; }
+
+.all-btn {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    background: transparent;
+    color: #3d4f6a;
+    border: 1px solid #1e2a3e;
+    border-radius: 6px;
+    padding: 8px 14px;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+}
+.all-btn:hover { color: #8899bb; border-color: #2a3a55; }
+.all-btn.active { color: #e8c97a; border-color: #5a4a20; background: #1a160a; }
+
+/* ── Point toggles ── */
+.toggles {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.tog {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    cursor: pointer;
+    padding: 7px 13px;
+    border-radius: 6px;
+    border: 1px solid transparent;
+    transition: all 0.15s;
+    user-select: none;
+}
+.tog:hover { border-color: #1e2a3e; background: #0f1420; }
+.tog.off { opacity: 0.28; }
+
+.tog-check {
+    width: 17px; height: 17px;
+    border-radius: 4px;
+    border: 1.5px solid currentColor;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.15s;
+}
+.tog:not(.off) .tog-check { background: currentColor; }
+.tog:not(.off) .tog-check::after { content: '✓'; color: #0b0d13; font-weight: 700; font-size: 10px; }
+.tog.off .tog-check::after { content: ''; }
+
+.tog-label {
+    font-size: 0.85rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+}
+</style>
+</head>
+<body>
+
+<header>
+    <div class="title"><span>x² + y² = r²</span>&nbsp; → &nbsp;Circle</div>
+    <div class="subtitle">Every Pythagorean integer solution lies on a circle &nbsp;·&nbsp; r = 5</div>
+</header>
+
+<div class="canvas-wrap">
+    <canvas id="canvas"></canvas>
+    <div id="tip">
+        <div class="tn" id="tipName"></div>
+        <div id="tipCoord"></div>
+        <div class="tc" id="tipCheck"></div>
+    </div>
+</div>
+
+<div class="bar">
+    <div class="steps">
+        <button class="sbtn active" data-step="1" onclick="setStep(1)">① Original</button>
+        <button class="sbtn" data-step="2" onclick="setStep(2)">② y-axis</button>
+        <button class="sbtn" data-step="3" onclick="setStep(3)">③ x-axis</button>
+        <button class="sbtn" data-step="4" onclick="setStep(4)">④ Origin</button>
+        <button class="all-btn" id="allBtn" onclick="toggleAll()">All</button>
+    </div>
+
+    <div class="sep"></div>
+
+    <div class="toggles">
+        <div class="tog" id="tog-A" onclick="togglePoint('A')" style="color:#f87171">
+            <div class="tog-check"></div>
+            <span class="tog-label">A</span>
+        </div>
+        <div class="tog" id="tog-B" onclick="togglePoint('B')" style="color:#4ade80">
+            <div class="tog-check"></div>
+            <span class="tog-label">B</span>
+        </div>
+        <div class="tog" id="tog-C" onclick="togglePoint('C')" style="color:#5b9cf6">
+            <div class="tog-check"></div>
+            <span class="tog-label">C</span>
+        </div>
+        <div class="tog" id="tog-D" onclick="togglePoint('D')" style="color:#f0c060">
+            <div class="tog-check"></div>
+            <span class="tog-label">D</span>
+        </div>
+    </div>
+</div>
+
+<script>
+// ── Data ──
+const R = 5;
+const COLORS = { A:'#f87171', B:'#4ade80', C:'#5b9cf6', D:'#f0c060' };
+
+const originals = [
+    { name:'A', x:5, y:0, skipY:false, skipX:true  },
+    { name:'B', x:4, y:3, skipY:false, skipX:false },
+    { name:'C', x:3, y:4, skipY:false, skipX:false },
+    { name:'D', x:0, y:5, skipY:true,  skipX:false },
+];
+
+function buildPoints() {
+    const pts = [];
+    originals.forEach(o => {
+        pts.push({ base:o.name, label:o.name,     x: o.x,  y: o.y,  group:1 });
+        if (!o.skipY)
+            pts.push({ base:o.name, label:o.name+"'",   x:-o.x,  y: o.y,  group:2 });
+        if (!o.skipX)
+            pts.push({ base:o.name, label:o.name+"''",  x: o.x,  y:-o.y,  group:3 });
+        pts.push({ base:o.name, label:o.name+"'''", x:-o.x,  y:-o.y, group:4 });
+    });
+    return pts;
+}
+const allPoints = buildPoints();
+
+// ── State ──
+let currentStep = 1;
+let showAll = false;
+let hoveredPoint = null;
+const enabled = { A:true, B:true, C:true, D:true };
+
+// ── Canvas ──
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+
+function resize() {
+    const wrap = document.querySelector('.canvas-wrap');
+    canvas.width  = wrap.clientWidth;
+    canvas.height = wrap.clientHeight;
+    draw();
+}
+window.addEventListener('resize', resize);
+
+function sc() { return Math.min(canvas.width, canvas.height) / 14; }
+function toC(x, y) {
+    const s = sc();
+    return { x: canvas.width/2 + x*s, y: canvas.height/2 - y*s };
+}
+
+// ── Visible points ──
+function getVisible() {
+    const groups = new Set();
+    if (showAll) { [1,2,3,4].forEach(g => groups.add(g)); }
+    else { for (let g=1; g<=currentStep; g++) groups.add(g); }
+    return allPoints.filter(p => groups.has(p.group) && enabled[p.base]);
+}
+
+// ── Draw ──
+function draw() {
+    const W = canvas.width, H = canvas.height;
+    const s = sc(), ox = W/2, oy = H/2;
+    ctx.clearRect(0,0,W,H);
+
+    // Background
+    const grad = ctx.createRadialGradient(ox,oy,0,ox,oy,W*0.6);
+    grad.addColorStop(0,'#0f1320'); grad.addColorStop(1,'#0b0d13');
+    ctx.fillStyle = grad; ctx.fillRect(0,0,W,H);
+
+    // Grid
+    ctx.strokeStyle = '#111826'; ctx.lineWidth = 1;
+    for (let i=-7;i<=7;i++) {
+        const a=toC(i,-7), b=toC(i,7);
+        ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
+        const c=toC(-7,i), d=toC(7,i);
+        ctx.beginPath(); ctx.moveTo(c.x,c.y); ctx.lineTo(d.x,d.y); ctx.stroke();
+    }
+
+    // ── Axes — prominent ──
+    const AX = 6.6; // extent
+    ctx.strokeStyle = '#3a5070'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(toC(-AX,0).x, oy); ctx.lineTo(toC(AX,0).x, oy); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(ox, toC(0,AX).y);  ctx.lineTo(ox, toC(0,-AX).y); ctx.stroke();
+
+    // Arrowheads
+    const aw = 6, ah = 11;
+    ctx.fillStyle = '#3a5070';
+    // → right
+    ctx.beginPath(); ctx.moveTo(toC(AX,0).x,oy); ctx.lineTo(toC(AX,0).x-ah,oy-aw); ctx.lineTo(toC(AX,0).x-ah,oy+aw); ctx.closePath(); ctx.fill();
+    // ← left
+    ctx.beginPath(); ctx.moveTo(toC(-AX,0).x,oy); ctx.lineTo(toC(-AX,0).x+ah,oy-aw); ctx.lineTo(toC(-AX,0).x+ah,oy+aw); ctx.closePath(); ctx.fill();
+    // ↑ up
+    ctx.beginPath(); ctx.moveTo(ox,toC(0,AX).y); ctx.lineTo(ox-aw,toC(0,AX).y+ah); ctx.lineTo(ox+aw,toC(0,AX).y+ah); ctx.closePath(); ctx.fill();
+    // ↓ down
+    ctx.beginPath(); ctx.moveTo(ox,toC(0,-AX).y); ctx.lineTo(ox-aw,toC(0,-AX).y-ah); ctx.lineTo(ox+aw,toC(0,-AX).y-ah); ctx.closePath(); ctx.fill();
+
+    // Axis letters
+    ctx.font = `500 ${Math.max(11,s*0.42)}px 'JetBrains Mono',monospace`;
+    ctx.fillStyle = '#5a7aaa';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText('x', toC(AX,0).x + 20, oy);
+    ctx.fillText('y', ox, toC(0,AX).y - 20);
+
+    // Tick labels
+    ctx.font = `${Math.max(8,s*0.3)}px 'JetBrains Mono',monospace`;
+    ctx.fillStyle = '#2a3a55';
+    for (let i=-6;i<=6;i++) {
+        if (!i) continue;
+        ctx.textAlign='center'; ctx.textBaseline='middle';
+        ctx.fillText(i, toC(i,0).x, oy + s*0.52);
+        ctx.textAlign='right';
+        ctx.fillText(i, ox - s*0.45, toC(0,i).y);
+    }
+
+    // ── Circle ──
+    ctx.beginPath(); ctx.arc(ox, oy, R*s, 0, Math.PI*2);
+    const anyEnabled = Object.values(enabled).some(Boolean);
+    ctx.strokeStyle = anyEnabled ? 'rgba(91,156,246,0.45)' : 'rgba(91,156,246,0.12)';
+    ctx.lineWidth = 1.8;
+    ctx.setLineDash([6,5]); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle = 'rgba(91,156,246,0.04)'; ctx.fill();
+
+    // r=5 label
+    const rp = toC(3.6, 3.4);
+    ctx.font = `300 ${Math.max(9,s*0.3)}px 'JetBrains Mono',monospace`;
+    ctx.fillStyle = 'rgba(91,156,246,0.38)';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText('r = 5', rp.x, rp.y);
+
+    // ── Center point O — always drawn ──
+    ctx.beginPath(); ctx.arc(ox, oy, 5, 0, Math.PI*2);
+    ctx.fillStyle = '#3a5070'; ctx.fill();
+    ctx.strokeStyle = '#0b0d13'; ctx.lineWidth = 2; ctx.stroke();
+    ctx.font = `400 ${Math.max(9,s*0.32)}px 'JetBrains Mono',monospace`;
+    ctx.fillStyle = '#5a7aaa';
+    ctx.textAlign = 'right'; ctx.textBaseline = 'top';
+    ctx.fillText('O', ox - 8, oy + 6);
+
+    const visible = getVisible();
+
+    // Faint radial lines from origin
+    visible.forEach(p => {
+        if (p.x===0 && p.y===0) return;
+        const cp = toC(p.x, p.y);
+        ctx.setLineDash([3,5]);
+        ctx.strokeStyle = COLORS[p.base]+'22'; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(ox,oy); ctx.lineTo(cp.x,cp.y); ctx.stroke();
+        ctx.setLineDash([]);
+    });
+
+    // Connection lines between same-base visible points
+    if (showAll || currentStep >= 2) {
+        originals.forEach(o => {
+            if (!enabled[o.name]) return;
+            const grp = visible.filter(p => p.base === o.name);
+            if (grp.length < 2) return;
+            for (let a=0; a<grp.length; a++) {
+                for (let b=a+1; b<grp.length; b++) {
+                    const pa = toC(grp[a].x, grp[a].y), pb = toC(grp[b].x, grp[b].y);
+                    ctx.setLineDash([3,5]); ctx.strokeStyle = COLORS[o.name]+'18'; ctx.lineWidth = 1;
+                    ctx.beginPath(); ctx.moveTo(pa.x,pa.y); ctx.lineTo(pb.x,pb.y); ctx.stroke();
+                    ctx.setLineDash([]);
+                }
+            }
+        });
+    }
+
+    // ── Draw points ──
+    visible.forEach(p => {
+        const cp = toC(p.x, p.y), col = COLORS[p.base];
+        const isOrig = p.group === 1;
+        const isHov = hoveredPoint && hoveredPoint.label === p.label && hoveredPoint.base === p.base;
+        const r = isHov ? (isOrig ? 10 : 8) : (isOrig ? 8 : 6);
+
+        if (isHov || isOrig) {
+            const g = ctx.createRadialGradient(cp.x,cp.y,0,cp.x,cp.y,r*3.5);
+            g.addColorStop(0, col+'35'); g.addColorStop(1, col+'00');
+            ctx.fillStyle = g; ctx.beginPath(); ctx.arc(cp.x,cp.y,r*3.5,0,Math.PI*2); ctx.fill();
+        }
+
+        ctx.beginPath(); ctx.arc(cp.x, cp.y, r, 0, Math.PI*2);
+        ctx.fillStyle = isOrig ? col : col+'bb';
+        ctx.fill(); ctx.strokeStyle = '#0b0d13'; ctx.lineWidth = 2; ctx.stroke();
+
+        const fs = Math.max(9, s*0.34);
+        ctx.font = `${isOrig?500:400} ${fs}px 'JetBrains Mono',monospace`;
+        const lx = cp.x + (p.x >= 0 ? r+6 : -(r+6));
+        const ly = cp.y + (p.y >= 0 ? -(r+6) : r+6);
+        ctx.textAlign = p.x >= 0 ? 'left' : 'right';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = isOrig ? col : col+'cc';
+        ctx.fillText(p.label, lx, ly);
+
+        if (isHov) {
+            ctx.font = `300 ${Math.max(8,s*0.28)}px 'JetBrains Mono',monospace`;
+            ctx.fillStyle = '#8899bbcc';
+            ctx.fillText(`(${p.x},${p.y})`, lx, ly + fs + 2);
+        }
+    });
+
+    // Axis mirror indicator
+    if (!showAll) {
+        if (currentStep === 2) drawMirror('y');
+        if (currentStep === 3) drawMirror('x');
+        if (currentStep === 4) drawMirror('o');
+    }
+}
+
+function drawMirror(axis) {
+    const s = sc(), ox = canvas.width/2, oy = canvas.height/2;
+    ctx.save();
+    if (axis === 'y') {
+        ctx.strokeStyle = 'rgba(167,139,250,0.22)'; ctx.lineWidth = 1.5;
+        ctx.setLineDash([8,6]);
+        ctx.beginPath(); ctx.moveTo(ox,toC(0,6.6).y); ctx.lineTo(ox,toC(0,-6.6).y); ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.font = `300 ${Math.max(9,s*0.28)}px 'JetBrains Mono',monospace`;
+        ctx.fillStyle = 'rgba(167,139,250,0.4)';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText('y-axis', ox + s*1.2, toC(0,6).y);
+    } else if (axis === 'x') {
+        ctx.strokeStyle = 'rgba(248,113,113,0.22)'; ctx.lineWidth = 1.5;
+        ctx.setLineDash([8,6]);
+        ctx.beginPath(); ctx.moveTo(toC(-6.6,0).x,oy); ctx.lineTo(toC(6.6,0).x,oy); ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.font = `300 ${Math.max(9,s*0.28)}px 'JetBrains Mono',monospace`;
+        ctx.fillStyle = 'rgba(248,113,113,0.4)';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText('x-axis', toC(5,0).x, oy - s*0.65);
+    } else {
+        ctx.strokeStyle = 'rgba(103,232,249,0.35)'; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.arc(ox, oy, 13, 0, Math.PI*2); ctx.stroke();
+    }
+    ctx.restore();
+}
+
+// ── Controls ──
+function setStep(n) {
+    currentStep = n; showAll = false;
+    document.getElementById('allBtn').classList.remove('active');
+    document.querySelectorAll('.sbtn').forEach(b => b.classList.toggle('active', +b.dataset.step === n));
+    draw();
+}
+
+function toggleAll() {
+    showAll = !showAll;
+    document.getElementById('allBtn').classList.toggle('active', showAll);
+    if (showAll) {
+        currentStep = 4;
+        document.querySelectorAll('.sbtn').forEach(b => b.classList.remove('active'));
+        document.querySelector('[data-step="4"]').classList.add('active');
+    }
+    draw();
+}
+
+function togglePoint(name) {
+    enabled[name] = !enabled[name];
+    document.getElementById('tog-'+name).classList.toggle('off', !enabled[name]);
+    draw();
+}
+
+// ── Hover ──
+canvas.addEventListener('mousemove', e => {
+    const rect = canvas.getBoundingClientRect();
+    const mx = (e.clientX - rect.left) * canvas.width / rect.width;
+    const my = (e.clientY - rect.top) * canvas.height / rect.height;
+    const visible = getVisible();
+    let found = null;
+    visible.forEach(p => {
+        const cp = toC(p.x, p.y);
+        if (Math.hypot(mx-cp.x, my-cp.y) < 16) found = p;
+    });
+    hoveredPoint = found;
+    canvas.style.cursor = found ? 'crosshair' : 'default';
+    const tip = document.getElementById('tip');
+    if (found) {
+        const s2 = found.x*found.x + found.y*found.y;
+        document.getElementById('tipName').textContent  = `${found.label} = (${found.x}, ${found.y})`;
+        document.getElementById('tipCoord').textContent = `${found.x}² + ${found.y}² = ${s2}`;
+        document.getElementById('tipCheck').textContent = `= 5²  ✓`;
+        tip.classList.add('show');
+    } else {
+        tip.classList.remove('show');
+    }
+    draw();
+});
+
+canvas.addEventListener('mouseleave', () => {
+    hoveredPoint = null;
+    document.getElementById('tip').classList.remove('show');
+    draw();
+});
+
+// ── Init ──
+resize();
+</script>
+</body>
+</html>

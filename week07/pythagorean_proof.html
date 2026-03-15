@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>x² + y² = 25</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@300;400;600&display=swap');
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+    font-family: 'Lora', serif;
+    background: #0d0f14;
+    color: #dde2ee;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ── Header ── */
+header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 28px;
+    border-bottom: 1px solid #1e2535;
+    background: #0d0f14;
+    flex-shrink: 0;
+}
+header h1 {
+    font-size: 0.95rem;
+    font-weight: 400;
+    font-style: italic;
+    color: #6b7a99;
+}
+.step-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    color: #3d4a66;
+    letter-spacing: 0.1em;
+}
+
+/* ── Main: two equal halves ── */
+.main {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+    min-height: 0;
+}
+
+/* ── LEFT: Circle ── */
+.left {
+    width: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-right: 1px solid #1e2535;
+    padding: 12px;
+}
+canvas { display: block; }
+
+/* ── RIGHT: Formula ── */
+.right {
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px 28px;
+}
+
+.pt-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.14em;
+    margin-bottom: 24px;
+    text-transform: uppercase;
+    color: #3d4a66;
+}
+
+.formula-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    width: 100%;
+}
+
+.fline {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    font-family: 'Lora', serif;
+    font-weight: 400;
+    line-height: 1;
+    white-space: nowrap;
+    padding: 10px 0;
+}
+
+.fline sup {
+    font-size: 0.52em;
+    vertical-align: super;
+    line-height: 0;
+}
+
+.fdiv {
+    width: 55%;
+    height: 1px;
+    background: #1e2535;
+}
+
+.cx  { color: #e06b6b; }
+.cy  { color: #5b9cf6; }
+.cr  { color: #f0c060; }
+.cop { color: #3d4a66; margin: 0 0.12em; }
+.cok { color: #4ade80; }
+.cm  { color: #3d4a66; }
+
+.skip-card {
+    text-align: center;
+    color: #3d4a66;
+    font-style: italic;
+    padding: 16px 0;
+}
+.skip-card b { color: #4a5a7a; font-style: normal; }
+
+/* ── Nav ── */
+.nav {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 28px;
+    padding: 12px 28px;
+    border-top: 1px solid #1e2535;
+    background: #0d0f14;
+}
+
+.nav-btn {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    letter-spacing: 0.07em;
+    background: #151a24;
+    color: #8899bb;
+    border: 1px solid #252f45;
+    border-radius: 6px;
+    padding: 9px 30px;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    user-select: none;
+    min-width: 110px;
+}
+.nav-btn:hover:not(:disabled) { background: #1e2840; color: #c5d0e8; border-color: #4a5a7a; }
+.nav-btn:active:not(:disabled) { transform: scale(0.97); }
+.nav-btn:disabled { opacity: 0.2; cursor: default; }
+
+.dots { display: flex; align-items: center; gap: 12px; }
+.dot-group { display: flex; gap: 4px; }
+.dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: #1e2535;
+    transition: background 0.2s, transform 0.2s;
+}
+.dot.active { transform: scale(1.7); }
+</style>
+</head>
+<body>
+
+<header>
+    <h1>Pythagorean Theorem → Circle &nbsp;·&nbsp; x² + y² = r²</h1>
+    <span class="step-badge" id="stepBadge">1 / 16</span>
+</header>
+
+<div class="main">
+    <div class="left"><canvas id="canvas"></canvas></div>
+    <div class="right">
+        <div class="pt-label" id="ptLabel"></div>
+        <div class="formula-wrap" id="fwrap"></div>
+    </div>
+</div>
+
+<div class="nav">
+    <button class="nav-btn" id="prevBtn" onclick="go(-1)" disabled>← Prev</button>
+    <div class="dots" id="dots"></div>
+    <button class="nav-btn" id="nextBtn" onclick="go(1)">Next →</button>
+</div>
+
+<script>
+const COLORS = { A:'#e06b6b', B:'#4ade80', C:'#5b9cf6', D:'#f0c060' };
+
+const steps = [
+    { base:'A', label:'A',    x: 5, y: 0, type:'Original',         skip:false },
+    { base:'A', label:"A'",   x:-5, y: 0, type:'Reflect · y-axis', skip:false },
+    { base:'A', label:"A''",  x: 5, y: 0, type:'Reflect · x-axis', skip:true,  why:'A is on x-axis → same point' },
+    { base:'A', label:"A'''", x:-5, y: 0, type:'Reflect · origin',  skip:true,  why:"Same as A' — skip" },
+
+    { base:'B', label:'B',    x: 4, y: 3, type:'Original',         skip:false },
+    { base:'B', label:"B'",   x:-4, y: 3, type:'Reflect · y-axis', skip:false },
+    { base:'B', label:"B''",  x: 4, y:-3, type:'Reflect · x-axis', skip:false },
+    { base:'B', label:"B'''", x:-4, y:-3, type:'Reflect · origin',  skip:false },
+
+    { base:'C', label:'C',    x: 3, y: 4, type:'Original',         skip:false },
+    { base:'C', label:"C'",   x:-3, y: 4, type:'Reflect · y-axis', skip:false },
+    { base:'C', label:"C''",  x: 3, y:-4, type:'Reflect · x-axis', skip:false },
+    { base:'C', label:"C'''", x:-3, y:-4, type:'Reflect · origin',  skip:false },
+
+    { base:'D', label:'D',    x: 0, y: 5, type:'Original',         skip:false },
+    { base:'D', label:"D'",   x: 0, y: 5, type:'Reflect · y-axis', skip:true,  why:'D is on y-axis → same point' },
+    { base:'D', label:"D''",  x: 0, y:-5, type:'Reflect · x-axis', skip:false },
+    { base:'D', label:"D'''", x: 0, y:-5, type:'Reflect · origin',  skip:true,  why:"Same as D'' — skip" },
+];
+
+let cur = 0;
+const drawn = new Set();
+const pts = [];
+
+function addPt(s) {
+    if (s.skip) return;
+    const k = `${s.x},${s.y}`;
+    if (!drawn.has(k)) { drawn.add(k); pts.push(s); }
+}
+
+// ── Canvas ──
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+
+function resize() {
+    const el = document.querySelector('.left');
+    const size = Math.min(el.clientWidth, el.clientHeight) - 24;
+    canvas.width = canvas.height = size;
+    draw();
+}
+window.addEventListener('resize', resize);
+
+function toC(x, y) {
+    const s = canvas.width / 14;
+    return { x: canvas.width/2 + x*s, y: canvas.height/2 - y*s };
+}
+function sc() { return canvas.width / 14; }
+
+function draw() {
+    const W = canvas.width, s = sc(), ox = W/2, oy = W/2;
+    ctx.clearRect(0, 0, W, W);
+
+    // bg
+    ctx.fillStyle = '#0d0f14'; ctx.fillRect(0,0,W,W);
+
+    // grid
+    ctx.strokeStyle = '#151a24'; ctx.lineWidth = 1;
+    for (let i = -6; i <= 6; i++) {
+        let a = toC(i,-6), b = toC(i,6);
+        ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
+        a = toC(-6,i); b = toC(6,i);
+        ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
+    }
+
+    // axes
+    ctx.strokeStyle = '#252f45'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(toC(-6,0).x,oy); ctx.lineTo(toC(6,0).x,oy); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(ox,toC(0,6).y); ctx.lineTo(ox,toC(0,-6).y); ctx.stroke();
+
+    // tick numbers
+    ctx.font = `${Math.max(8,s*0.36)}px 'JetBrains Mono',monospace`;
+    ctx.fillStyle = '#252f45'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    for (let i=-5;i<=5;i++) {
+        if(!i) continue;
+        ctx.fillText(i, toC(i,0).x, oy+s*0.55);
+        ctx.fillText(i, ox-s*0.6, toC(0,i).y);
+    }
+
+    // circle
+    ctx.beginPath(); ctx.arc(ox,oy,5*s,0,Math.PI*2);
+    ctx.strokeStyle='rgba(91,156,246,0.28)'; ctx.lineWidth=1.5;
+    ctx.setLineDash([6,5]); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle='rgba(91,156,246,0.04)'; ctx.fill();
+
+    // r=5 label
+    const rp = toC(3.6,3.4);
+    ctx.font=`italic ${Math.max(9,s*0.36)}px 'Lora',serif`;
+    ctx.fillStyle='rgba(91,156,246,0.4)';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('r = 5', rp.x, rp.y);
+
+    // legs for current step
+    const st = steps[cur];
+    if (!st.skip) {
+        const cp=toC(st.x,st.y), fx=toC(st.x,0);
+        ctx.setLineDash([4,4]);
+        ctx.strokeStyle='#e06b6b33'; ctx.lineWidth=1.5;
+        ctx.beginPath(); ctx.moveTo(ox,oy); ctx.lineTo(fx.x,oy); ctx.stroke();
+        ctx.strokeStyle='#5b9cf633';
+        ctx.beginPath(); ctx.moveTo(fx.x,oy); ctx.lineTo(fx.x,cp.y); ctx.stroke();
+        ctx.strokeStyle=COLORS[st.base]+'44';
+        ctx.beginPath(); ctx.moveTo(ox,oy); ctx.lineTo(cp.x,cp.y); ctx.stroke();
+        ctx.setLineDash([]);
+    }
+
+    // points
+    pts.forEach((p,i) => {
+        const cp=toC(p.x,p.y), col=COLORS[p.base], last=i===pts.length-1;
+        const r = last ? 8 : 5;
+        if (last) {
+            const g=ctx.createRadialGradient(cp.x,cp.y,0,cp.x,cp.y,22);
+            g.addColorStop(0,col+'44'); g.addColorStop(1,col+'00');
+            ctx.fillStyle=g; ctx.beginPath(); ctx.arc(cp.x,cp.y,22,0,Math.PI*2); ctx.fill();
+        }
+        ctx.beginPath(); ctx.arc(cp.x,cp.y,r,0,Math.PI*2);
+        ctx.fillStyle = last ? col : col+'88';
+        ctx.fill(); ctx.strokeStyle='#0d0f14'; ctx.lineWidth=2; ctx.stroke();
+        const fs=Math.max(9,s*0.36);
+        ctx.font=`${last?600:400} ${fs}px 'JetBrains Mono',monospace`;
+        const lx=cp.x+(p.x>=0?r+5:-(r+5)), ly=cp.y+(p.y>=0?-(r+5):r+5);
+        ctx.textAlign=p.x>=0?'left':'right'; ctx.textBaseline='middle';
+        ctx.fillStyle=last?col:col+'77';
+        ctx.fillText(p.label,lx,ly);
+    });
+}
+
+// ── Formula ──
+function renderFormula() {
+    const st = steps[cur];
+    const col = COLORS[st.base];
+
+    // label
+    const lbl = document.getElementById('ptLabel');
+    lbl.textContent = st.type;
+    lbl.style.color = col + 'bb';
+
+    const fw = document.getElementById('fwrap');
+    fw.innerHTML = '';
+
+    // font size responsive
+    const fs = 'clamp(1.8rem, 4vw, 3.4rem)';
+
+    if (st.skip) {
+        fw.innerHTML = `
+          <div class="fline" style="font-size:${fs}">
+            <span style="color:${col};font-weight:600">${st.label}</span>
+            <span class="cop">&nbsp;=&nbsp;</span>
+            <span class="cm">(${st.x},&thinsp;${st.y})</span>
+          </div>
+          <div class="fdiv" style="margin:14px 0"></div>
+          <div class="skip-card" style="font-size:clamp(0.95rem,2vw,1.3rem)">${st.why}</div>
+        `;
+        return;
+    }
+
+    const x2 = st.x*st.x, y2 = st.y*st.y;
+
+    // Row 1: point = (x, y)
+    fw.innerHTML += `
+      <div class="fline" style="font-size:${fs}">
+        <span style="color:${col};font-weight:600">${st.label}</span>
+        <span class="cop">&nbsp;=&nbsp;</span>
+        <span class="cm">(</span><span class="cx">${st.x}</span><span class="cm">,&thinsp;</span><span class="cy">${st.y}</span><span class="cm">)</span>
+      </div>
+      <div class="fdiv"></div>
+
+      <div class="fline" style="font-size:${fs}">
+        <span class="cx">x</span><sup class="cx">2</sup>
+        <span class="cop"> + </span>
+        <span class="cy">y</span><sup class="cy">2</sup>
+        <span class="cop"> = </span>
+        <span class="cr">r</span><sup class="cr">2</sup>
+      </div>
+      <div class="fdiv"></div>
+
+      <div class="fline" style="font-size:${fs}">
+        <span class="cx">${st.x}</span><sup class="cx">2</sup>
+        <span class="cop"> + </span>
+        <span class="cy">${st.y}</span><sup class="cy">2</sup>
+        <span class="cop"> = </span>
+        <span class="cr">5</span><sup class="cr">2</sup>
+      </div>
+      <div class="fdiv"></div>
+
+      <div class="fline" style="font-size:${fs}">
+        <span class="cx">${x2}</span>
+        <span class="cop"> + </span>
+        <span class="cy">${y2}</span>
+        <span class="cop"> = </span>
+        <span class="cr">25</span>
+        <span class="cop">&ensp;</span>
+        <span class="cok">✓</span>
+      </div>
+    `;
+}
+
+// ── Dots ──
+function renderDots() {
+    const el = document.getElementById('dots');
+    el.innerHTML = '';
+    ['A','B','C','D'].forEach(b => {
+        const grp = document.createElement('div');
+        grp.className = 'dot-group';
+        steps.forEach((s,i) => {
+            if (s.base!==b) return;
+            const d = document.createElement('div');
+            d.className = 'dot' + (i===cur?' active':'');
+            d.style.background = i <= cur ? COLORS[b]+(i<cur?'55':'') : '#1e2535';
+            grp.appendChild(d);
+        });
+        el.appendChild(grp);
+    });
+}
+
+// ── Nav ──
+function go(dir) {
+    const next = cur + dir;
+    if (next < 0 || next >= steps.length) return;
+    cur = next;
+    if (dir > 0) {
+        addPt(steps[cur]);
+    } else {
+        drawn.clear(); pts.length = 0;
+        for (let i=0;i<=cur;i++) addPt(steps[i]);
+    }
+    draw(); renderFormula(); renderDots();
+    document.getElementById('stepBadge').textContent = `${cur+1} / ${steps.length}`;
+    document.getElementById('prevBtn').disabled = cur===0;
+    const nb = document.getElementById('nextBtn');
+    nb.disabled = cur===steps.length-1;
+    nb.textContent = cur===steps.length-1 ? 'Done ✓' : 'Next →';
+}
+
+document.addEventListener('keydown', e => {
+    if (e.key==='ArrowRight'||e.key==='ArrowDown') go(1);
+    if (e.key==='ArrowLeft'||e.key==='ArrowUp')   go(-1);
+});
+
+// Init
+addPt(steps[0]);
+resize();
+renderFormula();
+renderDots();
+</script>
+</body>
+</html>

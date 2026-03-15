@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>(x−a)² + (y−b)² = 5²</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&display=swap');
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+    font-family: 'JetBrains Mono', monospace;
+    background: #0b0d13;
+    color: #c8d4e8;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ── 10% Header ── */
+header {
+    height: 10vh;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-bottom: 1px solid #1e2a3e;
+    gap: 6px;
+}
+
+/* ── 80% Canvas ── */
+.canvas-wrap {
+    height: 80vh;
+    flex-shrink: 0;
+    position: relative;
+}
+canvas { display: block; width: 100%; height: 100%; }
+
+/* ── 10% Bottom bar ── */
+.bar {
+    height: 10vh;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-top: 1px solid #1e2a3e;
+    gap: 8px;
+    padding: 0 32px;
+}
+
+/* ── Color tokens ── */
+.cx  { color: #e06b6b; font-weight: 600; }   /* x — red     */
+.ca  { color: #f0c060; font-weight: 600; }   /* a — gold    */
+.cy  { color: #5b9cf6; font-weight: 600; }   /* y — blue    */
+.cb  { color: #c084fc; font-weight: 600; }   /* b — purple  */
+.cr  { color: #4ade80; font-weight: 600; }   /* r — green   */
+.cbr { color: #94a3b8; }                      /* ( ) bright  */
+.cop { color: #64748b; }                      /* + − = ops   */
+
+/* ── Superscript ── */
+.sup {
+    font-size: 0.52em;
+    line-height: 0;
+    position: relative;
+    top: -0.62em;
+}
+
+/* ── Header formula ── */
+.formula-header {
+    display: flex;
+    align-items: center;
+    font-size: clamp(1.4rem, 3.2vh, 2rem);
+    font-weight: 400;
+    line-height: 1;
+    gap: 0;
+    letter-spacing: 0.01em;
+}
+
+.subtitle {
+    font-size: clamp(0.6rem, 1.2vh, 0.8rem);
+    font-weight: 300;
+    color: #334155;
+    letter-spacing: 0.1em;
+}
+
+/* ── Bottom live formula ── */
+.formula-live {
+    display: flex;
+    align-items: center;
+    font-size: clamp(1.3rem, 2.8vh, 1.8rem);
+    font-weight: 400;
+    line-height: 1;
+    gap: 0;
+}
+
+/* ── Sliders ── */
+.sliders {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 40px;
+}
+
+.slider-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.slider-lbl {
+    font-size: clamp(1rem, 2vh, 1.3rem);
+    font-weight: 600;
+    min-width: 48px;
+    text-align: right;
+    white-space: nowrap;
+}
+
+.slider-val {
+    font-size: clamp(1rem, 2vh, 1.3rem);
+    font-weight: 600;
+    min-width: 46px;
+    text-align: left;
+}
+
+input[type=range] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 200px;
+    height: 4px;
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+    background: #1a2435;
+}
+
+#aSlider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 22px; height: 22px; border-radius: 50%;
+    background: #f0c060; border: 3px solid #0b0d13;
+    box-shadow: 0 0 12px rgba(240,192,96,0.55); cursor: pointer;
+}
+#aSlider::-moz-range-thumb {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: #f0c060; border: 3px solid #0b0d13; cursor: pointer;
+}
+
+#bSlider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 22px; height: 22px; border-radius: 50%;
+    background: #c084fc; border: 3px solid #0b0d13;
+    box-shadow: 0 0 12px rgba(192,132,252,0.55); cursor: pointer;
+}
+#bSlider::-moz-range-thumb {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: #c084fc; border: 3px solid #0b0d13; cursor: pointer;
+}
+</style>
+</head>
+<body>
+
+<!-- ── 10% Header ── -->
+<header>
+    <div class="formula-header">
+        <span class="cbr">(</span><span class="cx">x</span><span class="cop"> − </span><span class="ca">a</span><span class="cbr">)</span><span class="sup cbr">2</span>
+        <span class="cop" style="margin:0 0.22em">+</span>
+        <span class="cbr">(</span><span class="cy">y</span><span class="cop"> − </span><span class="cb">b</span><span class="cbr">)</span><span class="sup cbr">2</span>
+        <span class="cop" style="margin:0 0.22em">=</span>
+        <span class="cr">5</span><span class="sup cr">2</span>
+    </div>
+    <div class="subtitle">Circle of radius 5 — drag sliders to move center (a, b)</div>
+</header>
+
+<!-- ── 80% Canvas ── -->
+<div class="canvas-wrap">
+    <canvas id="canvas"></canvas>
+</div>
+
+<!-- ── 10% Bottom bar ── -->
+<div class="bar">
+    <div class="formula-live" id="formulaLive"></div>
+    <div class="sliders">
+        <div class="slider-group">
+            <span class="slider-lbl ca">a =</span>
+            <input type="range" id="aSlider" min="-5" max="5" step="0.1" value="0">
+            <span class="slider-val ca" id="aVal">0.0</span>
+        </div>
+        <div class="slider-group">
+            <span class="slider-lbl cb">b =</span>
+            <input type="range" id="bSlider" min="-5" max="5" step="0.1" value="0">
+            <span class="slider-val cb" id="bVal">0.0</span>
+        </div>
+    </div>
+</div>
+
+<script>
+const canvas = document.getElementById('canvas');
+const ctx    = canvas.getContext('2d');
+const aSlider = document.getElementById('aSlider');
+const bSlider = document.getElementById('bSlider');
+
+const R = 5;
+let a = 0, b = 0;
+
+// ── Resize ──
+function resize() {
+    const wrap = document.querySelector('.canvas-wrap');
+    canvas.width  = wrap.clientWidth;
+    canvas.height = wrap.clientHeight;
+    draw();
+}
+window.addEventListener('resize', resize);
+
+function sc() { return Math.min(canvas.width, canvas.height) / 16; }
+function toC(x, y) {
+    const s = sc();
+    return { x: canvas.width/2 + x*s, y: canvas.height/2 - y*s };
+}
+
+// ── Live formula HTML ──
+// bright bracket/op color #94a3b8, numbers use class colors
+function S(cls, txt) { return `<span class="${cls}">${txt}</span>`; }
+function SUP(cls)    { return `<span class="sup ${cls}" style="font-size:0.52em;line-height:0;position:relative;top:-0.62em">2</span>`; }
+
+function updateFormula() {
+    document.getElementById('aVal').textContent = a.toFixed(1);
+    document.getElementById('bVal').textContent = b.toFixed(1);
+
+    // slider track fill
+    const aPct = ((a + 5) / 10) * 100;
+    const bPct = ((b + 5) / 10) * 100;
+    aSlider.style.background = `linear-gradient(to right,#f0c060 ${aPct}%,#1a2435 ${aPct}%)`;
+    bSlider.style.background = `linear-gradient(to right,#c084fc ${bPct}%,#1a2435 ${bPct}%)`;
+
+    // sign logic: (x − a) when a≥0, (x + |a|) when a<0
+    const aSign = a >= 0 ? '−' : '+';
+    const bSign = b >= 0 ? '−' : '+';
+    const aAbs  = Math.abs(a).toFixed(1);
+    const bAbs  = Math.abs(b).toFixed(1);
+
+    document.getElementById('formulaLive').innerHTML =
+        S('cbr','(') + S('cx','x') + S('cop',` ${aSign} `) + S('ca', aAbs) + S('cbr',')') + SUP('cbr') +
+        S('cop','&nbsp;+&nbsp;') +
+        S('cbr','(') + S('cy','y') + S('cop',` ${bSign} `) + S('cb', bAbs) + S('cbr',')') + SUP('cbr') +
+        S('cop','&nbsp;=&nbsp;') +
+        S('cr','5') + SUP('cr') +
+        S('cop','&nbsp;=&nbsp;') +
+        S('cr','25');
+}
+
+// ── Draw ──
+function draw() {
+    const W = canvas.width, H = canvas.height;
+    const s = sc(), ox = W/2, oy = H/2;
+    ctx.clearRect(0, 0, W, H);
+
+    // Background
+    const bg = ctx.createRadialGradient(ox,oy,0,ox,oy,W*0.6);
+    bg.addColorStop(0,'#0f1320'); bg.addColorStop(1,'#0b0d13');
+    ctx.fillStyle = bg; ctx.fillRect(0,0,W,H);
+
+    // Grid
+    ctx.strokeStyle = '#111826'; ctx.lineWidth = 1;
+    for (let i=-8;i<=8;i++) {
+        const p=toC(i,-8),q=toC(i,8); ctx.beginPath(); ctx.moveTo(p.x,p.y); ctx.lineTo(q.x,q.y); ctx.stroke();
+        const u=toC(-8,i),v=toC(8,i); ctx.beginPath(); ctx.moveTo(u.x,u.y); ctx.lineTo(v.x,v.y); ctx.stroke();
+    }
+
+    // ── Axes ──
+    const AX = 7.5;
+    ctx.strokeStyle = '#3a5070'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(toC(-AX,0).x,oy); ctx.lineTo(toC(AX,0).x,oy); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(ox,toC(0,AX).y);  ctx.lineTo(ox,toC(0,-AX).y); ctx.stroke();
+
+    // Arrowheads
+    const aw=6, ah=11; ctx.fillStyle='#3a5070';
+    ctx.beginPath(); ctx.moveTo(toC(AX,0).x,oy);  ctx.lineTo(toC(AX,0).x-ah,oy-aw);  ctx.lineTo(toC(AX,0).x-ah,oy+aw);  ctx.closePath(); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(toC(-AX,0).x,oy); ctx.lineTo(toC(-AX,0).x+ah,oy-aw); ctx.lineTo(toC(-AX,0).x+ah,oy+aw); ctx.closePath(); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(ox,toC(0,AX).y);  ctx.lineTo(ox-aw,toC(0,AX).y+ah);  ctx.lineTo(ox+aw,toC(0,AX).y+ah);  ctx.closePath(); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(ox,toC(0,-AX).y); ctx.lineTo(ox-aw,toC(0,-AX).y-ah); ctx.lineTo(ox+aw,toC(0,-AX).y-ah); ctx.closePath(); ctx.fill();
+
+    // Axis letters
+    ctx.font=`500 ${Math.max(11,s*0.42)}px 'JetBrains Mono',monospace`;
+    ctx.fillStyle='#5a7aaa'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('x', toC(AX,0).x+20, oy);
+    ctx.fillText('y', ox, toC(0,AX).y-20);
+
+    // Tick numbers
+    ctx.font=`${Math.max(8,s*0.3)}px 'JetBrains Mono',monospace`;
+    ctx.fillStyle='#2a3a55';
+    for (let i=-7;i<=7;i++) {
+        if (!i) continue;
+        ctx.textAlign='center'; ctx.textBaseline='middle';
+        ctx.fillText(i, toC(i,0).x, oy+s*0.52);
+        ctx.textAlign='right';
+        ctx.fillText(i, ox-s*0.45, toC(0,i).y);
+    }
+
+    const cp = toC(a, b);
+
+    // ── Dashed guide lines: origin → (a,0) → (a,b) ──
+    ctx.setLineDash([4,5]);
+    ctx.strokeStyle='rgba(240,192,96,0.3)'; ctx.lineWidth=1.3;
+    ctx.beginPath(); ctx.moveTo(ox,oy); ctx.lineTo(cp.x,oy); ctx.stroke();
+    ctx.strokeStyle='rgba(192,132,252,0.3)';
+    ctx.beginPath(); ctx.moveTo(cp.x,oy); ctx.lineTo(cp.x,cp.y); ctx.stroke();
+    ctx.setLineDash([]);
+
+    // a tick + label on x-axis
+    if (Math.abs(a) > 0.05) {
+        const fx = toC(a, 0);
+        ctx.strokeStyle='rgba(240,192,96,0.55)'; ctx.lineWidth=1.5;
+        ctx.beginPath(); ctx.moveTo(fx.x,oy-7); ctx.lineTo(fx.x,oy+7); ctx.stroke();
+        ctx.font=`500 ${Math.max(9,s*0.32)}px 'JetBrains Mono',monospace`;
+        ctx.fillStyle='rgba(240,192,96,0.7)';
+        ctx.textAlign='center'; ctx.textBaseline='top';
+        ctx.fillText(`a=${a.toFixed(1)}`, fx.x, oy+10);
+    }
+
+    // b tick + label on y-axis
+    if (Math.abs(b) > 0.05) {
+        const fy = toC(0, b);
+        ctx.strokeStyle='rgba(192,132,252,0.55)'; ctx.lineWidth=1.5;
+        ctx.beginPath(); ctx.moveTo(ox-7,fy.y); ctx.lineTo(ox+7,fy.y); ctx.stroke();
+        ctx.font=`500 ${Math.max(9,s*0.32)}px 'JetBrains Mono',monospace`;
+        ctx.fillStyle='rgba(192,132,252,0.7)';
+        ctx.textAlign='left'; ctx.textBaseline='middle';
+        ctx.fillText(`b=${b.toFixed(1)}`, ox+10, fy.y);
+    }
+
+    // ── Circle ──
+    const rPx = R * s;
+    // glow
+    const glow = ctx.createRadialGradient(cp.x,cp.y,Math.max(0,rPx-10),cp.x,cp.y,rPx+20);
+    glow.addColorStop(0,'rgba(74,222,128,0.09)'); glow.addColorStop(1,'rgba(74,222,128,0)');
+    ctx.fillStyle=glow; ctx.beginPath(); ctx.arc(cp.x,cp.y,rPx+20,0,Math.PI*2); ctx.fill();
+    // fill
+    ctx.beginPath(); ctx.arc(cp.x,cp.y,rPx,0,Math.PI*2);
+    ctx.fillStyle='rgba(74,222,128,0.04)'; ctx.fill();
+    // stroke
+    ctx.beginPath(); ctx.arc(cp.x,cp.y,rPx,0,Math.PI*2);
+    ctx.strokeStyle='rgba(74,222,128,0.82)'; ctx.lineWidth=2.5; ctx.stroke();
+
+    // ── Radius line ──
+    const ang  = 0.65;
+    const rEnd = toC(a + R*Math.cos(ang), b + R*Math.sin(ang));
+    ctx.setLineDash([5,4]);
+    ctx.strokeStyle='rgba(74,222,128,0.4)'; ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.moveTo(cp.x,cp.y); ctx.lineTo(rEnd.x,rEnd.y); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.font=`500 ${Math.max(10,s*0.34)}px 'JetBrains Mono',monospace`;
+    ctx.fillStyle='rgba(74,222,128,0.65)'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('r = 5', cp.x+(rEnd.x-cp.x)*0.5+6, cp.y+(rEnd.y-cp.y)*0.5-13);
+
+    // ── Origin O ──
+    ctx.beginPath(); ctx.arc(ox,oy,5,0,Math.PI*2);
+    ctx.fillStyle='#3a5070'; ctx.fill();
+    ctx.strokeStyle='#0b0d13'; ctx.lineWidth=2; ctx.stroke();
+    ctx.font=`400 ${Math.max(9,s*0.32)}px 'JetBrains Mono',monospace`;
+    ctx.fillStyle='#5a7aaa'; ctx.textAlign='right'; ctx.textBaseline='top';
+    ctx.fillText('O', ox-8, oy+6);
+
+    // ── Center dot (a,b) ──
+    const cg = ctx.createRadialGradient(cp.x,cp.y,0,cp.x,cp.y,22);
+    cg.addColorStop(0,'rgba(240,192,96,0.38)'); cg.addColorStop(1,'rgba(240,192,96,0)');
+    ctx.fillStyle=cg; ctx.beginPath(); ctx.arc(cp.x,cp.y,22,0,Math.PI*2); ctx.fill();
+
+    ctx.beginPath(); ctx.arc(cp.x,cp.y,7,0,Math.PI*2);
+    ctx.fillStyle='#f0c060'; ctx.fill();
+    ctx.strokeStyle='#0b0d13'; ctx.lineWidth=2.5; ctx.stroke();
+
+    // (a,b) label
+    ctx.font=`500 ${Math.max(10,s*0.36)}px 'JetBrains Mono',monospace`;
+    ctx.fillStyle='rgba(240,192,96,0.92)';
+    ctx.textAlign = a >= -0.05 ? 'left' : 'right';
+    ctx.textBaseline='bottom';
+    ctx.fillText(`(${a.toFixed(1)}, ${b.toFixed(1)})`, a >= -0.05 ? cp.x+12 : cp.x-12, cp.y-10);
+}
+
+// ── Events ──
+aSlider.addEventListener('input', () => { a = parseFloat(aSlider.value); updateFormula(); draw(); });
+bSlider.addEventListener('input', () => { b = parseFloat(bSlider.value); updateFormula(); draw(); });
+
+// Init
+updateFormula();
+resize();
+</script>
+</body>
+</html>
