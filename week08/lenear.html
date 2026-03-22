@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Linear Equation Explorer</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f7fa;
+    --panel-bg: #ffffff;
+    --border: #dde1e7;
+    --border-strong: #c4cad4;
+    --text-primary: #1a1d23;
+    --text-secondary: #4a5260;
+    --text-muted: #8a92a0;
+    --col-x: #7c3aed;
+    --col-y: #d97706;
+    --col-slope: #0369a1;
+    --col-intercept: #059669;
+    --col-eq: #be123c;
+    --col-A: #2563eb;
+    --col-B: #dc2626;
+    --col-C: #16a34a;
+    --col-line: #374151;
+    --col-dx: #7c3aed;
+    --col-dy: #d97706;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'JetBrains Mono', monospace;
+    background: var(--bg);
+    color: var(--text-primary);
+    height: 100vh;
+    display: flex;
+    overflow: hidden;
+  }
+
+  #formula-panel {
+    width: 22%;
+    min-width: 260px;
+    background: var(--panel-bg);
+    border-right: 2px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    padding: 20px 16px;
+    gap: 12px;
+    overflow-y: auto;
+    box-shadow: 2px 0 12px rgba(0,0,0,0.06);
+  }
+
+  .panel-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    border-bottom: 2px solid var(--border);
+    padding-bottom: 12px;
+  }
+
+  .formula-block {
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .formula-label {
+    font-size: 20px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    font-weight: 600;
+  }
+
+  .formula-expr {
+    font-size: 22px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+  }
+
+  .formula-value {
+    font-size: 40px;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.15;
+  }
+
+  .slope-val     { color: var(--col-slope); }
+  .intercept-val { color: var(--col-intercept); }
+
+  .equation-final {
+    background: #fff7ed;
+    border: 2px solid var(--col-eq);
+    border-radius: 10px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .equation-final .formula-label { color: var(--col-eq); }
+  .equation-final .eq-text {
+    font-size: 30px;
+    font-weight: 700;
+    color: var(--col-eq);
+    letter-spacing: 0.03em;
+  }
+
+  /* delta boxes stacked vertically (Δy first, then Δx below) */
+  .delta-col {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .delta-box {
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .delta-box .formula-label { font-size: 20px; }
+  .delta-box .formula-expr  { font-size: 20px; }
+  .delta-box .formula-value { font-size: 34px; }
+
+  .dy-val { color: var(--col-dy); }
+  .dx-val { color: var(--col-dx); }
+
+  .xc { color: var(--col-x); font-weight: 700; }
+  .yc { color: var(--col-y); font-weight: 700; }
+
+  #canvas-panel {
+    flex: 1;
+    position: relative;
+    background: #f0f4f8;
+    overflow: hidden;
+  }
+
+  #graph-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    cursor: crosshair;
+  }
+
+  .point-tooltip {
+    position: absolute;
+    background: #fff;
+    border: 1.5px solid var(--border-strong);
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 12px;
+    color: var(--text-primary);
+    pointer-events: none;
+    white-space: nowrap;
+    display: none;
+    z-index: 10;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+
+  #graph-canvas.dragging { cursor: grabbing; }
+  #graph-canvas.hovering { cursor: grab; }
+
+  .hint {
+    position: absolute;
+    bottom: 16px;
+    right: 16px;
+    font-size: 10px;
+    color: #a0aab4;
+    letter-spacing: 0.05em;
+    text-align: right;
+    line-height: 1.9;
+    pointer-events: none;
+  }
+</style>
+</head>
+<body>
+
+<div id="formula-panel">
+  <div class="panel-title">Formula</div>
+
+  <div class="formula-block">
+    <div class="formula-label">Slope</div>
+    <div class="formula-expr">m = Δ<span class="yc">y</span> / Δ<span class="xc">x</span></div>
+  </div>
+
+  <div class="delta-col">
+    <div class="delta-box">
+      <div class="formula-label">Δ<span class="yc">y</span></div>
+      <div class="formula-expr" id="dy-expr"><span class="yc">y</span>B − <span class="yc">y</span>A</div>
+      <div class="formula-value dy-val" id="dy-val">—</div>
+    </div>
+    <div class="delta-box">
+      <div class="formula-label">Δ<span class="xc">x</span></div>
+      <div class="formula-expr" id="dx-expr"><span class="xc">x</span>B − <span class="xc">x</span>A</div>
+      <div class="formula-value dx-val" id="dx-val">—</div>
+    </div>
+  </div>
+
+  <div class="formula-block">
+    <div class="formula-label">Slope (m)</div>
+    <div class="formula-expr" id="slope-expr">Δ<span class="yc">y</span> / Δ<span class="xc">x</span></div>
+    <div class="formula-value slope-val" id="slope-val">—</div>
+  </div>
+
+  <div class="formula-block">
+    <div class="formula-label">Y-Intercept (b) · C</div>
+    <div class="formula-expr">where <span class="xc">x</span> = 0</div>
+    <div class="formula-value intercept-val" id="intercept-val">—</div>
+  </div>
+
+  <div class="equation-final">
+    <div class="formula-label">★ Linear Equation</div>
+    <div class="eq-text" id="final-eq">y = mx + b</div>
+  </div>
+</div>
+
+<div id="canvas-panel">
+  <canvas id="graph-canvas"></canvas>
+  <div class="point-tooltip" id="tooltip"></div>
+  <div class="hint">Drag A or B · snaps to integers</div>
+</div>
+
+<script>
+const canvas  = document.getElementById('graph-canvas');
+const ctx     = canvas.getContext('2d');
+const tooltip = document.getElementById('tooltip');
+
+const COL_X    = '#7c3aed';
+const COL_Y    = '#d97706';
+const COL_A    = '#2563eb';
+const COL_B    = '#dc2626';
+const COL_C    = '#16a34a';
+const COL_LINE = '#374151';
+const COL_DX   = '#7c3aed';
+const COL_DY   = '#d97706';
+
+let A = { x: 2, y: 3 };
+let B = { x: 3, y: 4 };
+let ORIGIN_X, ORIGIN_Y, CELL;
+
+function resize() {
+  const panel = document.getElementById('canvas-panel');
+  canvas.width  = panel.clientWidth  * devicePixelRatio;
+  canvas.height = panel.clientHeight * devicePixelRatio;
+  canvas.style.width  = panel.clientWidth  + 'px';
+  canvas.style.height = panel.clientHeight + 'px';
+  const size = Math.min(panel.clientWidth, panel.clientHeight);
+  CELL     = Math.floor(size / 12);
+  ORIGIN_X = Math.round(panel.clientWidth  / 2);
+  ORIGIN_Y = Math.round(panel.clientHeight / 2);
+  draw();
+}
+
+function toCanvas(gx, gy) {
+  return { cx: ORIGIN_X + gx * CELL, cy: ORIGIN_Y - gy * CELL };
+}
+function toGrid(cx, cy) {
+  return { gx: (cx - ORIGIN_X) / CELL, gy: -(cy - ORIGIN_Y) / CELL };
+}
+
+function draw() {
+  const W = canvas.width  / devicePixelRatio;
+  const H = canvas.height / devicePixelRatio;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.save();
+  ctx.scale(devicePixelRatio, devicePixelRatio);
+
+  ctx.fillStyle = '#f0f4f8';
+  ctx.fillRect(0, 0, W, H);
+
+  const cols     = Math.ceil(W / CELL) + 4;
+  const rows     = Math.ceil(H / CELL) + 4;
+  const startCol = -Math.floor(cols / 2) - 1;
+  const startRow = -Math.floor(rows / 2) - 1;
+
+  // Grid
+  ctx.strokeStyle = '#dde3eb';
+  ctx.lineWidth = 1;
+  for (let i = startCol; i <= -startCol; i++) {
+    const x = ORIGIN_X + i * CELL;
+    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
+  }
+  for (let j = startRow; j <= -startRow; j++) {
+    const y = ORIGIN_Y + j * CELL;
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+  }
+
+  // Axes
+  ctx.strokeStyle = '#9aa3af';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(0, ORIGIN_Y); ctx.lineTo(W, ORIGIN_Y); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(ORIGIN_X, 0); ctx.lineTo(ORIGIN_X, H); ctx.stroke();
+
+  // Tick labels — x values shown BELOW the x-axis (extra gap)
+  const tickFs = Math.max(10, CELL * 0.32);
+  ctx.font = `${tickFs}px JetBrains Mono, monospace`;
+  ctx.fillStyle = '#9aa3af';
+  ctx.textAlign = 'center';
+  for (let i = startCol; i <= -startCol; i++) {
+    if (i === 0) continue;
+    ctx.fillText(i, ORIGIN_X + i * CELL, ORIGIN_Y + 28);   // 28px below axis
+  }
+  ctx.textAlign = 'right';
+  for (let j = startRow; j <= -startRow; j++) {
+    if (j === 0) continue;
+    ctx.fillText(-j, ORIGIN_X - 7, ORIGIN_Y + j * CELL + 4);
+  }
+
+  const dx = B.x - A.x;
+  const dy = B.y - A.y;
+  const slope     = dx !== 0 ? dy / dx : null;
+  const intercept = slope !== null ? A.y - slope * A.x : null;
+
+  // Infinite line
+  if (dx !== 0 || dy !== 0) {
+    const p1 = toCanvas(A.x + dx * -60, A.y + dy * -60);
+    const p2 = toCanvas(A.x + dx *  60, A.y + dy *  60);
+    ctx.save();
+    ctx.strokeStyle = '#2563eb';
+    ctx.lineWidth   = 4;
+    ctx.globalAlpha = 0.8;
+    ctx.beginPath(); ctx.moveTo(p1.cx, p1.cy); ctx.lineTo(p2.cx, p2.cy); ctx.stroke();
+    ctx.restore();
+  }
+
+  // Slope triangle
+  if (dx !== 0) {
+    const pa     = toCanvas(A.x, A.y);
+    const pb     = toCanvas(B.x, B.y);
+    const corner = toCanvas(B.x, A.y);
+
+    // Filled triangle
+    ctx.save();
+    ctx.globalAlpha = 0.10;
+    ctx.fillStyle = '#6366f1';
+    ctx.beginPath();
+    ctx.moveTo(pa.cx, pa.cy);
+    ctx.lineTo(corner.cx, corner.cy);
+    ctx.lineTo(pb.cx, pb.cy);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+
+    // Δx dashed (purple)
+    ctx.save();
+    ctx.strokeStyle = COL_DX;
+    ctx.lineWidth   = 2.5;
+    ctx.setLineDash([5, 4]);
+    ctx.globalAlpha = 0.85;
+    ctx.beginPath(); ctx.moveTo(pa.cx, corner.cy); ctx.lineTo(corner.cx, corner.cy); ctx.stroke();
+    // Δy dashed (amber)
+    ctx.strokeStyle = COL_DY;
+    ctx.beginPath(); ctx.moveTo(corner.cx, corner.cy); ctx.lineTo(pb.cx, pb.cy); ctx.stroke();
+    ctx.restore();
+
+    // Triangle labels — placed safely away from point labels
+    const labelFs = Math.max(11, CELL * 0.38);
+    ctx.save();
+    ctx.font        = `bold ${labelFs}px JetBrains Mono, monospace`;
+    ctx.globalAlpha = 0.92;
+    ctx.setLineDash([]);
+
+    // Δx: centered below/above the horizontal leg
+    const midX    = (pa.cx + corner.cx) / 2;
+    const dxBelow = pb.cy < corner.cy; // B is above A → label below the horizontal
+    ctx.fillStyle = COL_DX;
+    ctx.textAlign = 'center';
+    ctx.fillText(`Δx=${dx}`, midX, corner.cy + (dxBelow ? 20 : -10));
+
+    // Δy: outer side of vertical leg, NOT overlapping B label
+    const midY2    = (corner.cy + pb.cy) / 2;
+    const dyOnRight = corner.cx > pa.cx;
+    ctx.fillStyle  = COL_DY;
+    ctx.textAlign  = dyOnRight ? 'left' : 'right';
+    ctx.fillText(`Δy=${dy}`, corner.cx + (dyOnRight ? 8 : -8), midY2 + 5);
+    ctx.restore();
+  }
+
+  // C point (y-intercept)
+  if (intercept !== null) {
+    const C = toCanvas(0, intercept);
+    ctx.save();
+    ctx.strokeStyle = COL_C;
+    ctx.lineWidth   = 3;
+    ctx.beginPath(); ctx.arc(C.cx, C.cy, 10, 0, Math.PI * 2); ctx.stroke();
+    ctx.fillStyle   = COL_C;
+    ctx.beginPath(); ctx.arc(C.cx, C.cy, 5.5, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+    const bStr = Number.isInteger(intercept) ? intercept : intercept.toFixed(2);
+    // Label: BELOW the C point, left-aligned to the y-axis (ORIGIN_X)
+    drawSimpleLabel(ORIGIN_X + 8, C.cy + 22, `C = (0, ${bStr})`, COL_C, 'left');
+  }
+
+  // A point + label (left & upper)
+  const pA = toCanvas(A.x, A.y);
+  drawDot(pA.cx, pA.cy, COL_A, 9);
+  drawPointLabel(pA.cx, pA.cy, 'A', A.x, A.y);
+
+  // B point + label (left & upper)
+  const pB = toCanvas(B.x, B.y);
+  drawDot(pB.cx, pB.cy, COL_B, 9);
+  drawPointLabel(pB.cx, pB.cy, 'B', B.x, B.y);
+
+  ctx.restore();
+  updatePanel(slope, intercept, dx, dy);
+}
+
+// Draw label to LEFT and UPPER of point, x=purple, y=amber
+function drawPointLabel(cx, cy, name, gx, gy) {
+  const fs = Math.max(13, CELL * 0.42);
+  ctx.save();
+  ctx.font        = `bold ${fs}px JetBrains Mono, monospace`;
+  ctx.globalAlpha = 0.95;
+  ctx.setLineDash([]);
+
+  const parts = [
+    { text: `${name} = (`,  color: '#1a1d23' },
+    { text: `${gx}`,        color: COL_X },
+    { text: ', ',           color: '#1a1d23' },
+    { text: `${gy}`,        color: COL_Y },
+    { text: ')',            color: '#1a1d23' },
+  ];
+
+  // Measure total width
+  let totalW = 0;
+  parts.forEach(p => { totalW += ctx.measureText(p.text).width; });
+
+  // Place label to the LEFT and ABOVE the point dot
+  // offset: 16px above, and 12px gap between label right edge and point
+  const labelRight = cx - 14;
+  const labelY     = cy - 16;
+
+  ctx.textAlign = 'left';
+  let curX = labelRight - totalW;
+  parts.forEach(p => {
+    ctx.fillStyle = p.color;
+    ctx.fillText(p.text, curX, labelY);
+    curX += ctx.measureText(p.text).width;
+  });
+  ctx.restore();
+}
+
+function drawSimpleLabel(cx, cy, text, color, align) {
+  const fs = Math.max(12, CELL * 0.38);
+  ctx.save();
+  ctx.font        = `bold ${fs}px JetBrains Mono, monospace`;
+  ctx.fillStyle   = color;
+  ctx.textAlign   = align || 'left';
+  ctx.globalAlpha = 0.92;
+  ctx.fillText(text, cx, cy);
+  ctx.restore();
+}
+
+function drawDot(cx, cy, color, r) {
+  ctx.save();
+  ctx.fillStyle   = '#ffffff';
+  ctx.shadowColor = 'rgba(0,0,0,0.18)';
+  ctx.shadowBlur  = 8;
+  ctx.beginPath(); ctx.arc(cx, cy, r + 3.5, 0, Math.PI * 2); ctx.fill();
+  ctx.shadowBlur  = 0;
+  ctx.fillStyle   = color;
+  ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
+}
+
+function frac(n, d) {
+  if (d === 0) return '∞';
+  if (d === 1) return `${n}`;
+  if (d === -1) return `${-n}`;
+  const g  = gcd(Math.abs(n), Math.abs(d));
+  const sn = n / g, sd = d / g;
+  if (sd < 0) return `${-sn}/${-sd}`;
+  return `${sn}/${sd}`;
+}
+function gcd(a, b) { return b === 0 ? a : gcd(b, a % b); }
+
+function updatePanel(slope, intercept, dx, dy) {
+  const xS = `<span class="xc">x</span>`;
+  const yS = `<span class="yc">y</span>`;
+
+  document.getElementById('dy-expr').innerHTML =
+    `${yS}<sub>B</sub>(${B.y}) − ${yS}<sub>A</sub>(${A.y})`;
+  document.getElementById('dx-expr').innerHTML =
+    `${xS}<sub>B</sub>(${B.x}) − ${xS}<sub>A</sub>(${A.x})`;
+  document.getElementById('dy-val').textContent = dy;
+  document.getElementById('dx-val').textContent = dx;
+
+  if (dx === 0) {
+    document.getElementById('slope-expr').textContent   = `${dy} / 0`;
+    document.getElementById('slope-val').textContent    = 'undef.';
+    document.getElementById('intercept-val').textContent = '—';
+    document.getElementById('final-eq').textContent     = `x = ${A.x}`;
+    return;
+  }
+
+  const slopeFrac    = frac(dy, dx);
+  const slopeDecimal = dy / dx;
+  const slopeDisp    = Number.isInteger(slopeDecimal)
+    ? `${slopeDecimal}`
+    : `${slopeFrac} ≈ ${slopeDecimal.toFixed(2)}`;
+
+  document.getElementById('slope-expr').innerHTML =
+    `${dy} / ${dx}`;
+  document.getElementById('slope-val').textContent = slopeDisp;
+
+  const bStr = Number.isInteger(intercept) ? `${intercept}` : intercept.toFixed(2);
+  document.getElementById('intercept-val').textContent = `b = ${bStr}`;
+
+  let mStr;
+  if      (slopeDecimal ===  1) mStr = '';
+  else if (slopeDecimal === -1) mStr = '-';
+  else if (Number.isInteger(slopeDecimal)) mStr = `${slopeDecimal}`;
+  else mStr = slopeFrac;
+
+  let eq = `y = ${mStr}x`;
+  if      (intercept > 0) eq += ` + ${bStr}`;
+  else if (intercept < 0) eq += ` − ${Math.abs(intercept)}`;
+  document.getElementById('final-eq').textContent = eq;
+}
+
+// Drag
+let dragging = null;
+function hitRadius() { return Math.max(14, CELL * 0.6); }
+
+function hitTest(clientX, clientY) {
+  const rect = canvas.getBoundingClientRect();
+  const x = clientX - rect.left, y = clientY - rect.top;
+  const pA = toCanvas(A.x, A.y), pB = toCanvas(B.x, B.y);
+  const r  = hitRadius();
+  if (Math.hypot(x - pA.cx, y - pA.cy) < r) return 'A';
+  if (Math.hypot(x - pB.cx, y - pB.cy) < r) return 'B';
+  return null;
+}
+
+function snap(clientX, clientY) {
+  const rect = canvas.getBoundingClientRect();
+  const g = toGrid(clientX - rect.left, clientY - rect.top);
+  return { gx: Math.round(g.gx), gy: Math.round(g.gy) };
+}
+
+function movePt(name, s) {
+  if (name === 'A') {
+    if (s.gx !== B.x || s.gy !== B.y) { A.x = s.gx; A.y = s.gy; }
+  } else {
+    if (s.gx !== A.x || s.gy !== A.y) { B.x = s.gx; B.y = s.gy; }
+  }
+}
+
+canvas.addEventListener('mousedown', e => {
+  const h = hitTest(e.clientX, e.clientY);
+  if (h) { dragging = h; canvas.classList.add('dragging'); canvas.classList.remove('hovering'); }
+});
+
+window.addEventListener('mousemove', e => {
+  if (dragging) {
+    movePt(dragging, snap(e.clientX, e.clientY));
+    draw();
+    const rect = canvas.getBoundingClientRect();
+    const pt   = dragging === 'A' ? A : B;
+    tooltip.style.cssText = `display:block; left:${e.clientX-rect.left+16}px; top:${e.clientY-rect.top-32}px`;
+    tooltip.textContent = `${dragging} = (${pt.x}, ${pt.y})`;
+  } else {
+    canvas.classList.toggle('hovering', !!hitTest(e.clientX, e.clientY));
+    tooltip.style.display = 'none';
+  }
+});
+
+window.addEventListener('mouseup', () => {
+  dragging = null;
+  canvas.classList.remove('dragging');
+  tooltip.style.display = 'none';
+});
+
+canvas.addEventListener('touchstart', e => {
+  e.preventDefault();
+  const t = e.touches[0];
+  const h = hitTest(t.clientX, t.clientY);
+  if (h) dragging = h;
+}, { passive: false });
+
+canvas.addEventListener('touchmove', e => {
+  e.preventDefault();
+  if (!dragging) return;
+  movePt(dragging, snap(e.touches[0].clientX, e.touches[0].clientY));
+  draw();
+}, { passive: false });
+
+canvas.addEventListener('touchend', () => { dragging = null; });
+window.addEventListener('resize', resize);
+resize();
+</script>
+</body>
+</html>
