@@ -499,24 +499,31 @@ function init() {
 }
 
 function generateGraph() {
-  // integer slope -5..5, not 0
-  let m;
-  do { m = Math.floor(Math.random() * 11) - 5; } while (m === 0);
-  slope = m;
+  // Retry until A and B both land within -5..5 on x and y
+  let m, b, x1, x2, y1, y2;
 
-  // y-intercept integer -4..4
-  intercept = Math.floor(Math.random() * 9) - 4;
-
-  // Pick two integer x values with gap >= 2
-  let x1, x2;
   do {
-    x1 = Math.floor(Math.random() * 7) - 3; // -3..3
-    x2 = x1 + (Math.floor(Math.random() * 3) + 2) * (Math.random() < 0.5 ? 1 : -1);
-  } while (Math.abs(x2) > 5);
+    // integer slope -5..5, not 0
+    do { m = Math.floor(Math.random() * 11) - 5; } while (m === 0);
 
-  const y1 = slope * x1 + intercept;
-  const y2 = slope * x2 + intercept;
+    // y-intercept integer -5..5
+    b = Math.floor(Math.random() * 11) - 5;
 
+    // x1 in -5..5, x2 with gap of 2 or 3
+    x1 = Math.floor(Math.random() * 11) - 5;
+    const gap = (Math.floor(Math.random() * 2) + 2) * (Math.random() < 0.5 ? 1 : -1);
+    x2 = x1 + gap;
+
+    y1 = m * x1 + b;
+    y2 = m * x2 + b;
+  } while (
+    Math.abs(x2) > 5 ||
+    Math.abs(y1) > 5 ||
+    Math.abs(y2) > 5
+  );
+
+  slope     = m;
+  intercept = b;
   ptA = { x: x1, y: y1 };
   ptB = { x: x2, y: y2 };
 }
