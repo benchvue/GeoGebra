@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Find the Linear Equation</title>
+<link href="https://fonts.googleapis.com/css2?family=Literata:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:          #f8f6f1;
+    --panel-bg:    #ffffff;
+    --border:      #e2ddd6;
+    --border-mid:  #ccc8c0;
+    --text-dark:   #1c1a17;
+    --text-mid:    #5a5650;
+    --text-light:  #9a9590;
+
+    --col-x:    #6d28d9;
+    --col-y:    #b45309;
+    --col-A:    #1d4ed8;
+    --col-B:    #b91c1c;
+    --col-C:    #15803d;
+    --col-line: #2563eb;
+    --col-dx:   #6d28d9;
+    --col-dy:   #b45309;
+    --col-slope:#0e7490;
+    --col-eq:   #be123c;
+
+    --step-inactive: #e5e3df;
+    --step-active:   #1c1a17;
+    --step-done:     #d1fae5;
+    --step-done-text:#065f46;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Literata', Georgia, serif;
+    background: var(--bg);
+    color: var(--text-dark);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* ── TOP BAR ── */
+  #topbar {
+    background: var(--panel-bg);
+    border-bottom: 2px solid var(--border);
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+
+  #topbar h1 {
+    font-family: 'Literata', serif;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--text-dark);
+  }
+
+  #topbar h1 span {
+    font-style: italic;
+    color: var(--col-eq);
+  }
+
+  .btn-group { display: flex; gap: 10px; }
+
+  button {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 600;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    padding: 8px 18px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    letter-spacing: 0.02em;
+  }
+
+  .btn-primary {
+    background: var(--text-dark);
+    color: #fff;
+    border-color: var(--text-dark);
+  }
+  .btn-primary:hover { background: #3a3630; border-color: #3a3630; }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--text-mid);
+    border-color: var(--border-mid);
+  }
+  .btn-secondary:hover { border-color: var(--text-dark); color: var(--text-dark); background: var(--bg); }
+
+  .btn-danger {
+    background: transparent;
+    color: var(--col-B);
+    border-color: #fca5a5;
+  }
+  .btn-danger:hover { background: #fef2f2; border-color: var(--col-B); }
+
+  .btn-nav {
+    background: var(--panel-bg);
+    color: var(--text-dark);
+    border-color: var(--border-mid);
+    min-width: 110px;
+  }
+  .btn-nav:hover:not(:disabled) { background: var(--text-dark); color: #fff; border-color: var(--text-dark); }
+  .btn-nav:disabled { opacity: 0.35; cursor: not-allowed; }
+
+  /* ── MAIN LAYOUT ── */
+  #main {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+  }
+
+  /* ── LEFT: STEPS PANEL ── */
+  #steps-panel {
+    width: 50%;
+    background: var(--panel-bg);
+    border-right: 2px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  #steps-header {
+    padding: 18px 24px 14px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  #steps-header .title {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-light);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  #step-counter {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--text-light);
+  }
+
+  #steps-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  /* Individual step card */
+  .step-card {
+    border: 2px solid var(--step-inactive);
+    border-radius: 12px;
+    padding: 16px 18px;
+    transition: all 0.25s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .step-card.locked {
+    opacity: 0.4;
+    background: var(--bg);
+  }
+
+  .step-card.active {
+    border-color: var(--text-dark);
+    background: #fff;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  }
+
+  .step-card.done {
+    border-color: #6ee7b7;
+    background: #f0fdf4;
+  }
+
+  .step-card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+
+  .step-num {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    flex-shrink: 0;
+    background: var(--step-inactive);
+    color: var(--text-mid);
+  }
+
+  .step-card.active .step-num {
+    background: var(--text-dark);
+    color: #fff;
+  }
+
+  .step-card.done .step-num {
+    background: #10b981;
+    color: #fff;
+  }
+
+  .step-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-dark);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .step-card.locked .step-title { color: var(--text-light); }
+
+  .step-content {
+    padding-left: 40px;
+    display: none;
+  }
+
+  .step-card.active .step-content,
+  .step-card.done .step-content { display: block; }
+
+  .step-desc {
+    font-size: 14px;
+    color: var(--text-mid);
+    margin-bottom: 10px;
+    line-height: 1.6;
+  }
+
+  .step-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+
+  .step-value.hidden { filter: blur(6px); user-select: none; }
+
+  .xc { color: var(--col-x); }
+  .yc { color: var(--col-y); }
+  .sc { color: var(--col-slope); }
+  .ic { color: var(--col-C); }
+  .ec { color: var(--col-eq); }
+
+  /* formula breakdown rows */
+  .calc-row {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 15px;
+    color: var(--text-mid);
+    margin-top: 4px;
+    flex-wrap: wrap;
+  }
+
+  .calc-row .val { font-size: 20px; font-weight: 700; }
+
+  /* ── NAV BAR ── */
+  #nav-bar {
+    padding: 14px 24px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  /* ── RIGHT: GRAPH PANEL ── */
+  #canvas-panel {
+    flex: 1;
+    position: relative;
+    background: #f0f4f8;
+    overflow: hidden;
+  }
+
+  #graph-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* step progress dots */
+  .step-dots {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+  .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--border-mid);
+    transition: background 0.2s;
+  }
+  .dot.done { background: #10b981; }
+  .dot.active { background: var(--text-dark); width: 20px; border-radius: 4px; }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div id="topbar">
+  <h1>Find the <span>Linear Equation</span></h1>
+  <div class="btn-group">
+    <button class="btn-danger" onclick="resetAll()">↺ Reset</button>
+    <button class="btn-primary" onclick="newGraph()">⚄ New Graph</button>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div id="main">
+
+  <!-- LEFT: Steps -->
+  <div id="steps-panel">
+    <div id="steps-header">
+      <div class="title">Discovery Steps</div>
+      <div id="step-counter">Step 0 / 8</div>
+    </div>
+
+    <div id="steps-body">
+
+      <!-- Step 0: Graph shown -->
+      <div class="step-card locked" id="card-0">
+        <div class="step-card-header">
+          <div class="step-num">0</div>
+          <div class="step-title">Random Graph Appears</div>
+        </div>
+        <div class="step-content">
+          <div class="step-desc">A mystery line is drawn. Can you figure out its equation?</div>
+        </div>
+      </div>
+
+      <!-- Step 1: Point A -->
+      <div class="step-card locked" id="card-1">
+        <div class="step-card-header">
+          <div class="step-num">1</div>
+          <div class="step-title">Point A on the line</div>
+        </div>
+        <div class="step-content">
+          <div class="step-desc">Pick a point where the line crosses a grid intersection.</div>
+          <div class="step-value">
+            A = (<span class="xc" id="ax-val">?</span>, <span class="yc" id="ay-val">?</span>)
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2: Point B -->
+      <div class="step-card locked" id="card-2">
+        <div class="step-card-header">
+          <div class="step-num">2</div>
+          <div class="step-title">Point B on the line</div>
+        </div>
+        <div class="step-content">
+          <div class="step-desc">Pick a second grid point — different from A.</div>
+          <div class="step-value">
+            B = (<span class="xc" id="bx-val">?</span>, <span class="yc" id="by-val">?</span>)
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3: Δy -->
+      <div class="step-card locked" id="card-3">
+        <div class="step-card-header">
+          <div class="step-num">3</div>
+          <div class="step-title">Calculate Δy</div>
+        </div>
+        <div class="step-content">
+          <div class="step-desc">Vertical change from A to B.</div>
+          <div class="calc-row">
+            Δ<span class="yc">y</span> = <span class="yc">y</span>B − <span class="yc">y</span>A
+            = <span class="yc val" id="by-show">?</span> − <span class="yc val" id="ay-show">?</span>
+          </div>
+          <div class="step-value yc" id="dy-val" style="margin-top:8px">—</div>
+        </div>
+      </div>
+
+      <!-- Step 4: Δx -->
+      <div class="step-card locked" id="card-4">
+        <div class="step-card-header">
+          <div class="step-num">4</div>
+          <div class="step-title">Calculate Δx</div>
+        </div>
+        <div class="step-content">
+          <div class="step-desc">Horizontal change from A to B.</div>
+          <div class="calc-row">
+            Δ<span class="xc">x</span> = <span class="xc">x</span>B − <span class="xc">x</span>A
+            = <span class="xc val" id="bx-show">?</span> − <span class="xc val" id="ax-show">?</span>
+          </div>
+          <div class="step-value xc" id="dx-val" style="margin-top:8px">—</div>
+        </div>
+      </div>
+
+      <!-- Step 5: slope -->
+      <div class="step-card locked" id="card-5">
+        <div class="step-card-header">
+          <div class="step-num">5</div>
+          <div class="step-title">Calculate Slope (m)</div>
+        </div>
+        <div class="step-content">
+          <div class="step-desc">Rise over run.</div>
+          <div class="calc-row">
+            m = Δ<span class="yc">y</span> / Δ<span class="xc">x</span>
+            = <span class="yc val" id="dy-show">?</span> / <span class="xc val" id="dx-show">?</span>
+          </div>
+          <div class="step-value sc" id="slope-val" style="margin-top:8px">—</div>
+        </div>
+      </div>
+
+      <!-- Step 6: y-intercept -->
+      <div class="step-card locked" id="card-6">
+        <div class="step-card-header">
+          <div class="step-num">6</div>
+          <div class="step-title">Y-Intercept (b)</div>
+        </div>
+        <div class="step-content">
+          <div class="step-desc">Where does the line cross the y-axis? (x = 0)</div>
+          <div class="calc-row">
+            b = <span class="yc">y</span>A − m·<span class="xc">x</span>A
+            = <span class="yc val" id="ay-show2">?</span> − <span class="sc val" id="m-show">?</span>·<span class="xc val" id="ax-show2">?</span>
+          </div>
+          <div class="step-value ic" id="intercept-val" style="margin-top:8px">—</div>
+        </div>
+      </div>
+
+      <!-- Step 7: equation -->
+      <div class="step-card locked" id="card-7">
+        <div class="step-card-header">
+          <div class="step-num">7</div>
+          <div class="step-title">The Equation!</div>
+        </div>
+        <div class="step-content">
+          <div class="step-desc">Putting it all together:</div>
+          <div class="step-value ec" id="final-eq" style="font-size:34px; margin-top:6px">—</div>
+        </div>
+      </div>
+
+    </div><!-- steps-body -->
+
+    <!-- NAV -->
+    <div id="nav-bar">
+      <div class="step-dots" id="step-dots"></div>
+      <div class="btn-group">
+        <button class="btn-nav" id="btn-prev" onclick="prevStep()" disabled>← Previous</button>
+        <button class="btn-nav" id="btn-next" onclick="nextStep()">Next →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: Graph -->
+  <div id="canvas-panel">
+    <canvas id="graph-canvas"></canvas>
+  </div>
+
+</div><!-- main -->
+
+<script>
+// ── State ──
+const COL_X    = '#6d28d9';
+const COL_Y    = '#b45309';
+const COL_A    = '#1d4ed8';
+const COL_B    = '#b91c1c';
+const COL_C    = '#15803d';
+const COL_LINE = '#2563eb';
+const COL_DX   = '#6d28d9';
+const COL_DY   = '#b45309';
+
+const canvas = document.getElementById('graph-canvas');
+const ctx    = canvas.getContext('2d');
+
+let ORIGIN_X, ORIGIN_Y, CELL;
+let currentStep = -1; // -1 = before first step
+const TOTAL_STEPS = 8; // 0..7
+
+// Graph data
+let slope, intercept, ptA, ptB;
+
+// ── Init ──
+function init() {
+  generateGraph();
+  buildDots();
+  currentStep = -1;
+  renderSteps();
+  draw();
+}
+
+function generateGraph() {
+  // integer slope -5..5, not 0
+  let m;
+  do { m = Math.floor(Math.random() * 11) - 5; } while (m === 0);
+  slope = m;
+
+  // y-intercept integer -4..4
+  intercept = Math.floor(Math.random() * 9) - 4;
+
+  // Pick two integer x values with gap >= 2
+  let x1, x2;
+  do {
+    x1 = Math.floor(Math.random() * 7) - 3; // -3..3
+    x2 = x1 + (Math.floor(Math.random() * 3) + 2) * (Math.random() < 0.5 ? 1 : -1);
+  } while (Math.abs(x2) > 5);
+
+  const y1 = slope * x1 + intercept;
+  const y2 = slope * x2 + intercept;
+
+  ptA = { x: x1, y: y1 };
+  ptB = { x: x2, y: y2 };
+}
+
+// ── Step logic ──
+function nextStep() {
+  if (currentStep < TOTAL_STEPS - 1) {
+    currentStep++;
+    renderSteps();
+    draw();
+  }
+}
+
+function prevStep() {
+  if (currentStep > 0) {
+    currentStep--;
+    renderSteps();
+    draw();
+  } else if (currentStep === 0) {
+    currentStep = -1;
+    renderSteps();
+    draw();
+  }
+}
+
+function resetAll() {
+  currentStep = -1;
+  renderSteps();
+  draw();
+}
+
+function newGraph() {
+  generateGraph();
+  currentStep = -1;
+  renderSteps();
+  draw();
+}
+
+function renderSteps() {
+  document.getElementById('step-counter').textContent =
+    currentStep < 0 ? 'Step 0 / 8' : `Step ${currentStep + 1} / 8`;
+
+  document.getElementById('btn-prev').disabled = currentStep <= 0;
+  document.getElementById('btn-next').disabled = currentStep >= TOTAL_STEPS - 1;
+
+  const dy = ptB.y - ptA.y;
+  const dx = ptB.x - ptA.x;
+  const bStr = Number.isInteger(intercept) ? `${intercept}` : intercept.toFixed(2);
+  const mStr = Number.isInteger(slope) ? `${slope}` : slope.toFixed(2);
+
+  // Fill in values for all steps
+  setText('ax-val',  ptA.x);  setText('ay-val',  ptA.y);
+  setText('bx-val',  ptB.x);  setText('by-val',  ptB.y);
+  setText('by-show', ptB.y);  setText('ay-show',  ptA.y);
+  setText('bx-show', ptB.x);  setText('ax-show',  ptA.x);
+  setText('dy-val',  dy);     setText('dx-val',   dx);
+  setText('dy-show', dy);     setText('dx-show',  dx);
+  setText('ay-show2',ptA.y);  setText('ax-show2', ptA.x);  setText('m-show', mStr);
+  setText('slope-val', mStr);
+  setText('intercept-val', `b = ${bStr}`);
+
+  // Build equation string
+  let eqM = slope === 1 ? '' : slope === -1 ? '-' : `${slope}`;
+  let eq = `y = ${eqM}x`;
+  if (intercept > 0) eq += ` + ${bStr}`;
+  else if (intercept < 0) eq += ` − ${Math.abs(intercept)}`;
+  setText('final-eq', eq);
+
+  // Update cards
+  for (let i = 0; i < TOTAL_STEPS; i++) {
+    const card = document.getElementById(`card-${i}`);
+    card.classList.remove('locked', 'active', 'done');
+    if (currentStep < 0) {
+      card.classList.add('locked');
+    } else if (i < currentStep) {
+      card.classList.add('done');
+    } else if (i === currentStep) {
+      card.classList.add('active');
+      // Scroll into view
+      setTimeout(() => card.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50);
+    } else {
+      card.classList.add('locked');
+    }
+  }
+
+  // Dots
+  updateDots();
+}
+
+function setText(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = val;
+}
+
+// ── Dots ──
+function buildDots() {
+  const container = document.getElementById('step-dots');
+  container.innerHTML = '';
+  for (let i = 0; i < TOTAL_STEPS; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot';
+    d.id = `dot-${i}`;
+    container.appendChild(d);
+  }
+}
+
+function updateDots() {
+  for (let i = 0; i < TOTAL_STEPS; i++) {
+    const d = document.getElementById(`dot-${i}`);
+    if (!d) continue;
+    d.className = 'dot';
+    if (currentStep < 0) { /* all inactive */ }
+    else if (i < currentStep) d.classList.add('done');
+    else if (i === currentStep) d.classList.add('active');
+  }
+}
+
+// ── Canvas ──
+function resize() {
+  const panel = document.getElementById('canvas-panel');
+  canvas.width  = panel.clientWidth  * devicePixelRatio;
+  canvas.height = panel.clientHeight * devicePixelRatio;
+  canvas.style.width  = panel.clientWidth  + 'px';
+  canvas.style.height = panel.clientHeight + 'px';
+  const size = Math.min(panel.clientWidth, panel.clientHeight);
+  CELL     = Math.floor(size / 12);
+  ORIGIN_X = Math.round(panel.clientWidth  / 2);
+  ORIGIN_Y = Math.round(panel.clientHeight / 2);
+  draw();
+}
+
+function toCanvas(gx, gy) {
+  return { cx: ORIGIN_X + gx * CELL, cy: ORIGIN_Y - gy * CELL };
+}
+
+function draw() {
+  const W = canvas.width  / devicePixelRatio;
+  const H = canvas.height / devicePixelRatio;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.save();
+  ctx.scale(devicePixelRatio, devicePixelRatio);
+
+  // Background
+  ctx.fillStyle = '#f0f4f8';
+  ctx.fillRect(0, 0, W, H);
+
+  const cols = Math.ceil(W / CELL) + 4;
+  const rows = Math.ceil(H / CELL) + 4;
+  const c0 = -Math.floor(cols / 2) - 1;
+  const r0 = -Math.floor(rows / 2) - 1;
+
+  // Grid
+  ctx.strokeStyle = '#dde3eb';
+  ctx.lineWidth = 1;
+  for (let i = c0; i <= -c0; i++) {
+    const x = ORIGIN_X + i * CELL;
+    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
+  }
+  for (let j = r0; j <= -r0; j++) {
+    const y = ORIGIN_Y + j * CELL;
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+  }
+
+  // Axes
+  ctx.strokeStyle = '#9aa3af';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(0, ORIGIN_Y); ctx.lineTo(W, ORIGIN_Y); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(ORIGIN_X, 0); ctx.lineTo(ORIGIN_X, H); ctx.stroke();
+
+  // Tick labels
+  const tfs = Math.max(10, CELL * 0.30);
+  ctx.font = `${tfs}px JetBrains Mono, monospace`;
+  ctx.fillStyle = '#9aa3af';
+  ctx.textAlign = 'center';
+  for (let i = c0; i <= -c0; i++) {
+    if (i === 0) continue;
+    ctx.fillText(i, ORIGIN_X + i * CELL, ORIGIN_Y + 26);
+  }
+  ctx.textAlign = 'right';
+  for (let j = r0; j <= -r0; j++) {
+    if (j === 0) continue;
+    ctx.fillText(-j, ORIGIN_X - 7, ORIGIN_Y + j * CELL + 4);
+  }
+
+  const step = currentStep;
+
+  // Step 0+: show the line
+  if (step >= 0) {
+    const p1 = toCanvas(-60, slope * -60 + intercept);
+    const p2 = toCanvas( 60, slope *  60 + intercept);
+    ctx.save();
+    ctx.strokeStyle = COL_LINE;
+    ctx.lineWidth   = 4;
+    ctx.globalAlpha = 0.75;
+    ctx.beginPath(); ctx.moveTo(p1.cx, p1.cy); ctx.lineTo(p2.cx, p2.cy); ctx.stroke();
+    ctx.restore();
+  }
+
+  // Step 1+: Point A
+  if (step >= 1) {
+    const pA = toCanvas(ptA.x, ptA.y);
+    drawDot(pA.cx, pA.cy, COL_A, 9);
+    drawPointLabel(pA.cx, pA.cy, 'A', ptA.x, ptA.y);
+  }
+
+  // Step 2+: Point B
+  if (step >= 2) {
+    const pB = toCanvas(ptB.x, ptB.y);
+    drawDot(pB.cx, pB.cy, COL_B, 9);
+    drawPointLabel(pB.cx, pB.cy, 'B', ptB.x, ptB.y);
+  }
+
+  // Step 3+: Δy arrow (vertical)
+  if (step >= 3) {
+    const pa     = toCanvas(ptA.x, ptA.y);
+    const pb     = toCanvas(ptB.x, ptB.y);
+    const corner = toCanvas(ptB.x, ptA.y);
+
+    // Δy vertical dashed line
+    ctx.save();
+    ctx.strokeStyle = COL_DY;
+    ctx.lineWidth   = 2.5;
+    ctx.setLineDash([5, 4]);
+    ctx.globalAlpha = 0.9;
+    ctx.beginPath(); ctx.moveTo(corner.cx, corner.cy); ctx.lineTo(pb.cx, pb.cy); ctx.stroke();
+    ctx.restore();
+
+    // Δy label
+    const midY = (corner.cy + pb.cy) / 2;
+    const dy   = ptB.y - ptA.y;
+    const onRight = corner.cx >= pa.cx;
+    drawSimpleLabel(corner.cx + (onRight ? 8 : -8), midY + 5,
+      `Δy=${dy}`, COL_DY, onRight ? 'left' : 'right');
+  }
+
+  // Step 4+: Δx arrow (horizontal)
+  if (step >= 4) {
+    const pa     = toCanvas(ptA.x, ptA.y);
+    const corner = toCanvas(ptB.x, ptA.y);
+    const dx     = ptB.x - ptA.x;
+
+    ctx.save();
+    ctx.strokeStyle = COL_DX;
+    ctx.lineWidth   = 2.5;
+    ctx.setLineDash([5, 4]);
+    ctx.globalAlpha = 0.9;
+    ctx.beginPath(); ctx.moveTo(pa.cx, corner.cy); ctx.lineTo(corner.cx, corner.cy); ctx.stroke();
+    ctx.restore();
+
+    const midX  = (pa.cx + corner.cx) / 2;
+    const pb    = toCanvas(ptB.x, ptB.y);
+    const below = pb.cy < corner.cy;
+    drawSimpleLabel(midX, corner.cy + (below ? 20 : -10), `Δx=${dx}`, COL_DX, 'center');
+  }
+
+  // Step 5+: slope triangle fill
+  if (step >= 5) {
+    const pa     = toCanvas(ptA.x, ptA.y);
+    const pb     = toCanvas(ptB.x, ptB.y);
+    const corner = toCanvas(ptB.x, ptA.y);
+    ctx.save();
+    ctx.globalAlpha = 0.08;
+    ctx.fillStyle = '#6366f1';
+    ctx.beginPath();
+    ctx.moveTo(pa.cx, pa.cy);
+    ctx.lineTo(corner.cx, corner.cy);
+    ctx.lineTo(pb.cx, pb.cy);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  }
+
+  // Step 6+: C point (y-intercept)
+  if (step >= 6) {
+    const C = toCanvas(0, intercept);
+    ctx.save();
+    ctx.strokeStyle = COL_C;
+    ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.arc(C.cx, C.cy, 10, 0, Math.PI * 2); ctx.stroke();
+    ctx.fillStyle = COL_C;
+    ctx.beginPath(); ctx.arc(C.cx, C.cy, 5.5, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+    const bStr = Number.isInteger(intercept) ? intercept : intercept.toFixed(2);
+    drawSimpleLabel(ORIGIN_X + 8, C.cy + 22, `C = (0, ${bStr})`, COL_C, 'left');
+  }
+
+  // Step 7+: show equation on graph
+  if (step >= 7) {
+    let eqM = slope === 1 ? '' : slope === -1 ? '-' : `${slope}`;
+    let eq = `y = ${eqM}x`;
+    const bStr = Number.isInteger(intercept) ? `${Math.abs(intercept)}` : Math.abs(intercept).toFixed(2);
+    if (intercept > 0) eq += ` + ${bStr}`;
+    else if (intercept < 0) eq += ` − ${bStr}`;
+
+    const fs = Math.max(16, CELL * 0.55);
+    ctx.save();
+    ctx.font        = `bold ${fs}px JetBrains Mono, monospace`;
+    ctx.fillStyle   = '#be123c';
+    ctx.globalAlpha = 0.92;
+    ctx.textAlign   = 'left';
+    ctx.fillText(eq, 18, 32);
+    ctx.restore();
+  }
+
+  ctx.restore();
+}
+
+function drawPointLabel(cx, cy, name, gx, gy) {
+  const fs = Math.max(13, CELL * 0.42);
+  ctx.save();
+  ctx.font        = `bold ${fs}px JetBrains Mono, monospace`;
+  ctx.globalAlpha = 0.95;
+  ctx.setLineDash([]);
+
+  const parts = [
+    { text: `${name} = (`, color: '#1c1a17' },
+    { text: `${gx}`,       color: COL_X },
+    { text: ', ',          color: '#1c1a17' },
+    { text: `${gy}`,       color: COL_Y },
+    { text: ')',           color: '#1c1a17' },
+  ];
+
+  let totalW = 0;
+  parts.forEach(p => { totalW += ctx.measureText(p.text).width; });
+
+  ctx.textAlign = 'left';
+  let curX = cx - 14 - totalW;
+  const labelY = cy - 16;
+  parts.forEach(p => {
+    ctx.fillStyle = p.color;
+    ctx.fillText(p.text, curX, labelY);
+    curX += ctx.measureText(p.text).width;
+  });
+  ctx.restore();
+}
+
+function drawSimpleLabel(cx, cy, text, color, align) {
+  const fs = Math.max(11, CELL * 0.36);
+  ctx.save();
+  ctx.font        = `bold ${fs}px JetBrains Mono, monospace`;
+  ctx.fillStyle   = color;
+  ctx.textAlign   = align || 'left';
+  ctx.globalAlpha = 0.92;
+  ctx.fillText(text, cx, cy);
+  ctx.restore();
+}
+
+function drawDot(cx, cy, color, r) {
+  ctx.save();
+  ctx.fillStyle   = '#ffffff';
+  ctx.shadowColor = 'rgba(0,0,0,0.18)';
+  ctx.shadowBlur  = 8;
+  ctx.beginPath(); ctx.arc(cx, cy, r + 3.5, 0, Math.PI * 2); ctx.fill();
+  ctx.shadowBlur  = 0;
+  ctx.fillStyle   = color;
+  ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
+}
+
+// ── Keyboard shortcuts ──
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextStep(); }
+  if (e.key === 'ArrowLeft')                   { e.preventDefault(); prevStep(); }
+  if (e.key === 'r' || e.key === 'R')          resetAll();
+  if (e.key === 'n' || e.key === 'N')          newGraph();
+});
+
+window.addEventListener('resize', resize);
+resize();
+init();
+</script>
+</body>
+</html>
